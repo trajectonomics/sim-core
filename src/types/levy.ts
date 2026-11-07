@@ -18,7 +18,7 @@ export type ConstMeasure = {
 	readonly op: "const"
 	readonly value: MinorUnits
 } & (
-	| { readonly asOf?: DateString; readonly growth?: undefined }
+	| { readonly asOf?: DateString; readonly growth?: never }
 	| { readonly asOf: DateString; readonly growth: Growth }
 )
 

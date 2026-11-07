@@ -9,10 +9,11 @@ interface Edge {
 
 function indexIds(measures: readonly unknown[]): Map<string, number> {
 	const ids = new Map<string, number>()
-	measures.forEach((item, index) => {
+	for (let index = 0; index < measures.length; index++) {
+		const item: unknown = measures[index]
 		const id = isRecord(item) ? item["id"] : undefined
 		if (typeof id === "string" && !ids.has(id)) ids.set(id, index)
-	})
+	}
 	return ids
 }
 
@@ -51,8 +52,9 @@ export function checkGraph(levy: Readonly<Record<string, unknown>>, path: Path, 
 	const ids = indexIds(measures)
 	const due = levy["due"]
 	if (typeof due === "string" && !ids.has(due)) emit("UNKNOWN_MEASURE", [...path, "due"])
-	const edges = measures.map((item, index) =>
-		edgesOf(item, [...path, "measures", index], ids, emit),
-	)
+	const edges: Edge[][] = []
+	for (let index = 0; index < measures.length; index++) {
+		edges.push(edgesOf(measures[index], [...path, "measures", index], ids, emit))
+	}
 	reportCycles(edges, emit)
 }

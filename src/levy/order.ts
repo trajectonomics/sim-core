@@ -7,7 +7,12 @@ import { operandsOf } from "./refs"
  * still finite but a Measure may precede its operands.
  */
 export function dependencyOrder(measures: readonly Measure[]): readonly Measure[] {
-	const byId = new Map(measures.map((measure) => [measure.id, measure]))
+	// Index loops throughout: `check()` walks arrays by index, so this must see the same Measures.
+	const byId = new Map<string, Measure>()
+	for (let index = 0; index < measures.length; index++) {
+		const measure = measures[index]
+		if (measure !== undefined) byId.set(measure.id, measure)
+	}
 	const seen = new Set<string>()
 	const ordered: Measure[] = []
 	const visit = (measure: Measure): void => {
@@ -19,6 +24,9 @@ export function dependencyOrder(measures: readonly Measure[]): readonly Measure[
 		}
 		ordered.push(measure)
 	}
-	for (const measure of measures) visit(measure)
+	for (let index = 0; index < measures.length; index++) {
+		const measure = measures[index]
+		if (measure !== undefined) visit(measure)
+	}
 	return ordered
 }
