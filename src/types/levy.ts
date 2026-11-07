@@ -13,13 +13,14 @@ export interface MonthDay {
 }
 
 /** A fixed amount. With `growth`, it steps once per whole year after `asOf` (required then). */
-export interface ConstMeasure {
+export type ConstMeasure = {
 	readonly id: string
 	readonly op: "const"
 	readonly value: MinorUnits
-	readonly asOf?: DateString
-	readonly growth?: Growth
-}
+} & (
+	| { readonly asOf?: DateString; readonly growth?: undefined }
+	| { readonly asOf: DateString; readonly growth: Growth }
+)
 
 /** Sum of the Flows carrying `label`: `gross` sums income Flows, `funded` contribution Flows. */
 export interface TallyMeasure {
