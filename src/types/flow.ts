@@ -1,4 +1,4 @@
-import type { AccountId, DateString, Frequency, Growth, MinorUnits } from "./common"
+import type { AccountId, BasisPoints, DateString, Frequency, Growth, MinorUnits } from "./common"
 
 interface FlowBase {
 	readonly id: string
@@ -14,6 +14,10 @@ export interface IncomeFlow extends FlowBase {
 	readonly kind: "income"
 	/** Earned (true) versus passive (false) income. */
 	readonly earned: boolean
+	/** Tally label a Levy sums over; without one the Flow is never tallied. Needs a Levy. */
+	readonly label?: string
+	/** Share of each Occurrence taken at source, 0 to 10000. Needs a Levy. */
+	readonly prepaymentBps?: BasisPoints
 }
 
 export interface ExpenseFlow extends FlowBase {
@@ -24,6 +28,8 @@ export interface ExpenseFlow extends FlowBase {
 export interface ContributionFlow extends FlowBase {
 	readonly kind: "contribution"
 	readonly target: AccountId
+	/** Tally label a Levy sums over; without one the Flow is never tallied. Needs a Levy. */
+	readonly label?: string
 }
 
 export type Flow = IncomeFlow | ExpenseFlow | ContributionFlow

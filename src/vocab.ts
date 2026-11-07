@@ -12,3 +12,6 @@ export const FREQUENCIES = [
 	"annual",
 ] as const
 export const RESOLUTIONS = ["day", "month"] as const
+export const MEASURE_OPS = ["const", "tally", "add", "sub", "min", "max", "scale", "pick"] as const
+export const TALLY_BASES = ["gross", "funded"] as const
+export const ROUNDINGS = ["floor", "halfUp", "ceil"] as const

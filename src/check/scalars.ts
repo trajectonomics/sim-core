@@ -16,17 +16,21 @@ export const safeInt: Check = (value, path, emit) => {
 	if (!Number.isSafeInteger(value)) emit("NOT_SAFE_INTEGER", path)
 }
 
-/** A safe-integer rate above -10000 bps, so a positive growth factor always exists. */
-export const rate: Check = (value, path, emit) => {
-	if (!Number.isSafeInteger(value)) return emit("NOT_SAFE_INTEGER", path)
-	if ((value as number) <= -10000) emit("RATE_OUT_OF_RANGE", path)
+/** A safe integer within `min..max`, else `code`; anything that is not a safe integer is `NOT_SAFE_INTEGER`. */
+export function boundedInt(min: number, max: number, code: ErrorCode): Check {
+	return (value, path, emit) => {
+		if (typeof value !== "number" || !Number.isSafeInteger(value)) {
+			return emit("NOT_SAFE_INTEGER", path)
+		}
+		if (value < min || value > max) emit(code, path)
+	}
 }
 
+/** A safe-integer rate above -10000 bps, so a positive growth factor always exists. */
+export const rate: Check = boundedInt(-9999, Infinity, "RATE_OUT_OF_RANGE")
+
 /** Non-negative safe integer minor units. */
-export const amount: Check = (value, path, emit) => {
-	if (!Number.isSafeInteger(value)) emit("NOT_SAFE_INTEGER", path)
-	else if ((value as number) < 0) emit("NEGATIVE_AMOUNT", path)
-}
+export const amount: Check = boundedInt(0, Infinity, "NEGATIVE_AMOUNT")
 
 export const date: Check = (value, path, emit) => {
 	if (!isValidDate(value)) emit("INVALID_DATE", path)

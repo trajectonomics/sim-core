@@ -12,6 +12,22 @@ export type {
 } from "./common"
 export type { ContributionFlow, ExpenseFlow, Flow, IncomeFlow } from "./flow"
 export type {
+	BinaryMeasure,
+	ConstMeasure,
+	Levy,
+	LevyContext,
+	Measure,
+	MeasureOp,
+	MeasuresResult,
+	MonthDay,
+	PickMeasure,
+	Rounding,
+	ScaleMeasure,
+	Tallies,
+	TallyBasis,
+	TallyMeasure,
+} from "./levy"
+export type {
 	AccountAmount,
 	AnnualRollup,
 	InputProblem,

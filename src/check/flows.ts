@@ -11,10 +11,10 @@ function checkDates(flow: Readonly<Record<string, unknown>>, path: Path, emit: E
 	else if (frequency === "once" && end !== start) emit("ONCE_FLOW_END_MISMATCH", [...path, "end"])
 }
 
-function flowCheck(accounts: AccountIndex | undefined): Check {
+function flowCheck(accounts: AccountIndex | undefined, hasLevy: boolean): Check {
 	return (value, path, emit) => {
 		const kind = isRecord(value) ? value["kind"] : undefined
-		const flow = checkShape(value, path, flowShape(kind, accounts), emit)
+		const flow = checkShape(value, path, flowShape(kind, accounts, hasLevy), emit)
 		if (flow) checkDates(flow, path, emit)
 	}
 }
@@ -24,7 +24,8 @@ export function checkFlows(
 	path: Path,
 	accounts: AccountIndex | undefined,
 	emit: Emit,
+	hasLevy: boolean,
 ): void {
-	list(flowCheck(accounts))(value, path, emit)
+	list(flowCheck(accounts, hasLevy))(value, path, emit)
 	checkUnique(value, path, "id", emit)
 }

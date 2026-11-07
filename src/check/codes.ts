@@ -22,6 +22,15 @@ const CODES = [
 	"LIABILITY_MISUSE",
 	"SURPLUS_UNROUTED",
 	"RATE_OUT_OF_RANGE",
+	"INVALID_OP",
+	"INVALID_BASIS",
+	"INVALID_ROUNDING",
+	"INVALID_DENOMINATOR",
+	"INVALID_MONTH_DAY",
+	"UNKNOWN_MEASURE",
+	"MEASURE_CYCLE",
+	"FIELD_NOT_ALLOWED",
+	"LEVY_REQUIRED",
 ] as const
 
 /** The closed set of problem codes. Frozen so consumers cannot mutate it at runtime. */
