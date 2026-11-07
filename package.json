@@ -1,5 +1,5 @@
 {
-	"name": "@trajectonomics/sim-core",
+	"name": "@trajectonomics/sim",
 	"version": "0.0.0-development",
 	"description": "Pure, deterministic personal-finance projection engine",
 	"license": "MIT",

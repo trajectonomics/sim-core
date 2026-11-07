@@ -1,5 +1,5 @@
 /**
- * @trajectonomics/sim-core — Pure, deterministic personal-finance projection engine.
+ * @trajectonomics/sim — Pure, deterministic personal-finance projection engine.
  *
  * Vocabulary types, `check()` and the deterministic projection engine.
  */

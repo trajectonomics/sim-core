@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Instructions for AI coding agents in `trajectonomics/sim-core` (`@trajectonomics/sim-core` on npm).
+Instructions for AI coding agents in `trajectonomics/sim-core` (`@trajectonomics/sim` on npm).
 
 ## Rules
 
