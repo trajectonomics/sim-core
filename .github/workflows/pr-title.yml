@@ -1,7 +1,7 @@
 name: PR title
 
-# Squash merges use the PR title as the commit subject, and scripts/version.ts
-# reads those subjects to pick the next version. So the title must be a
+# Squash merges use the PR title as the commit subject, and the shared publish
+# workflow reads those subjects to pick the next version. So the title must be a
 # conventional commit: feat: -> minor, feat!: / BREAKING CHANGE -> major,
 # anything else -> patch.
 on:
