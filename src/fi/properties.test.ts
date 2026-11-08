@@ -1,26 +1,17 @@
 import { describe, expect, it } from "bun:test"
-import { addDays } from "../calendar/arith"
 import { project } from "../engine/project"
 import { expense, income } from "../engine/test-flows"
 import { makeFixture } from "../engine/test-helpers"
 import type { Fixture } from "../fixtures/fixture"
 import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
+import { oracleCutFlows } from "../golden/oracle-fi"
 import { financialIndependence } from "../index"
-import type { Flow, SurvivalOptions } from "../types"
+import type { SurvivalOptions } from "../types"
 import { candidateMonths } from "./candidates"
 
 function fi(fixture: Fixture, options: SurvivalOptions = { method: "survival" }) {
 	return financialIndependence(fixture.baseline, fixture.scenario, fixture.timeline, options)
-}
-
-function cutFlow(flow: Flow, month: string): readonly Flow[] {
-	if (flow.kind !== "income" || !flow.earned) return [flow]
-	if (flow.frequency === "once") return flow.start >= month ? [] : [flow]
-	if (flow.start >= month) return []
-	const end = addDays(month, -1)
-	if (flow.end !== undefined && flow.end <= end) return [flow]
-	return [{ ...flow, end }]
 }
 
 function rewritten(fixture: Fixture, month: string): Fixture {
@@ -28,7 +19,9 @@ function rewritten(fixture: Fixture, month: string): Fixture {
 		...fixture,
 		scenario: {
 			...fixture.scenario,
-			flows: fixture.scenario.flows.flatMap((flow) => cutFlow(flow, month)),
+			flows: fixture.scenario.flows.flatMap((flow) =>
+				flow.kind === "income" && flow.earned ? oracleCutFlows(flow, month) : [flow],
+			),
 		},
 	}
 }
@@ -54,10 +47,11 @@ function withHorizon(fixture: Fixture, horizon: string): Fixture {
 
 describe("survival properties", () => {
 	it.each([
-		["freelancer", withHorizon(freelancer, "2040-01-01")],
-		["thai employee", withHorizon(thaiEmployee, "2040-01-01")],
-	] as const)("matches a hand-rewritten Scenario for %s", (_name, fixture) => {
-		expect(reachedMonth(fi(fixture))).toBe(rewrittenMonth(fixture))
+		["freelancer", withHorizon(freelancer, "2040-01-01"), "2030-12-01"],
+		["thai employee", withHorizon(thaiEmployee, "2040-01-01"), "2035-08-01"],
+	] as const)("matches a hand-rewritten Scenario for %s", (_name, fixture, expected) => {
+		expect(reachedMonth(fi(fixture))).toBe(expected)
+		expect(rewrittenMonth(fixture)).toBe(expected)
 	})
 
 	it("returns the earliest pass even when a later month would fail", () => {

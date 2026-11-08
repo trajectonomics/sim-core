@@ -19,7 +19,7 @@ function months(timeline: Timeline): readonly DateString[] {
 	return result
 }
 
-function cut(flow: Flow, month: DateString): readonly Flow[] {
+export function oracleCutFlows(flow: Flow, month: DateString): readonly Flow[] {
 	if (flow.frequency === "once") return flow.start >= month ? [] : [flow]
 	if (flow.start >= month) return []
 	const end = oracleAddDays(month, -1)
@@ -58,8 +58,8 @@ function rewritten(fixture: Fixture, month: DateString, options: OracleFiOptions
 	const { timeline, scenario } = fixture
 	const retirement = options.retirementSpending
 	const kept = scenario.flows.flatMap((flow) => {
-		if (flow.kind === "income" && flow.earned) return cut(flow, month)
-		if (flow.kind === "expense" && retirement !== undefined) return cut(flow, month)
+		if (flow.kind === "income" && flow.earned) return oracleCutFlows(flow, month)
+		if (flow.kind === "expense" && retirement !== undefined) return oracleCutFlows(flow, month)
 		return [flow]
 	})
 	const added =
