@@ -4,17 +4,16 @@ import { amountAt } from "../engine/amount"
 import type { DatedEvent } from "../engine/events"
 import type { DateString, Scenario, Timeline } from "../types"
 import type { SurvivalOptions } from "../types/financial-independence"
-import { retirementFlow } from "./events"
+import { retirementFlow } from "./candidate-flows"
+
+const LAST_SUPPORTED_DATE = "9998-12-31"
 
 export interface ExpenseWindow {
 	readonly dates: readonly DateString[]
 	readonly cumulative: readonly bigint[]
 }
 
-interface Measurement {
-	readonly date: DateString
-	readonly amount: bigint
-}
+type Measurement = { readonly date: DateString; readonly amount: bigint }
 
 type Retirement = NonNullable<SurvivalOptions["retirementSpending"]>
 
@@ -73,7 +72,8 @@ export function expenseWindow(
 	options: SurvivalOptions,
 	firstCandidate: DateString,
 ): ExpenseWindow {
-	const through = addMonthsClamped(timeline.horizon, 12)
+	const extended = addMonthsClamped(timeline.horizon, 12)
+	const through = extended > LAST_SUPPORTED_DATE ? LAST_SUPPORTED_DATE : extended
 	const retirement = options.retirementSpending
 	const measurements =
 		retirement === undefined

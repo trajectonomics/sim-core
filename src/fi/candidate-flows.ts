@@ -18,7 +18,7 @@ export function retirementFlow(timeline: Timeline, amount: number, growth: Growt
 	}
 }
 
-function retirementEvents(
+function retirementFlows(
 	month: DateString,
 	timeline: Timeline,
 	amount: number,
@@ -32,9 +32,9 @@ function retirementEvents(
 	return events
 }
 
-function stopped(event: DatedEvent, retirement: boolean): boolean {
-	if (event.flow.kind === "income" && event.flow.earned) return true
-	return retirement && event.flow.kind === "expense"
+function stopped(dated: DatedEvent, retirement: boolean): boolean {
+	if (dated.flow.kind === "income" && dated.flow.earned) return true
+	return retirement && dated.flow.kind === "expense"
 }
 
 function byDateThenId(left: DatedEvent, right: DatedEvent): number {
@@ -43,7 +43,7 @@ function byDateThenId(left: DatedEvent, right: DatedEvent): number {
 }
 
 /** Original events from `month` onward, with earned income (and replaced expenses) filtered out. */
-export function candidateEvents(
+export function candidateFlows(
 	events: readonly DatedEvent[],
 	timeline: Timeline,
 	month: DateString,
@@ -54,6 +54,6 @@ export function candidateEvents(
 		(event) => event.date >= month && !stopped(event, retirement !== undefined),
 	)
 	if (retirement === undefined) return kept
-	const added = retirementEvents(month, timeline, retirement.amount, retirement.growth)
+	const added = retirementFlows(month, timeline, retirement.amount, retirement.growth)
 	return [...kept, ...added].sort(byDateThenId)
 }

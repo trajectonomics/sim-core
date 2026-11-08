@@ -4,7 +4,7 @@ import type { Scenario, Timeline } from "../types"
 import type { SurvivalOptions, TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
 import { type BufferFailure, bestBuffer, bestShortfall, type ShortfallFailure } from "./best"
-import { candidateEvents } from "./events"
+import { candidateFlows } from "./candidate-flows"
 import { type ExpenseWindow, expenseBetween } from "./expenses"
 import type { Prefix } from "./prefix"
 import { twentyFiveTimes } from "./reference"
@@ -54,7 +54,7 @@ function inspectCandidate(input: SearchInput, month: string): CandidateOutcome {
 	}
 	const point = input.prefix.points.get(month)
 	if (point === undefined) return { kind: "skip" }
-	const events = candidateEvents(input.events, input.timeline, month, input.options)
+	const events = candidateFlows(input.events, input.timeline, month, input.options)
 	const walked = walkCandidate({
 		scenario: input.scenario,
 		timeline: input.timeline,

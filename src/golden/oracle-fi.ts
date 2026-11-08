@@ -2,6 +2,10 @@ import type { Fixture } from "../fixtures/fixture"
 import type { DateString, ExpenseFlow, Flow, Growth, SurvivalOptions, Timeline } from "../types"
 import { oracleAddDays, oracleAddMonthsClamped, oracleGrowthYears } from "./oracle-date"
 import { oracleGrow } from "./oracle-money"
+
+/** The oracle covers the survival walk; the buffer is covered by hand-computed fixtures. */
+export type OracleFiOptions = Pick<SurvivalOptions, "method" | "retirementSpending">
+
 import { oracleRun } from "./oracle-sim"
 
 function months(timeline: Timeline): readonly DateString[] {
@@ -50,7 +54,7 @@ function retirementFlows(
 	return flows
 }
 
-function rewritten(fixture: Fixture, month: DateString, options: SurvivalOptions): Fixture {
+function rewritten(fixture: Fixture, month: DateString, options: OracleFiOptions): Fixture {
 	const { timeline, scenario } = fixture
 	const retirement = options.retirementSpending
 	const kept = scenario.flows.flatMap((flow) => {
@@ -75,7 +79,7 @@ function rewritten(fixture: Fixture, month: DateString, options: SurvivalOptions
 }
 
 /** Naive FI scan: rewrite the Scenario, then ask the independent Projection oracle for a Shortfall. */
-export function oracleFiMonth(fixture: Fixture, options: SurvivalOptions): DateString | undefined {
+export function oracleFiMonth(fixture: Fixture, options: OracleFiOptions): DateString | undefined {
 	for (const month of months(fixture.timeline)) {
 		const run = oracleRun(rewritten(fixture, month, options), [fixture.timeline.horizon])
 		if (run.runsOut === undefined) return month

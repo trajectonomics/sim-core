@@ -81,6 +81,22 @@ describe("survival properties", () => {
 		})
 	})
 
+	it("stays inside the last supported year without hanging", () => {
+		const fixture = makeFixture({
+			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
+			balances: { cash: 1_000_000 },
+			flows: [expense("living", 100, { frequency: "monthly", start: "9998-01-01" })],
+			surplus: [{ account: "cash" }],
+			withdraw: ["cash"],
+			start: "9998-01-01",
+			horizon: "9998-12-31",
+		})
+		expect(fi(fixture)).toMatchObject({
+			ok: true,
+			financialIndependence: { reachable: true, month: "9998-01-01" },
+		})
+	})
+
 	it("does not depend on flow order", () => {
 		const fixture = withHorizon(freelancer, "2035-01-01")
 		const shuffled: Fixture = {

@@ -57,6 +57,8 @@ describe("financialIndependence survival", () => {
 				bestCase: { month: "2026-01-01", runsOut: { date: "2026-01-01", unmet: 100 } },
 			},
 		})
+		if (!result.ok || result.financialIndependence.reachable) throw new Error("expected a failure")
+		expect(result.financialIndependence).not.toHaveProperty("reference")
 	})
 
 	it("returns noCandidateMonth when a mid-month start and horizon share a month", () => {
