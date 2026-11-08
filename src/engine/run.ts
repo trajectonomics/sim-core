@@ -1,6 +1,6 @@
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import { collectDates } from "./dates"
-import { buildEvents, type DatedEvent } from "./events"
+import { buildEvents, eventsFor } from "./events"
 import { type SettlementPeriodPlan, settlementPeriods } from "./levy-plan"
 import { finishTracker } from "./levy-settle"
 import { createTracker } from "./levy-tally"
@@ -25,16 +25,6 @@ function settlementDates(
 	horizon: DateString,
 ): DateString[] {
 	return periods.map((period) => period.settlementDate).filter((date) => date <= horizon)
-}
-
-function eventsFor(
-	events: readonly DatedEvent[],
-	index: number,
-	date: DateString,
-): readonly [number, readonly DatedEvent[]] {
-	let next = index
-	while (next < events.length && events[next]?.date === date) next++
-	return [next, events.slice(index, next)]
 }
 
 function attachLevy(

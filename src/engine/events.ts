@@ -31,3 +31,14 @@ export function buildEvents(scenario: Scenario, timeline: Timeline): readonly Da
 				: 1,
 	)
 }
+
+/** The slice of events sharing `date`, starting at `index`, and the index just past them. */
+export function eventsFor(
+	events: readonly DatedEvent[],
+	index: number,
+	date: DateString,
+): readonly [number, readonly DatedEvent[]] {
+	let next = index
+	while (next < events.length && events[next]?.date === date) next++
+	return [next, events.slice(index, next)]
+}

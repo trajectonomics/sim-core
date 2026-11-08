@@ -11,6 +11,16 @@ export type {
 	MinorUnits,
 	Resolution,
 } from "./common"
+export type {
+	FiBestCase,
+	FiBinding,
+	FinancialIndependence,
+	FinancialIndependenceDefinition,
+	FinancialIndependenceOptions,
+	FinancialIndependenceResult,
+	SurvivalOptions,
+	TwentyFiveTimesReference,
+} from "./financial-independence"
 export type { ContributionFlow, ExpenseFlow, Flow, IncomeFlow } from "./flow"
 export type {
 	BinaryMeasure,
