@@ -1,6 +1,6 @@
 import { addMonthsClamped } from "../calendar/arith"
 import type { DatedEvent } from "../engine/events"
-import type { Scenario, Timeline } from "../types"
+import type { DateString, Scenario, Timeline } from "../types"
 import type { SurvivalOptions, TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
 import { type BufferFailure, bestBuffer, bestShortfall, type ShortfallFailure } from "./best"
@@ -14,18 +14,18 @@ export interface SearchInput {
 	readonly scenario: Scenario
 	readonly timeline: Timeline
 	readonly options: SurvivalOptions
-	readonly candidates: readonly string[]
+	readonly candidates: readonly DateString[]
 	readonly events: readonly DatedEvent[]
 	readonly prefix: Prefix
 	readonly expenses: ExpenseWindow
-	readonly settlementDates: readonly string[]
+	readonly settlementDates: readonly DateString[]
 	readonly minBufferMonths: number
 }
 
 export type SearchOutcome =
 	| {
 			readonly kind: "reachable"
-			readonly month: string
+			readonly month: DateString
 			readonly reference: TwentyFiveTimesReference
 	  }
 	| {
@@ -39,14 +39,14 @@ type CandidateOutcome =
 	| { readonly kind: "skip" }
 	| {
 			readonly kind: "reachable"
-			readonly month: string
+			readonly month: DateString
 			readonly reference: TwentyFiveTimesReference
 	  }
 	| { readonly kind: "buffer"; readonly failure: BufferFailure }
 	| { readonly kind: "shortfall"; readonly failure: ShortfallFailure; readonly beforeStop: boolean }
 	| { readonly kind: "problem"; readonly problem: ProjectionProblem }
 
-function inspectCandidate(input: SearchInput, month: string): CandidateOutcome {
+function inspectCandidate(input: SearchInput, month: DateString): CandidateOutcome {
 	const before = input.prefix.runsOut
 	if (before !== undefined && month > before.date) {
 		const shortfall = { date: before.date, unmet: before.unmet, undrawable: 0n }

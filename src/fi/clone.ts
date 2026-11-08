@@ -13,11 +13,11 @@ function cloneTally(tally: LevyTally): LevyTally {
 	return { gross: new Map(tally.gross), funded: new Map(tally.funded), prepaid: tally.prepaid }
 }
 
-function clonePeriod(
-	period: EngineSettlementPeriod | undefined,
+function cloneSettlementPeriod(
+	settlement: EngineSettlementPeriod | undefined,
 ): EngineSettlementPeriod | undefined {
-	if (period === undefined) return undefined
-	return { ...period, measures: period.measures.map((measure) => ({ ...measure })) }
+	if (settlement === undefined) return undefined
+	return { ...settlement, measures: settlement.measures.map((measure) => ({ ...measure })) }
 }
 
 /** A deep-enough copy to continue a candidate without touching the baseline prefix. */
@@ -26,6 +26,6 @@ export function cloneTracker(tracker: LevyTracker | undefined): LevyTracker | un
 	return {
 		...tracker,
 		tallies: tracker.tallies.map(cloneTally),
-		results: tracker.results.map(clonePeriod),
+		results: tracker.results.map(cloneSettlementPeriod),
 	}
 }

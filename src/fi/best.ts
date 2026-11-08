@@ -1,13 +1,14 @@
+import type { DateString } from "../types"
 import type { BufferBreach } from "./buffer"
 import type { Shortfall } from "./walk"
 
 export interface BufferFailure {
-	readonly month: string
+	readonly month: DateString
 	readonly breach: BufferBreach
 }
 
 export interface ShortfallFailure {
-	readonly month: string
+	readonly month: DateString
 	readonly shortfall: Shortfall
 }
 
