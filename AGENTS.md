@@ -18,6 +18,8 @@ Instructions for AI coding agents in `trajectonomics/sim-core` (`@trajectonomics
    - Run `bun run format` to auto-fix formatting and imports. Do not loosen `tsconfig.base.json` or `biome.json` to make an error go away.
 6. Never edit `version` in `package.json` manually and never run `npm publish` locally. Releases are handled via GitHub Actions workflows or git tags (`v*`). PR titles should follow conventional commits (`feat:`, `fix:`, `chore:`, `feat!:` ...).
 7. Review against `CODING_STANDARDS.md`.
+8. Pi (`pi.dev`) model restriction: When running the Pi coding agent (`pi.dev`), strictly use **DeepSeek 4.1 Flash** only (e.g., `deepseek/deepseek-v4.1-flash`, `deepseek/deepseek-v4.1-flash-fast`), whether routed via Command Code GOAT (`command-code`) or OpenCode Go (`opencode`). Do not switch to or run any other models (Claude, GPT, Gemini, etc.) in Pi sessions for this repository. This rule is mechanically enforced via `.pi/settings.json`.
+
 
 ## Core Simulation Principles
 
