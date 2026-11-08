@@ -3,6 +3,7 @@ import { checkCashflow } from "./cashflow"
 import type { AccountIndex, Check, Emit, Path } from "./codes"
 import { checkFlows } from "./flows"
 import { checkLevy } from "./levy"
+import { checkContributionRouting } from "./routing"
 import { rate, str } from "./scalars"
 import { anyVersion, checkShape, isRecord, opt, req } from "./shape"
 
@@ -26,5 +27,6 @@ export function checkScenario(
 		cashflow: req((v, p, e) => checkCashflow(v, p, accounts, e)),
 		levy: opt(checkLevy),
 	}
-	checkShape(value, path, shape, emit)
+	const checked = checkShape(value, path, shape, emit)
+	checkContributionRouting(checked?.["flows"], checked?.["cashflow"], accounts, path, emit)
 }

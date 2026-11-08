@@ -23,7 +23,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -122,6 +122,7 @@
 				}
 			],
 			"cashflow": {
+				"contribute": ["ssf"],
 				"surplus": [
 					{
 						"account": "tax-reserve",
@@ -139,7 +140,7 @@
 			"horizon": "2051-01-01",
 			"resolution": "day"
 		},
-		"sha256": "b792c9abb66ba6c3aa05a0aca625b7b410a4ce24e4d80f41dd5d447aa91adffa"
+		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833"
 	},
 	{
 		"name": "thai-employee-month",
@@ -165,7 +166,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -248,6 +249,7 @@
 				}
 			],
 			"cashflow": {
+				"contribute": ["rmf"],
 				"surplus": [
 					{
 						"account": "cash",
@@ -265,7 +267,7 @@
 			"horizon": "2056-01-01",
 			"resolution": "month"
 		},
-		"sha256": "e4028387a12662fd3bea328941fae532aeccded7977059fe63457adbd23f357c"
+		"sha256": "1f54262a5d84382979929adb2675cbef47a848d36ccccce67aa6f87eb6c711d1"
 	},
 	{
 		"name": "leap-tie-day",
@@ -279,7 +281,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 300
@@ -298,6 +300,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": []
 			}
 		},
@@ -306,7 +309,113 @@
 			"horizon": "2029-03-01",
 			"resolution": "day"
 		},
-		"sha256": "dbe95f1774b8d5d7c598cf52fd43e4765ea0e81889a13356a8510171dc03f4ca"
+		"sha256": "4229ec37910413dfdcf8e68b00ffcfadce75fd73b9c3f199d0ee903e651adc70"
+	},
+	{
+		"name": "capped-month",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 0
+				},
+				{
+					"account": "loan",
+					"amount": 500
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 100
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 200
+				},
+				{
+					"id": "other",
+					"kind": "asset",
+					"rate": 300
+				},
+				{
+					"id": "loan",
+					"kind": "liability",
+					"rate": 100
+				}
+			],
+			"flows": [
+				{
+					"id": "pay",
+					"kind": "income",
+					"earned": true,
+					"amount": 1000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 50
+					}
+				},
+				{
+					"id": "repay",
+					"kind": "contribution",
+					"target": "loan",
+					"amount": 400,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "save-savings",
+					"kind": "contribution",
+					"target": "savings",
+					"amount": 800,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "save-other",
+					"kind": "contribution",
+					"target": "other",
+					"amount": 700,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					}
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": ["other", "savings"],
+				"withdraw": ["cash"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2026-06-30",
+			"resolution": "month"
+		},
+		"sha256": "205ae5c1e87b815ee4436a2fa8ae17740aa406df496c18276acdf76b9d67da8e"
 	},
 	{
 		"name": "levy-salary-day",
@@ -320,7 +429,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -353,6 +462,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": ["cash"]
 			},
 			"levy": {
@@ -637,7 +747,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "1f289762f10fcb4dd33c4e71deea42a388daaa6ccde3a55926b99a6b533140f8"
+		"sha256": "8c293cded58448b903fe86e14af2a5be7d22b9aeeb1943c2925e4db1bb9102c8"
 	},
 	{
 		"name": "levy-settled-month",
@@ -651,7 +761,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -684,6 +794,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": ["cash"]
 			},
 			"levy": {
@@ -968,7 +1079,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "month"
 		},
-		"sha256": "09f43da81ac5de15b26d8802f2b597c53e3e381b34f47e266f2113bbfe72494c"
+		"sha256": "6b5138143cf719dc7c304f0469fd248685be5bda1abf91770e7d67c1f80fb76a"
 	},
 	{
 		"name": "levy-refund-day",
@@ -982,7 +1093,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1015,6 +1126,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": ["cash"]
 			},
 			"levy": {
@@ -1299,7 +1411,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "af8e7ef7c1aa0fcf69bdc0cf94ee823f14abb14e87d1c766c8bd61e4df0b33f6"
+		"sha256": "6750f39cb0599fddbf8a12c5505b86ef2513a2c64cf68190fd9dbb9b6d902cd5"
 	},
 	{
 		"name": "levy-shortfall-day",
@@ -1313,7 +1425,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1347,6 +1459,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": []
 			},
 			"levy": {
@@ -1631,7 +1744,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "ced17a97d0244d5ff915498206f8a920c618db43c11ee79818810ea7e736d664"
+		"sha256": "57ede9c3f5208be96fb93047df90e732387c895a9afb82707518620b463e26b5"
 	},
 	{
 		"name": "levy-unsettled-month",
@@ -1645,7 +1758,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1678,6 +1791,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": ["cash"]
 			},
 			"levy": {
@@ -1962,6 +2076,6 @@
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "fde22279fd3697e222034cb797b2bd90ac4583284364aba38ddb3f1bd3848f35"
+		"sha256": "c87bc31e6ab56377ec9775f975cb8030fef79f1832296ff4cf4ce467e6071e1b"
 	}
 ]

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "bun:test"
-import type { Levy } from "../types"
 import { salaryLevySetup } from "./levy-fixture"
-import { contribution, expense, income } from "./test-flows"
+import { expense, income } from "./test-flows"
 import { amounts, rowAt, run } from "./test-helpers"
 
 describe("Levy Prepayment and Settlement", () => {
@@ -78,68 +77,6 @@ describe("Levy Prepayment and Settlement", () => {
 		const row = rowAt(projection, "2027-03-31")
 		expect(amounts(row)).toEqual({ cash: 108_500_000 })
 		expect(projection.levy!.periods[0]?.settled).toBe(true)
-	})
-})
-
-describe("Levy tallies", () => {
-	it("uses the funded amount when a contribution is capped", () => {
-		// #18 adds the Available cashflow cap for asset contributions; the funded path is the same,
-		// and this case uses the cap the engine has today: a liability's amount owed.
-		const levy: Levy = {
-			id: "funded-levy",
-			period: { month: 1, day: 1 },
-			settlement: { month: 3, day: 31 },
-			measures: [{ id: "saved", op: "tally", label: "fund", basis: "funded" }],
-			due: "saved",
-		}
-		const projection = run({
-			accounts: [
-				{ id: "cash", kind: "asset", rate: 0 },
-				{ id: "debt", kind: "liability", rate: 0 },
-			],
-			balances: { cash: 1000, debt: 30 },
-			flows: [contribution("fund", "debt", 100, { label: "fund", start: "2026-01-02" })],
-			surplus: [{ account: "cash" }],
-			withdraw: ["cash"],
-			start: "2026-01-01",
-			horizon: "2027-03-31",
-			levy,
-		})
-		expect(projection.levy!.periods[0]).toMatchObject({
-			prepaid: 0,
-			due: 30,
-			settlement: 30,
-			settled: true,
-		})
-		expect(amounts(rowAt(projection, "2027-03-31"))).toEqual({ cash: 940, debt: 0 })
-	})
-
-	it("sums same-date contributions before splitting the capped amount by label", () => {
-		const levy: Levy = {
-			id: "funded-levy",
-			period: { month: 1, day: 1 },
-			settlement: { month: 3, day: 31 },
-			measures: [{ id: "saved", op: "tally", label: "b", basis: "funded" }],
-			due: "saved",
-		}
-		const projection = run({
-			accounts: [
-				{ id: "cash", kind: "asset", rate: 0 },
-				{ id: "debt", kind: "liability", rate: 0 },
-			],
-			balances: { cash: 1000, debt: 50 },
-			flows: [
-				contribution("a", "debt", 30, { label: "a", start: "2026-01-02" }),
-				contribution("b", "debt", 40, { label: "b", start: "2026-01-02" }),
-			],
-			surplus: [{ account: "cash" }],
-			withdraw: ["cash"],
-			start: "2026-01-01",
-			horizon: "2027-03-31",
-			levy,
-		})
-		expect(projection.levy!.periods[0]).toMatchObject({ due: 20, settlement: 20, settled: true })
-		expect(amounts(rowAt(projection, "2027-03-31"))).toEqual({ cash: 930, debt: 0 })
 	})
 })
 

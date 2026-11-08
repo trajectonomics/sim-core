@@ -33,6 +33,7 @@ describe("lazy per-account commits", () => {
 			balances: { cash: 0, savings: 0 },
 			flows: [income("pay", 100), expense("bill", 30), contribution("save", "savings", 20)],
 			surplus: [{ account: "cash" }],
+			contribute: ["savings"],
 			horizon: "2026-01-01",
 		})
 		expect(amounts(rowAt(projection, "2026-01-01"))).toEqual({ cash: 50, savings: 20 })
@@ -83,16 +84,19 @@ describe("contributions and liability caps", () => {
 		expect(amounts(rowAt(projection, "2026-02-01"))).toEqual({ cash: 120, debt: 0 })
 	})
 
-	it("can draw from the same account that received a contribution", () => {
+	it("never funds an asset contribution from existing assets", () => {
 		const projection = run({
 			accounts: [cash, { id: "savings", kind: "asset", rate: 0 }],
 			balances: { cash: 100, savings: 0 },
-			flows: [income("pay", 100), expense("bill", 200), contribution("save", "savings", 100)],
+			flows: [contribution("save", "savings", 100)],
 			surplus: [{ account: "cash" }],
+			contribute: ["savings"],
 			withdraw: ["savings", "cash"],
 			horizon: "2026-01-01",
 		})
-		expect(amounts(rowAt(projection, "2026-01-01"))).toEqual({ cash: 0, savings: 0 })
+		expect(amounts(rowAt(projection, "2026-01-01"))).toEqual({ cash: 100, savings: 0 })
+		expect(projection.runsOut).toBeUndefined()
+		expect(projection.unfundedContributions).toEqual([{ account: "savings", amount: 100 }])
 	})
 })
 

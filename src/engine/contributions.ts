@@ -2,94 +2,90 @@ import type { AccountId, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { addTo } from "./add"
 import type { ContributionEntry } from "./aggregate"
+import { grantAsset } from "./asset-grant"
+import { appliedByLabel, groupEntries, plannedTotal } from "./contribution-entries"
 import { minBigInt } from "./min"
 import { mutate } from "./mutate"
 import { compareIds } from "./order"
 import type { StateMap } from "./state"
 import { valuation } from "./value"
 
-export interface ContributionResult {
-	readonly outflow: bigint
+export interface DebtResult {
+	readonly paid: bigint
 	readonly funded: ReadonlyMap<string, bigint>
 	readonly problem: ProjectionProblem | undefined
 }
 
-interface TargetResult {
-	readonly outflow: bigint
+export interface AssetResult {
+	readonly applied: bigint
 	readonly funded: ReadonlyMap<string, bigint>
+	readonly unfunded: ReadonlyMap<AccountId, bigint>
 	readonly problem: ProjectionProblem | undefined
 }
 
-/** Splits the amount actually applied across the entries, in engine (date, id) order. */
-function allocate(
-	entries: readonly ContributionEntry[],
-	payment: bigint,
-): ReadonlyMap<string, bigint> {
-	const funded = new Map<string, bigint>()
-	let remaining = payment
-	for (const entry of entries) {
-		if (remaining === 0n) break
-		const applied = minBigInt(entry.amount, remaining)
-		remaining -= applied
-		if (entry.label !== undefined && applied > 0n) addTo(funded, entry.label, applied)
-	}
-	return funded
-}
+const NOTHING: DebtResult = { paid: 0n, funded: new Map(), problem: undefined }
 
-function group(entries: readonly ContributionEntry[]): ReadonlyMap<AccountId, ContributionEntry[]> {
-	const groups = new Map<AccountId, ContributionEntry[]>()
-	for (const entry of entries) {
-		const found = groups.get(entry.target)
-		if (found === undefined) groups.set(entry.target, [entry])
-		else found.push(entry)
-	}
-	return groups
-}
-
-function totalOf(entries: readonly ContributionEntry[]): bigint {
-	let total = 0n
-	for (const entry of entries) total += entry.amount
-	return total
-}
-
-/**
- * Applies one target's same-date contributions. Asset targets are not yet capped by Available
- * cashflow (#18); funded tallies already follow the amount actually applied, so that cap will
- * carry into them without a tally change.
- */
-function applyTarget(
+function applyDebtTarget(
 	states: StateMap,
 	target: AccountId,
 	entries: readonly ContributionEntry[],
 	date: DateString,
-): TargetResult {
-	const total = totalOf(entries)
+): DebtResult {
 	const state = states.get(target)
-	if (total === 0n || state === undefined) {
-		return { outflow: 0n, funded: new Map(), problem: undefined }
-	}
-	const liability = state.rule.kind === "liability"
-	const owed = liability ? valuation(state, date) : total
-	const payment = minBigInt(total, owed)
-	const problem = mutate(state, date, liability ? -payment : payment)
-	if (problem !== undefined) return { outflow: 0n, funded: new Map(), problem }
-	return { outflow: payment, funded: allocate(entries, payment), problem: undefined }
+	const planned = plannedTotal(entries)
+	if (state?.rule.kind !== "liability" || planned === 0n) return NOTHING
+	const payment = minBigInt(planned, valuation(state, date))
+	if (payment === 0n) return NOTHING
+	const problem = mutate(state, date, -payment)
+	if (problem !== undefined) return { paid: 0n, funded: new Map(), problem }
+	return { paid: payment, funded: appliedByLabel(entries, payment), problem: undefined }
 }
 
-/** Applies same-date contributions per target, capping liability payments at the amount owed. */
-export function applyContributions(
+/** Liability payments are obligations: each pays `min(planned, owed)`, in account-id order. */
+export function applyDebt(
 	states: StateMap,
 	entries: readonly ContributionEntry[],
 	date: DateString,
-): ContributionResult {
-	const groups = group(entries)
-	let outflow = 0n
+): DebtResult {
+	const groups = groupEntries(entries)
+	let paid = 0n
 	const funded = new Map<string, bigint>()
 	for (const target of [...groups.keys()].sort(compareIds)) {
-		const result = applyTarget(states, target, groups.get(target) ?? [], date)
-		if (result.problem !== undefined) return { outflow, funded, problem: result.problem }
-		outflow += result.outflow
+		const result = applyDebtTarget(states, target, groups.get(target) ?? [], date)
+		if (result.problem !== undefined) return { paid, funded, problem: result.problem }
+		paid += result.paid
 		for (const [label, amount] of result.funded) addTo(funded, label, amount)
 	}
-	return { outflow, funded, problem: undefined }
+	return { paid, funded, problem: undefined }
+}
+
+/**
+ * Asset contributions spend only `available` cashflow, in `contribute` priority order. The part
+ * that does not fit is reported as unfunded and dropped; a zero grant never touches an account.
+ */
+export function applyAssets(
+	states: StateMap,
+	contribute: readonly AccountId[],
+	entries: readonly ContributionEntry[],
+	available: bigint,
+	date: DateString,
+): AssetResult {
+	const groups = groupEntries(entries)
+	let remaining = available
+	let applied = 0n
+	const funded = new Map<string, bigint>()
+	const unfunded = new Map<AccountId, bigint>()
+	for (const target of contribute) {
+		const targetEntries = groups.get(target) ?? []
+		if (plannedTotal(targetEntries) === 0n) continue
+		const grant = grantAsset(states, target, targetEntries, remaining, date)
+		if (grant.problem !== undefined) {
+			return { applied, funded, unfunded, problem: grant.problem }
+		}
+		if (grant.unfunded > 0n) unfunded.set(target, grant.unfunded)
+		remaining -= grant.applied
+		applied += grant.applied
+		for (const [label, amount] of grant.funded) addTo(funded, label, amount)
+	}
+	return { applied, funded, unfunded, problem: undefined }
 }

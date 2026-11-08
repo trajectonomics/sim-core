@@ -25,6 +25,7 @@ export interface AnnualRollup {
 	readonly income: MinorUnits
 	readonly expense: MinorUnits
 	readonly contributions: MinorUnits
+	readonly unfundedContributions: MinorUnits
 	/** Prepayment plus Settlements net of refunds; present only when the Scenario has a Levy. */
 	readonly levy?: MinorUnits
 	readonly interest: MinorUnits
@@ -62,6 +63,7 @@ export interface LevyReport {
 export interface Projection {
 	readonly rows: readonly ProjectionRow[]
 	readonly annual: readonly AnnualRollup[]
+	readonly unfundedContributions: readonly AccountAmount[]
 	readonly runsOut?: RunsOut
 	readonly levy?: LevyReport
 }

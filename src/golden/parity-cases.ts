@@ -1,6 +1,7 @@
 import type { Fixture } from "../fixtures/fixture"
 import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
+import { capped } from "./contribution-cases"
 import {
 	levyRefundDay,
 	levySalaryDay,
@@ -18,12 +19,12 @@ export interface ParityCase {
 const leapTie: Fixture = {
 	baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 1 }] },
 	scenario: {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		currency: "THB",
 		economy: { inflation: 300 },
 		accounts: [{ id: "cash", kind: "asset", rate: 5000 }],
 		flows: [],
-		cashflow: { surplus: [{ account: "cash" }], withdraw: [] },
+		cashflow: { surplus: [{ account: "cash" }], contribute: [], withdraw: [] },
 	},
 	timeline: { start: "2027-02-28", horizon: "2029-03-01", resolution: "day" },
 }
@@ -36,6 +37,7 @@ export const PARITY_CASES: readonly ParityCase[] = [
 		fixture: { ...thaiEmployee, timeline: { ...thaiEmployee.timeline, resolution: "month" } },
 	},
 	{ name: "leap-tie-day", fixture: leapTie },
+	{ name: "capped-month", fixture: capped },
 	{ name: "levy-salary-day", fixture: levySalaryDay },
 	{ name: "levy-settled-month", fixture: levySettledMonth },
 	{ name: "levy-refund-day", fixture: levyRefundDay },

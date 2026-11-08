@@ -8,6 +8,7 @@ import { buildRollups } from "./rollups"
 import { rowDates } from "./row-dates"
 import { buildRows } from "./rows"
 import { accountRules } from "./rules"
+import { buildUnfunded } from "./unfunded"
 
 export type BuildResult =
 	| { readonly projection: Projection }
@@ -30,11 +31,14 @@ export function buildProjection(
 	const periods = buildPeriods(timeline.start, end, run.runsOut?.date)
 	const rollups = buildRollups(run, periods, openingNetWorth(baseline, rules))
 	if (rollups.problem !== undefined) return { problem: rollups.problem }
+	const unfunded = buildUnfunded(run.totals, end)
+	if (unfunded.problem !== undefined) return { problem: unfunded.problem }
 	const levy = buildLevy(run.levy)
 	if (levy.problem !== undefined) return { problem: levy.problem }
 	const projection: Projection = {
 		rows: rows.rows!,
 		annual: rollups.annual!,
+		unfundedContributions: unfunded.amounts!,
 		...(run.runsOut === undefined
 			? {}
 			: { runsOut: { date: run.runsOut.date, unmet: Number(run.runsOut.unmet) } }),

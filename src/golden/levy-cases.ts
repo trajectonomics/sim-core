@@ -29,13 +29,14 @@ function salaryFixture(options: SalaryCase): Fixture {
 	return {
 		baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 0 }] },
 		scenario: {
-			schemaVersion: 1,
+			schemaVersion: 2,
 			currency: "THB",
 			economy: { inflation: 0 },
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
 			flows: [salaryFlow(options.prepaymentBps, options.end)],
 			cashflow: {
 				surplus: [{ account: "cash" }],
+				contribute: [],
 				withdraw: options.withdraw ?? ["cash"],
 			},
 			levy: TH_LIKE,

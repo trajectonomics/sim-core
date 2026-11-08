@@ -21,6 +21,7 @@ export interface Setup {
 	readonly balances: Readonly<Record<string, MinorUnits>>
 	readonly flows?: readonly Flow[]
 	readonly surplus: readonly SurplusStep[]
+	readonly contribute?: readonly AccountId[]
 	readonly withdraw?: readonly AccountId[]
 	readonly start?: DateString
 	readonly horizon?: DateString
@@ -31,12 +32,16 @@ export interface Setup {
 
 export function makeFixture(setup: Setup): Fixture {
 	const scenario: Scenario = {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		currency: "THB",
 		economy: { inflation: setup.inflation ?? 0 },
 		accounts: setup.accounts,
 		flows: setup.flows ?? [],
-		cashflow: { surplus: setup.surplus, withdraw: setup.withdraw ?? [] },
+		cashflow: {
+			surplus: setup.surplus,
+			contribute: setup.contribute ?? [],
+			withdraw: setup.withdraw ?? [],
+		},
 		...(setup.levy === undefined ? {} : { levy: setup.levy }),
 	}
 	const timeline: Timeline = {

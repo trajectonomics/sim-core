@@ -70,11 +70,11 @@ _Avoid_: Stream, Event, Transaction, Recurring transaction, Schedule
 A Flow that moves money from cashflow into an Account. Not an expense: net worth is unchanged at that instant. Into a liability account it is a debt payment and an obligation. Into an asset account it is a target: it is limited to the Available cashflow on that Occurrence and is never funded from existing assets. Same-date amounts are summed per Account, and `cashflow.contribute` sets the funding priority.
 
 **Available cashflow**:
-The income on one Occurrence minus its expenses and debt payments actually made, floored at zero. Other dates are ignored; this is the ceiling for asset contributions.
+The income on one Occurrence minus its expenses and debt payments actually made, floored at zero. Other dates are ignored; this is the ceiling for asset contributions. Because the cap is per Occurrence, money saved on one date can still be spent by an expense on another and leave a Shortfall then.
 _Avoid_: Free cashflow, disposable income
 
 **Unfunded contribution**:
-The part of an asset contribution's planned amount, after same-date summing per Account, that Available cashflow could not cover. It is dropped, not carried over. Debt planned above the amount owed is not unfunded.
+The part of an asset contribution's planned amount, after same-date summing per Account, that Available cashflow could not cover. It is dropped, not carried over, and a zero grant never touches the account. Debt planned above the amount owed is not unfunded.
 _Avoid_: Missed contribution
 
 **Earned income**:

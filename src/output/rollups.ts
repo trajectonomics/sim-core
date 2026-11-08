@@ -9,6 +9,7 @@ interface FlowSums {
 	readonly income: bigint
 	readonly expense: bigint
 	readonly contributions: bigint
+	readonly unfunded: bigint
 	readonly levy: bigint
 }
 
@@ -21,15 +22,17 @@ function sumFlows(totals: readonly DayTotals[], period: Period): FlowSums {
 	let income = 0n
 	let expense = 0n
 	let contributions = 0n
+	let unfunded = 0n
 	let levy = 0n
 	for (const total of totals) {
 		if (total.date < period.from || total.date > period.to) continue
 		income += total.income
 		expense += total.expense
 		contributions += total.contributions
+		for (const amount of total.unfunded.values()) unfunded += amount
 		levy += total.levy
 	}
-	return { income, expense, contributions, levy }
+	return { income, expense, contributions, unfunded, levy }
 }
 
 function unsafe(values: readonly bigint[], date: string): ProjectionProblem | undefined {
@@ -55,6 +58,7 @@ function rollupOf(
 		income: Number(sums.income),
 		expense: Number(sums.expense),
 		contributions: Number(sums.contributions),
+		unfundedContributions: Number(sums.unfunded),
 		...(hasLevy ? { levy: Number(sums.levy) } : {}),
 		interest: Number(interest),
 		unmet: Number(unmet),
@@ -76,8 +80,19 @@ export function buildRollups(
 		const sums = sumFlows(run.totals, period)
 		const closing = snapshots.get(period.to)!.netWorth
 		const unmet = run.runsOut?.date === period.to ? run.runsOut.unmet : 0n
+		const interest = closing - openingWorth - sums.income + sums.expense + sums.levy - unmet
 		const problem = unsafe(
-			[openingWorth, closing, sums.income, sums.expense, sums.contributions, sums.levy, unmet],
+			[
+				openingWorth,
+				closing,
+				sums.income,
+				sums.expense,
+				sums.contributions,
+				sums.unfunded,
+				sums.levy,
+				interest,
+				unmet,
+			],
 			period.to,
 		)
 		if (problem !== undefined) return { annual: undefined, problem }

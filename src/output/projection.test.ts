@@ -50,6 +50,7 @@ describe("projection rows", () => {
 				}),
 			],
 			surplus: [{ account: "cash" }],
+			contribute: ["savings"],
 			withdraw: ["cash"],
 			start: "2026-01-31",
 			horizon: "2026-05-15",
@@ -77,6 +78,7 @@ describe("annual roll-ups", () => {
 			balances: { cash: 1000, savings: 0 },
 			flows: [income("pay", 100), expense("bill", 20), contribution("save", "savings", 30)],
 			surplus: [{ account: "cash" }],
+			contribute: ["savings"],
 			withdraw: ["cash"],
 			horizon: "2026-12-31",
 		})
@@ -90,6 +92,7 @@ describe("annual roll-ups", () => {
 				income: 100,
 				expense: 20,
 				contributions: 30,
+				unfundedContributions: 0,
 				interest: 105,
 				unmet: 0,
 				partial: false,

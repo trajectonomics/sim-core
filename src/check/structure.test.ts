@@ -36,15 +36,19 @@ describe("check() structure", () => {
 		)
 	})
 
-	it("rejects a scenario with schemaVersion other than 1", () => {
-		expect(problemsFor({ scenario: [["schemaVersion"], "1"] })).toEqual(
+	it("requires scenario schemaVersion 2", () => {
+		expect(problemsFor({ scenario: [["schemaVersion"], 1] })).toEqual(
 			expected("UNSUPPORTED_SCHEMA_VERSION", ["scenario", "schemaVersion"]),
 		)
 	})
 
+	it("accepts baseline schemaVersion 1 with scenario schemaVersion 2", () => {
+		expect(problemsFor({})).toEqual([])
+	})
+
 	it("skips baseline account lookups when the scenario version is unsupported", () => {
 		const problems = problemsFor({
-			scenario: [["schemaVersion"], 2],
+			scenario: [["schemaVersion"], 1],
 			baseline: [["balances", 0, "account"], "not-declared"],
 		})
 		expect(problems).toEqual(expected("UNSUPPORTED_SCHEMA_VERSION", ["scenario", "schemaVersion"]))

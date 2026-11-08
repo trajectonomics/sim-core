@@ -22,6 +22,7 @@ function expectOracleMatch(fixture: Fixture, projection: Projection): void {
 	expect(projection.rows).toEqual(view.rows)
 	expect(projection.runsOut).toEqual(view.runsOut)
 	expect(projection.annual).toEqual(view.annual)
+	expect(projection.unfundedContributions).toEqual(view.unfundedContributions)
 }
 
 function monthly(fixture: Fixture): Fixture {
@@ -97,6 +98,7 @@ describe("small purpose-built golden cases", () => {
 				income: 400,
 				expense: 0,
 				contributions: 0,
+				unfundedContributions: 0,
 				interest: 0,
 				unmet: 0,
 				partial: true,
