@@ -41,7 +41,17 @@ test's behaviour changes.
 - **Execution.** The scan reuses the unchanged prefix: one walk saves cloned account states and
   Levy tallies before each candidate month, then each candidate continues from its own clone.
   This keeps Levy tallies and Settlements recomputed for the modified part without building a
-  full Projection per candidate.
+  full Projection per candidate. Settlement dates are part of the survival walk; no Levy amount is
+  cached between candidates.
+- **Levy report.** An older issue comment asked for unsettled Levy periods in the result, but the
+  agreed `FinancialIndependence` result type has no Levy field. This version follows the result
+  type and returns no Levy report.
+- **Overflow.** A prefix overflow that no earlier candidate avoids is returned as `ok: false` with
+  `VALUE_OVERFLOW`; candidates up to the stop date are still scanned first, so an earlier passing
+  month can win. An overflow at the horizon does not hide a reachable answer.
+- **Last supported year.** The measurement window is not truncated by the horizon, but dates stop
+  at `9998-12-31`, the last year the core accepts. Near that edge the window can be shorter than
+  twelve months rather than leave the supported calendar.
 
 ## Considered options
 

@@ -34,4 +34,28 @@ describe("best-case ordering", () => {
 			},
 		})
 	})
+
+	it("keeps an earlier candidate whose Shortfall lands after the baseline stop date", () => {
+		const { baseline, scenario, timeline } = makeFixture({
+			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
+			balances: { cash: 250 },
+			flows: [expense("large-once", 1000, { start: "2026-02-01" })],
+			surplus: [{ account: "cash" }],
+			withdraw: ["cash"],
+			horizon: "2026-06-01",
+		})
+		expect(
+			financialIndependence(baseline, scenario, timeline, {
+				method: "survival",
+				retirementSpending: { amount: 100, growth: { bps: 0 } },
+			}),
+		).toMatchObject({
+			ok: true,
+			financialIndependence: {
+				reachable: false,
+				binding: "insufficientMoney",
+				bestCase: { month: "2026-02-01", runsOut: { date: "2026-04-01", unmet: 50 } },
+			},
+		})
+	})
 })

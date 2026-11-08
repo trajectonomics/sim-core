@@ -1,16 +1,15 @@
 import { collectDates } from "../engine/dates"
-import { type DatedEvent, eventsFor } from "../engine/events"
+import { type DatedEvent, flowsAt } from "../engine/events"
 import { hasSettlement } from "../engine/levy-tally"
 import { processDate } from "../engine/occurrence"
 import { isSafeInteger, overflow } from "../engine/overflow"
-import type { StateMap } from "../engine/state"
-import { valuation } from "../engine/value"
 import type { DateString, Scenario, Timeline } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { type BufferBreach, checkBuffer } from "./buffer"
 import { cloneStates } from "./clone"
 import type { ExpenseWindow } from "./expenses"
 import type { PrefixPoint } from "./prefix"
+import { lockedOrAbsentAssets } from "./undrawable"
 
 export interface Shortfall {
 	readonly date: DateString
@@ -40,18 +39,6 @@ type DayOutcome =
 	| { readonly kind: "shortfall"; readonly shortfall: Shortfall }
 	| { readonly kind: "problem"; readonly problem: ProjectionProblem }
 
-function lockedOrAbsentAssets(states: StateMap, scenario: Scenario, date: DateString): bigint {
-	const withdraw = new Set(scenario.cashflow.withdraw)
-	let total = 0n
-	for (const state of states.values()) {
-		if (state.rule.kind !== "asset") continue
-		const locked = state.rule.lockedUntil !== undefined && date < state.rule.lockedUntil
-		if (!locked && withdraw.has(state.rule.id)) continue
-		total += valuation(state, date)
-	}
-	return total
-}
-
 function processFlows(
 	input: WalkInput,
 	date: DateString,
@@ -66,9 +53,14 @@ function processFlows(
 	if (outcome.runsOut === undefined) return { kind: "ok" }
 	if (!isSafeInteger(outcome.runsOut.unmet)) return { kind: "problem", problem: overflow(date) }
 	const undrawable = lockedOrAbsentAssets(point.states, scenario, date)
+	if ("problem" in undrawable) return { kind: "problem", problem: undrawable.problem }
 	return {
 		kind: "shortfall",
-		shortfall: { date: outcome.runsOut.date, unmet: outcome.runsOut.unmet, undrawable },
+		shortfall: {
+			date: outcome.runsOut.date,
+			unmet: outcome.runsOut.unmet,
+			undrawable: undrawable.value,
+		},
 	}
 }
 
@@ -98,7 +90,7 @@ export function walkCandidate(input: WalkInput): WalkOutcome {
 	let index = 0
 	let firstBreach: BufferBreach | undefined
 	for (const date of dates) {
-		const [next, dayEvents] = eventsFor(events, index, date)
+		const [next, dayEvents] = flowsAt(events, index, date)
 		index = next
 		const day = processDay(working, date, dayEvents)
 		if (day.kind !== "ok") return day

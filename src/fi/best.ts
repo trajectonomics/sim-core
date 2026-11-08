@@ -11,16 +11,30 @@ export interface ShortfallFailure {
 	readonly shortfall: Shortfall
 }
 
+function better<T>(
+	current: T | undefined,
+	next: T,
+	dateOf: (failure: T) => string,
+	metricOf: (failure: T) => bigint,
+	monthOf: (failure: T) => string,
+): T {
+	if (current === undefined) return next
+	if (dateOf(next) !== dateOf(current)) return dateOf(next) > dateOf(current) ? next : current
+	if (metricOf(next) !== metricOf(current)) {
+		return metricOf(next) < metricOf(current) ? next : current
+	}
+	return monthOf(next) < monthOf(current) ? next : current
+}
+
 /** Latest first breach date, then smallest deficit, then earliest month. */
 export function bestBuffer(current: BufferFailure | undefined, next: BufferFailure): BufferFailure {
-	if (current === undefined) return next
-	if (next.breach.date !== current.breach.date) {
-		return next.breach.date > current.breach.date ? next : current
-	}
-	const nextDeficit = next.breach.required - next.breach.accessible
-	const currentDeficit = current.breach.required - current.breach.accessible
-	if (nextDeficit !== currentDeficit) return nextDeficit < currentDeficit ? next : current
-	return next.month < current.month ? next : current
+	return better(
+		current,
+		next,
+		(failure) => failure.breach.date,
+		(failure) => failure.breach.required - failure.breach.accessible,
+		(failure) => failure.month,
+	)
 }
 
 /** Latest runs-out date, then smallest unmet amount, then earliest month. */
@@ -28,12 +42,11 @@ export function bestShortfall(
 	current: ShortfallFailure | undefined,
 	next: ShortfallFailure,
 ): ShortfallFailure {
-	if (current === undefined) return next
-	if (next.shortfall.date !== current.shortfall.date) {
-		return next.shortfall.date > current.shortfall.date ? next : current
-	}
-	if (next.shortfall.unmet !== current.shortfall.unmet) {
-		return next.shortfall.unmet < current.shortfall.unmet ? next : current
-	}
-	return next.month < current.month ? next : current
+	return better(
+		current,
+		next,
+		(failure) => failure.shortfall.date,
+		(failure) => failure.shortfall.unmet,
+		(failure) => failure.month,
+	)
 }

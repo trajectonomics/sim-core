@@ -14,7 +14,21 @@ import { baselinePrefix, levyPlan } from "./prefix"
 import { search } from "./search"
 
 function definitionOf(options: SurvivalOptions): FinancialIndependenceDefinition {
-	return { ...options, definitionVersion: 1 }
+	const spending = options.retirementSpending
+	return {
+		method: options.method,
+		...(spending === undefined
+			? {}
+			: {
+					retirementSpending: {
+						amount: spending.amount,
+						growth:
+							typeof spending.growth === "string" ? spending.growth : { bps: spending.growth.bps },
+					},
+				}),
+		...(options.minBufferMonths === undefined ? {} : { minBufferMonths: options.minBufferMonths }),
+		definitionVersion: 1,
+	}
 }
 
 /** The earliest month at which stopping earned income survives to the horizon under the `survival` method. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { income } from "../engine/test-flows"
+import { expense, income } from "../engine/test-flows"
 import { makeFixture } from "../engine/test-helpers"
 import { financialIndependence } from "../index"
 import type { SurvivalOptions } from "../types"
@@ -44,6 +44,22 @@ describe("overflow as data", () => {
 		).toMatchObject({
 			ok: true,
 			financialIndependence: { reachable: true, month: "2026-01-01" },
+		})
+	})
+
+	it("returns a problem instead of misclassifying an unsafe locked asset", () => {
+		expect(
+			fi({
+				accounts: [{ id: "vault", kind: "asset", rate: 5000, lockedUntil: "2099-01-01" }],
+				balances: { vault: Number.MAX_SAFE_INTEGER },
+				flows: [expense("bill", 100, { start: "2027-01-01" })],
+				surplus: [{ account: "vault" }],
+				withdraw: [],
+				horizon: "2027-01-01",
+			}),
+		).toEqual({
+			ok: false,
+			problems: [{ code: "VALUE_OVERFLOW", date: "2027-01-01", account: "vault" }],
 		})
 	})
 

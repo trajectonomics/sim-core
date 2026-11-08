@@ -33,7 +33,7 @@ export function buildEvents(scenario: Scenario, timeline: Timeline): readonly Da
 }
 
 /** The slice of events sharing `date`, starting at `index`, and the index just past them. */
-export function eventsFor(
+export function flowsAt(
 	events: readonly DatedEvent[],
 	index: number,
 	date: DateString,

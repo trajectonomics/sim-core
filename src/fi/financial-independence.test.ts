@@ -61,6 +61,26 @@ describe("financialIndependence survival", () => {
 		expect(result.financialIndependence).not.toHaveProperty("reference")
 	})
 
+	it("snapshots the definition instead of aliasing the options object", () => {
+		const options: SurvivalOptions = {
+			method: "survival",
+			retirementSpending: { amount: 100, growth: { bps: 0 } },
+		}
+		const result = fi(
+			{
+				accounts: [cash],
+				balances: { cash: 100 },
+				surplus: [{ account: "cash" }],
+				withdraw: ["cash"],
+				horizon: "2026-01-01",
+			},
+			options,
+		)
+		if (!result.ok) throw new Error("expected ok")
+		;(options.retirementSpending as { amount: number }).amount = 999
+		expect(result.financialIndependence.definition.retirementSpending?.amount).toBe(100)
+	})
+
 	it("returns noCandidateMonth when a mid-month start and horizon share a month", () => {
 		const result = fi(
 			{

@@ -7,9 +7,14 @@ import type { SurvivalOptions } from "../types/financial-independence"
 const RETIREMENT_ID = "fi-retirement-spending"
 
 /** The synthetic Expense Flow behind retirement spending; its years are anchored at the Timeline start. */
-export function retirementFlow(timeline: Timeline, amount: number, growth: Growth): ExpenseFlow {
+export function retirementFlow(
+	timeline: Timeline,
+	amount: number,
+	growth: Growth,
+	id: string = RETIREMENT_ID,
+): ExpenseFlow {
 	return {
-		id: RETIREMENT_ID,
+		id,
 		kind: "expense",
 		amount,
 		frequency: "monthly",
@@ -23,8 +28,9 @@ function retirementFlows(
 	timeline: Timeline,
 	amount: number,
 	growth: Growth,
+	id: string,
 ): readonly DatedEvent[] {
-	const flow = retirementFlow(timeline, amount, growth)
+	const flow = retirementFlow(timeline, amount, growth, id)
 	const events: DatedEvent[] = []
 	for (let date = month; date <= timeline.horizon; date = addMonthsClamped(date, 1)) {
 		events.push({ date, flow, years: growthYears(timeline.start, date) })
@@ -35,6 +41,13 @@ function retirementFlows(
 function stopped(dated: DatedEvent, retirement: boolean): boolean {
 	if (dated.flow.kind === "income" && dated.flow.earned) return true
 	return retirement && dated.flow.kind === "expense"
+}
+
+function uniqueRetirementId(events: readonly DatedEvent[]): string {
+	const ids = new Set(events.map((event) => event.flow.id))
+	let id = RETIREMENT_ID
+	while (ids.has(id)) id += "-"
+	return id
 }
 
 function byDateThenId(left: DatedEvent, right: DatedEvent): number {
@@ -54,6 +67,12 @@ export function candidateFlows(
 		(event) => event.date >= month && !stopped(event, retirement !== undefined),
 	)
 	if (retirement === undefined) return kept
-	const added = retirementFlows(month, timeline, retirement.amount, retirement.growth)
+	const added = retirementFlows(
+		month,
+		timeline,
+		retirement.amount,
+		retirement.growth,
+		uniqueRetirementId(events),
+	)
 	return [...kept, ...added].sort(byDateThenId)
 }

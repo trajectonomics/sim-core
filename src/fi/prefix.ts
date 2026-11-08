@@ -1,5 +1,5 @@
 import { collectDates } from "../engine/dates"
-import { type DatedEvent, eventsFor } from "../engine/events"
+import { type DatedEvent, flowsAt } from "../engine/events"
 import { settlementPeriods } from "../engine/levy-plan"
 import { createTracker, hasSettlement } from "../engine/levy-tally"
 import type { LevyTracker } from "../engine/levy-types"
@@ -39,7 +39,7 @@ export function levyPlan(scenario: Scenario, timeline: Timeline): LevyPlan {
 	}
 }
 
-interface Step {
+interface PrefixAdvance {
 	readonly problem?: ProjectionProblem
 	readonly runsOut?: EngineRunsOut
 }
@@ -50,7 +50,7 @@ function advance(
 	date: DateString,
 	dayEvents: readonly DatedEvent[],
 	tracker: LevyTracker | undefined,
-): Step {
+): PrefixAdvance {
 	if (dayEvents.length === 0 && !(tracker !== undefined && hasSettlement(tracker, date))) {
 		return {}
 	}
@@ -80,7 +80,7 @@ export function baselinePrefix(
 		if (wanted.has(date)) {
 			points.set(date, { states: cloneStates(states), tracker: cloneTracker(tracker) })
 		}
-		const [next, dayEvents] = eventsFor(events, index, date)
+		const [next, dayEvents] = flowsAt(events, index, date)
 		index = next
 		const stepped = advance(states, scenario, date, dayEvents, tracker)
 		if (stepped.problem !== undefined) {
