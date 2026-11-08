@@ -48,7 +48,9 @@ test's behaviour changes.
   type and returns no Levy report.
 - **Overflow.** A prefix overflow that no earlier candidate avoids is returned as `ok: false` with
   `VALUE_OVERFLOW`; candidates up to the stop date are still scanned first, so an earlier passing
-  month can win. An overflow at the horizon does not hide a reachable answer.
+  month can win. A candidate walk overflow does not stop the scan, but an unsafe 25× reference on
+  the earliest passing month is terminal: that month cannot be reported, and a later month must
+  not silently replace it.
 - **Last supported year.** The measurement window is not truncated by the horizon, but dates stop
   at `9998-12-31`, the last year the core accepts. Near that edge the window can be shorter than
   twelve months rather than leave the supported calendar.

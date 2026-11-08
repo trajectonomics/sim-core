@@ -85,6 +85,19 @@ describe("overflow as data", () => {
 		})
 	})
 
+	it("stops at an unsafe reference on the earliest passing month", () => {
+		expect(
+			fi({
+				accounts: [cash],
+				balances: { cash: Number.MAX_SAFE_INTEGER },
+				flows: [expense("huge", Number.MAX_SAFE_INTEGER, { start: "2026-01-02" })],
+				surplus: [{ account: "cash" }],
+				withdraw: ["cash"],
+				horizon: "2026-02-01",
+			}),
+		).toEqual({ ok: false, problems: [{ code: "VALUE_OVERFLOW", date: "2026-01-01" }] })
+	})
+
 	it("returns a problem for an unsafe reference value", () => {
 		expect(
 			fi(

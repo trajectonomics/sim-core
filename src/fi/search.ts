@@ -3,7 +3,8 @@ import type { DatedEvent } from "../engine/events"
 import type { DateString, Scenario, Timeline } from "../types"
 import type { SurvivalOptions, TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
-import { type BufferFailure, bestBuffer, bestShortfall, type ShortfallFailure } from "./best"
+import { type Accumulator, consume } from "./accumulate"
+import type { BufferFailure, ShortfallFailure } from "./best"
 import { candidateFlows } from "./candidate-flows"
 import { type ExpenseWindow, expenseBetween } from "./expenses"
 import type { Prefix } from "./prefix"
@@ -33,9 +34,8 @@ export type SearchOutcome =
 			readonly buffer: BufferFailure | undefined
 			readonly shortfall: ShortfallFailure | undefined
 	  }
-	| { readonly kind: "problem"; readonly problem: ProjectionProblem }
-
-type CandidateOutcome =
+	| { readonly kind: "problem"; readonly problem: ProjectionProblem; readonly terminal?: boolean }
+export type CandidateOutcome =
 	| { readonly kind: "skip" }
 	| {
 			readonly kind: "reachable"
@@ -44,7 +44,7 @@ type CandidateOutcome =
 	  }
 	| { readonly kind: "buffer"; readonly failure: BufferFailure }
 	| { readonly kind: "shortfall"; readonly failure: ShortfallFailure; readonly beforeStop: boolean }
-	| { readonly kind: "problem"; readonly problem: ProjectionProblem }
+	| { readonly kind: "problem"; readonly problem: ProjectionProblem; readonly terminal?: boolean }
 
 function inspectCandidate(input: SearchInput, month: DateString): CandidateOutcome {
 	const before = input.prefix.runsOut
@@ -72,26 +72,8 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 	}
 	const annual = expenseBetween(input.expenses, month, addMonthsClamped(month, 12))
 	const reference = twentyFiveTimes(point.states, month, annual)
-	if (!reference.ok) return { kind: "problem", problem: reference.problem }
+	if (!reference.ok) return { kind: "problem", problem: reference.problem, terminal: true }
 	return { kind: "reachable", month, reference: reference.reference }
-}
-
-interface Accumulator {
-	buffer?: BufferFailure
-	shortfall?: ShortfallFailure
-	problem?: ProjectionProblem
-	reachable?: CandidateOutcome & { readonly kind: "reachable" }
-	stop?: boolean
-}
-
-function consume(outcome: CandidateOutcome, acc: Accumulator): void {
-	if (outcome.kind === "problem") acc.problem ??= outcome.problem
-	else if (outcome.kind === "reachable") acc.reachable = outcome
-	else if (outcome.kind === "buffer") acc.buffer = bestBuffer(acc.buffer, outcome.failure)
-	else if (outcome.kind === "shortfall") {
-		acc.shortfall = bestShortfall(acc.shortfall, outcome.failure)
-		if (outcome.beforeStop) acc.stop = true
-	}
 }
 
 /** Ascending linear scan; returns the first pass, never assuming monotonicity. */
@@ -99,7 +81,7 @@ export function search(input: SearchInput): SearchOutcome {
 	const acc: Accumulator = {}
 	for (const month of input.candidates) {
 		consume(inspectCandidate(input, month), acc)
-		if (acc.reachable !== undefined) return acc.reachable
+		if (acc.done !== undefined) return acc.done
 		if (acc.stop === true) break
 	}
 	if (acc.problem !== undefined) return { kind: "problem", problem: acc.problem }
