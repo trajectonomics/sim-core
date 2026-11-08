@@ -23,7 +23,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -122,6 +122,7 @@
 				}
 			],
 			"cashflow": {
+				"contribute": ["ssf"],
 				"surplus": [
 					{
 						"account": "tax-reserve",
@@ -139,7 +140,7 @@
 			"horizon": "2051-01-01",
 			"resolution": "day"
 		},
-		"sha256": "b792c9abb66ba6c3aa05a0aca625b7b410a4ce24e4d80f41dd5d447aa91adffa"
+		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833"
 	},
 	{
 		"name": "thai-employee-month",
@@ -165,7 +166,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -248,6 +249,7 @@
 				}
 			],
 			"cashflow": {
+				"contribute": ["rmf"],
 				"surplus": [
 					{
 						"account": "cash",
@@ -265,7 +267,7 @@
 			"horizon": "2056-01-01",
 			"resolution": "month"
 		},
-		"sha256": "e4028387a12662fd3bea328941fae532aeccded7977059fe63457adbd23f357c"
+		"sha256": "1f54262a5d84382979929adb2675cbef47a848d36ccccce67aa6f87eb6c711d1"
 	},
 	{
 		"name": "leap-tie-day",
@@ -279,7 +281,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 1,
+			"schemaVersion": 2,
 			"currency": "THB",
 			"economy": {
 				"inflation": 300
@@ -298,6 +300,7 @@
 						"account": "cash"
 					}
 				],
+				"contribute": [],
 				"withdraw": []
 			}
 		},
@@ -306,6 +309,112 @@
 			"horizon": "2029-03-01",
 			"resolution": "day"
 		},
-		"sha256": "dbe95f1774b8d5d7c598cf52fd43e4765ea0e81889a13356a8510171dc03f4ca"
+		"sha256": "4229ec37910413dfdcf8e68b00ffcfadce75fd73b9c3f199d0ee903e651adc70"
+	},
+	{
+		"name": "capped-month",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 0
+				},
+				{
+					"account": "loan",
+					"amount": 500
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 100
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 200
+				},
+				{
+					"id": "other",
+					"kind": "asset",
+					"rate": 300
+				},
+				{
+					"id": "loan",
+					"kind": "liability",
+					"rate": 100
+				}
+			],
+			"flows": [
+				{
+					"id": "pay",
+					"kind": "income",
+					"earned": true,
+					"amount": 1000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 50
+					}
+				},
+				{
+					"id": "repay",
+					"kind": "contribution",
+					"target": "loan",
+					"amount": 400,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "save-savings",
+					"kind": "contribution",
+					"target": "savings",
+					"amount": 800,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "save-other",
+					"kind": "contribution",
+					"target": "other",
+					"amount": 700,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					}
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": ["other", "savings"],
+				"withdraw": ["cash"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2026-06-30",
+			"resolution": "month"
+		},
+		"sha256": "205ae5c1e87b815ee4436a2fa8ae17740aa406df496c18276acdf76b9d67da8e"
 	}
 ]

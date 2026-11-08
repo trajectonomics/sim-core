@@ -1,7 +1,7 @@
-import type { DateString, Scenario } from "../types"
+import type { AccountId, DateString, Scenario } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { aggregate } from "./aggregate"
-import { applyContributions } from "./contributions"
+import { applyAssets, applyDebt } from "./contributions"
 import type { DatedEvent } from "./events"
 import type { StateMap } from "./state"
 import { applySurplus } from "./surplus"
@@ -12,6 +12,7 @@ export interface DayTotals {
 	readonly income: bigint
 	readonly expense: bigint
 	readonly contributions: bigint
+	readonly unfunded: ReadonlyMap<AccountId, bigint>
 }
 
 export interface EngineRunsOut {
@@ -33,15 +34,35 @@ export function processDate(
 	events: readonly DatedEvent[],
 ): DateOutcome {
 	const day = aggregate(events, scenario.economy.inflation)
-	const applied = applyContributions(states, day.contributions, date)
+	const debt = applyDebt(states, day.contributions, date)
+	if (debt.problem !== undefined) {
+		const totals = {
+			date,
+			income: day.income,
+			expense: day.expense,
+			contributions: debt.paid,
+			unfunded: new Map<AccountId, bigint>(),
+		}
+		return { totals, problem: debt.problem, runsOut: undefined }
+	}
+	const cashflow = day.income - day.expense - debt.paid
+	const available = cashflow > 0n ? cashflow : 0n
+	const assets = applyAssets(
+		states,
+		scenario.cashflow.contribute,
+		day.contributions,
+		available,
+		date,
+	)
 	const totals = {
 		date,
 		income: day.income,
 		expense: day.expense,
-		contributions: applied.outflow,
+		contributions: debt.paid + assets.applied,
+		unfunded: assets.unfunded,
 	}
-	if (applied.problem !== undefined) return { totals, problem: applied.problem, runsOut: undefined }
-	const net = day.income - day.expense - applied.outflow
+	if (assets.problem !== undefined) return { totals, problem: assets.problem, runsOut: undefined }
+	const net = cashflow - assets.applied
 	if (net > 0n) {
 		const problem = applySurplus(states, scenario, date, net)
 		return { totals, problem, runsOut: undefined }

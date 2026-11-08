@@ -1,3 +1,4 @@
+import type { Fixture } from "../fixtures/fixture"
 import type { DateString, Flow, Frequency } from "../types"
 import { oracleAddDays, oracleAddMonthsClamped, oracleGrowthYears } from "./oracle-date"
 import { oracleGrow } from "./oracle-money"
@@ -60,4 +61,18 @@ export function oracleAmount(event: OracleEvent, inflation: number): bigint {
 	const growth = event.flow.growth
 	const rate = growth === "inflation" ? inflation : growth.bps
 	return oracleGrow(BigInt(event.flow.amount), rate, event.years * 365)
+}
+
+/** Every event in the timeline, grouped by date. */
+export function oracleEventsByDate(
+	fixture: Fixture,
+): ReadonlyMap<DateString, readonly OracleEvent[]> {
+	const { scenario, timeline } = fixture
+	const byDate = new Map<DateString, OracleEvent[]>()
+	for (const event of oracleEvents(scenario.flows, timeline.start, timeline.horizon)) {
+		const list = byDate.get(event.date) ?? []
+		list.push(event)
+		byDate.set(event.date, list)
+	}
+	return byDate
 }

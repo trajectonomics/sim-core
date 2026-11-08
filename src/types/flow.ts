@@ -24,7 +24,7 @@ export interface ExpenseFlow extends FlowBase {
 	readonly kind: "expense"
 }
 
-/** Cash moves into `target`; a liability target is a debt payment, capped at the amount owed. */
+/** Cash moves into `target`. A liability target is a debt payment capped at the amount owed; an asset target spends Available cashflow in `cashflow.contribute` order. */
 export interface ContributionFlow extends FlowBase {
 	readonly kind: "contribution"
 	readonly target: AccountId

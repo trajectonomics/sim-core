@@ -12,7 +12,7 @@ const baseline: Baseline = {
 }
 
 const scenario: Scenario = {
-	schemaVersion: 1,
+	schemaVersion: 2,
 	currency: "THB",
 	economy: { inflation: 200 },
 	accounts: [
@@ -80,6 +80,7 @@ const scenario: Scenario = {
 		},
 	],
 	cashflow: {
+		contribute: ["ssf"],
 		surplus: [{ account: "tax-reserve", upTo: 5_000_000 }, { account: "brokerage" }],
 		withdraw: ["cash", "tax-reserve", "brokerage", "ssf"],
 	},

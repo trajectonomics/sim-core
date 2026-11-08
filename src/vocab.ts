@@ -1,4 +1,5 @@
-export const SCHEMA_VERSION: 1 = 1
+export const BASELINE_SCHEMA_VERSION: 1 = 1
+export const SCENARIO_SCHEMA_VERSION: 2 = 2
 
 export const ACCOUNT_KINDS = ["asset", "liability"] as const
 export const FLOW_KINDS = ["income", "expense", "contribution"] as const
