@@ -1,14 +1,14 @@
 import type { Fixture } from "../fixtures/fixture"
 import type { AccountId, DateString } from "../types"
-import { oracleAddDays } from "./oracle-date"
-import { type OracleEvent, oracleEvents } from "./oracle-flow"
 import {
-	oracleContributions,
-	oracleIncomeExpense,
-	oracleSurplus,
-	oracleWithdraw,
-} from "./oracle-ops"
-import { type OracleSnapshot, oracleSnapshot } from "./oracle-snapshot"
+	oracleAssetContributions,
+	oracleDebtPayments,
+	oraclePlannedContributions,
+} from "./oracle-contributions"
+import { oracleAddDays } from "./oracle-date"
+import { type OracleEvent, oracleEventsByDate } from "./oracle-flow"
+import { oracleIncomeExpense, oracleSurplus, oracleWithdraw } from "./oracle-ops"
+import { type OracleBalance, type OracleSnapshot, oracleSnapshot } from "./oracle-snapshot"
 import type { OracleState, OracleStates } from "./oracle-state"
 
 export interface OracleRunsOut {
@@ -21,6 +21,7 @@ export interface OracleFlowDay {
 	readonly income: bigint
 	readonly expense: bigint
 	readonly contributions: bigint
+	readonly unfunded: readonly OracleBalance[]
 }
 
 export interface OracleRun {
@@ -58,9 +59,19 @@ function processDay(
 	const { scenario } = fixture
 	const inflation = scenario.economy.inflation
 	const [income, expense] = oracleIncomeExpense(events, inflation)
-	const outflow = oracleContributions(states, events, inflation, date)
-	const net = income - expense - outflow
-	const flow = { date, income, expense, contributions: outflow }
+	const planned = oraclePlannedContributions(events, inflation)
+	const debt = oracleDebtPayments(states, planned, date)
+	const cashflow = income - expense - debt
+	const budget = cashflow > 0n ? cashflow : 0n
+	const assets = oracleAssetContributions(states, scenario, planned, budget, date)
+	const flow = {
+		date,
+		income,
+		expense,
+		contributions: debt + assets.applied,
+		unfunded: assets.unfunded,
+	}
+	const net = cashflow - assets.applied
 	if (net > 0n) oracleSurplus(states, scenario.cashflow.surplus, date, net)
 	if (net < 0n) {
 		const remaining = oracleWithdraw(states, scenario, date, -net)
@@ -69,22 +80,11 @@ function processDay(
 	return { flow }
 }
 
-function eventsByDate(fixture: Fixture): ReadonlyMap<DateString, readonly OracleEvent[]> {
-	const { scenario, timeline } = fixture
-	const byDate = new Map<DateString, OracleEvent[]>()
-	for (const event of oracleEvents(scenario.flows, timeline.start, timeline.horizon)) {
-		const list = byDate.get(event.date) ?? []
-		list.push(event)
-		byDate.set(event.date, list)
-	}
-	return byDate
-}
-
 export function oracleRun(fixture: Fixture, observations: readonly DateString[]): OracleRun {
 	const { scenario, timeline } = fixture
 	const inflation = scenario.economy.inflation
 	const states = createStates(fixture)
-	const byDate = eventsByDate(fixture)
+	const byDate = oracleEventsByDate(fixture)
 	const wanted = new Set<DateString>(observations)
 	const snapshots: OracleSnapshot[] = []
 	const flows: OracleFlowDay[] = []

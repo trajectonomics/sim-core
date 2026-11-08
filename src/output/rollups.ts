@@ -9,6 +9,7 @@ interface FlowSums {
 	readonly income: bigint
 	readonly expense: bigint
 	readonly contributions: bigint
+	readonly unfunded: bigint
 }
 
 export interface RollupOutcome {
@@ -20,13 +21,15 @@ function sumFlows(totals: readonly DayTotals[], period: Period): FlowSums {
 	let income = 0n
 	let expense = 0n
 	let contributions = 0n
+	let unfunded = 0n
 	for (const total of totals) {
 		if (total.date < period.from || total.date > period.to) continue
 		income += total.income
 		expense += total.expense
 		contributions += total.contributions
+		for (const amount of total.unfunded.values()) unfunded += amount
 	}
-	return { income, expense, contributions }
+	return { income, expense, contributions, unfunded }
 }
 
 function unsafe(values: readonly bigint[], date: string): ProjectionProblem | undefined {
@@ -49,7 +52,16 @@ export function buildRollups(
 		const unmet = run.runsOut?.date === period.to ? run.runsOut.unmet : 0n
 		const interest = closing - openingWorth - sums.income + sums.expense - unmet
 		const problem = unsafe(
-			[openingWorth, closing, sums.income, sums.expense, sums.contributions, interest, unmet],
+			[
+				openingWorth,
+				closing,
+				sums.income,
+				sums.expense,
+				sums.contributions,
+				sums.unfunded,
+				interest,
+				unmet,
+			],
 			period.to,
 		)
 		if (problem !== undefined) return { annual: undefined, problem }
@@ -62,6 +74,7 @@ export function buildRollups(
 			income: Number(sums.income),
 			expense: Number(sums.expense),
 			contributions: Number(sums.contributions),
+			unfundedContributions: Number(sums.unfunded),
 			interest: Number(interest),
 			unmet: Number(unmet),
 			partial: period.partial,

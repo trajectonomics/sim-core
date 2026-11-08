@@ -11,6 +11,7 @@ export interface OracleYear {
 	readonly income: bigint
 	readonly expense: bigint
 	readonly contributions: bigint
+	readonly unfundedContributions: bigint
 	readonly interest: bigint
 	readonly unmet: bigint
 	readonly partial: boolean
@@ -57,6 +58,7 @@ export function oracleAnnual(fixture: Fixture, run: OracleRun): OracleYear[] {
 			days.reduce((total, flow) => total + pick(flow), 0n)
 		const income = sum((flow) => flow.income)
 		const expense = sum((flow) => flow.expense)
+		const unfunded = sum((flow) => flow.unfunded.reduce((total, item) => total + item.amount, 0n))
 		const unmet = run.runsOut?.date === to ? run.runsOut.unmet : 0n
 		const closing = worth.get(to)!
 		years.push({
@@ -67,6 +69,7 @@ export function oracleAnnual(fixture: Fixture, run: OracleRun): OracleYear[] {
 			income,
 			expense,
 			contributions: sum((flow) => flow.contributions),
+			unfundedContributions: unfunded,
 			interest: closing - opening - income + expense - unmet,
 			unmet,
 			partial: to < last || to === run.runsOut?.date,

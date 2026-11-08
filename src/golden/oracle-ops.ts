@@ -1,4 +1,4 @@
-import type { AccountId, DateString, Scenario, SurplusStep } from "../types"
+import type { DateString, Scenario, SurplusStep } from "../types"
 import { type OracleEvent, oracleAmount } from "./oracle-flow"
 import { type OracleStates, oracleMutate, oracleValuation } from "./oracle-state"
 
@@ -19,31 +19,6 @@ export function oracleIncomeExpense(
 		if (event.flow.kind === "expense") expense += amount
 	}
 	return [income, expense]
-}
-
-export function oracleContributions(
-	states: OracleStates,
-	events: readonly OracleEvent[],
-	inflation: number,
-	date: DateString,
-): bigint {
-	const totals = new Map<AccountId, bigint>()
-	for (const event of events) {
-		if (event.flow.kind !== "contribution") continue
-		const target = event.flow.target
-		totals.set(target, (totals.get(target) ?? 0n) + oracleAmount(event, inflation))
-	}
-	let outflow = 0n
-	for (const target of [...totals.keys()].sort()) {
-		const state = states.get(target)!
-		const total = totals.get(target) ?? 0n
-		const liability = state.rule.kind === "liability"
-		const owed = liability ? oracleValuation(state, date) : total
-		const payment = min(total, owed)
-		oracleMutate(state, date, liability ? -payment : payment)
-		outflow += payment
-	}
-	return outflow
 }
 
 export function oracleSurplus(

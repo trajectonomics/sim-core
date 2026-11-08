@@ -1,10 +1,11 @@
 import { describe, expect, it } from "bun:test"
 import { project } from "../engine/project"
-import { contribution } from "../engine/test-flows"
+import { contribution, income } from "../engine/test-flows"
 import { run } from "../engine/test-helpers"
 import type { Fixture } from "../fixtures/fixture"
 import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
+import type { Account } from "../types"
 import type { Projection } from "../types/projection"
 
 function projected(fixture: Fixture): Projection {
@@ -65,23 +66,30 @@ describe("balances and conservation", () => {
 		}
 	})
 
-	it("keeps net worth unchanged across a contribution", () => {
-		const projection = run({
+	it("keeps net worth identical whether income is saved or left in cash", () => {
+		const base = {
 			accounts: [
 				{ id: "cash", kind: "asset", rate: 0 },
 				{ id: "savings", kind: "asset", rate: 0 },
-			],
+			] satisfies readonly Account[],
 			balances: { cash: 1000, savings: 0 },
-			flows: [contribution("save", "savings", 100, { start: "2026-01-02" })],
+			flows: [income("pay", 100, { start: "2026-01-02" })],
 			surplus: [{ account: "cash" }],
+			contribute: ["savings"],
 			withdraw: ["cash"],
 			horizon: "2026-01-02",
+		} as const
+		const saved = run({
+			...base,
+			flows: [...base.flows, contribution("save", "savings", 100, { start: "2026-01-02" })],
 		})
-		expect(projection.rows.map((row) => row.netWorth)).toEqual([1000, 1000])
-		expect(projection.annual[0]).toMatchObject({
+		const cashOnly = run(base)
+		expect(saved.rows.map((row) => row.netWorth)).toEqual(cashOnly.rows.map((row) => row.netWorth))
+		expect(saved.annual[0]).toMatchObject({
 			openingNetWorth: 1000,
-			closingNetWorth: 1000,
+			closingNetWorth: 1100,
 			contributions: 100,
+			unfundedContributions: 0,
 			interest: 0,
 		})
 	})

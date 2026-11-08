@@ -8,6 +8,8 @@ export interface SurplusStep {
 
 export interface Cashflow {
 	readonly surplus: readonly SurplusStep[]
+	/** Ordered funding priority for asset contributions. Every asset target must appear; extras are inert. */
+	readonly contribute: readonly AccountId[]
 	/** Ordered withdrawal sources; locked accounts are skipped. */
 	readonly withdraw: readonly AccountId[]
 }

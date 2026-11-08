@@ -28,10 +28,15 @@ export function checkCashflow(
 	const cashflow = checkShape(
 		value,
 		path,
-		{ surplus: req(list(step)), withdraw: req(list(account)) },
+		{
+			surplus: req(list(step)),
+			contribute: req(list(account)),
+			withdraw: req(list(account)),
+		},
 		emit,
 	)
 	if (cashflow) checkRouting(cashflow, path, emit)
 	checkUnique(cashflow?.["surplus"], [...path, "surplus"], "account", emit)
+	checkUniqueValues(cashflow?.["contribute"], [...path, "contribute"], emit)
 	checkUniqueValues(cashflow?.["withdraw"], [...path, "withdraw"], emit)
 }

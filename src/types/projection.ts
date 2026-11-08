@@ -25,6 +25,7 @@ export interface AnnualRollup {
 	readonly income: MinorUnits
 	readonly expense: MinorUnits
 	readonly contributions: MinorUnits
+	readonly unfundedContributions: MinorUnits
 	readonly interest: MinorUnits
 	readonly unmet: MinorUnits
 	readonly partial: boolean
@@ -38,6 +39,7 @@ export interface RunsOut {
 export interface Projection {
 	readonly rows: readonly ProjectionRow[]
 	readonly annual: readonly AnnualRollup[]
+	readonly unfundedContributions: readonly AccountAmount[]
 	readonly runsOut?: RunsOut
 }
 
