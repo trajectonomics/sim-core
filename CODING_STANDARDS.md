@@ -1,6 +1,6 @@
 # Coding standards
 
-Judgement calls for review. Mechanical rules live in `biome.json`, `biome-plugins/`, the tsconfigs and `bun run check`, not here.
+Judgement calls for review. Mechanical rules live in `biome.json`, the tsconfigs and `bun run check`, not here.
 
 - **Glossary vocabulary.** Identifiers and test names use the terms in `GLOSSARY.md`. A term listed under `_Avoid_` (Event, Stream, Period, Run, Tick, ...) does not name a type, function or file.
 - **Hand-computed expectations.** A test's expected value comes from a hand calculation, the oracle, or a recorded fixture. Re-applying the formula under test to produce the expected value cannot fail, so it is not a test.
