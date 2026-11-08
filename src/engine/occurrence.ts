@@ -3,16 +3,20 @@ import type { ProjectionProblem } from "../types/projection"
 import { aggregate } from "./aggregate"
 import { applyAssets, applyDebt } from "./contributions"
 import type { DatedEvent } from "./events"
+import { mergeFunded, settlementOn, tally, totalsOf } from "./levy-step"
+import type { LevyTracker } from "./levy-types"
+import { route } from "./route"
 import type { StateMap } from "./state"
-import { applySurplus } from "./surplus"
-import { applyWithdraw } from "./withdraw"
 
 export interface DayTotals {
 	readonly date: DateString
+	/** Planned gross income before Prepayment. */
 	readonly income: bigint
 	readonly expense: bigint
 	readonly contributions: bigint
 	readonly unfunded: ReadonlyMap<AccountId, bigint>
+	/** Prepayment plus Settlements net of refunds on this date. */
+	readonly levy: bigint
 }
 
 export interface EngineRunsOut {
@@ -32,49 +36,29 @@ export function processDate(
 	scenario: Scenario,
 	date: DateString,
 	events: readonly DatedEvent[],
+	tracker: LevyTracker | undefined,
 ): DateOutcome {
 	const day = aggregate(events, scenario.economy.inflation)
-	const debt = applyDebt(states, day.contributions, date)
+	const settlement = settlementOn(tracker, date)
+	const debt = applyDebt(states, day.contributionEntries, date)
 	if (debt.problem !== undefined) {
-		const totals = {
-			date,
-			income: day.income,
-			expense: day.expense,
-			contributions: debt.paid,
-			unfunded: new Map<AccountId, bigint>(),
-		}
+		tally(tracker, date, day.gross, debt.funded, day.prepaid)
+		const totals = totalsOf(date, day, debt.paid, new Map(), settlement)
 		return { totals, problem: debt.problem, runsOut: undefined }
 	}
-	const cashflow = day.income - day.expense - debt.paid
+	const cashflow = day.income - day.prepaid - day.expense - debt.paid - settlement.amount
 	const available = cashflow > 0n ? cashflow : 0n
 	const assets = applyAssets(
 		states,
 		scenario.cashflow.contribute,
-		day.contributions,
+		day.contributionEntries,
 		available,
 		date,
 	)
-	const totals = {
-		date,
-		income: day.income,
-		expense: day.expense,
-		contributions: debt.paid + assets.applied,
-		unfunded: assets.unfunded,
-	}
+	tally(tracker, date, day.gross, mergeFunded(debt.funded, assets.funded), day.prepaid)
+	const totals = totalsOf(date, day, debt.paid + assets.applied, assets.unfunded, settlement)
+	if (settlement.problem !== undefined)
+		return { totals, problem: settlement.problem, runsOut: undefined }
 	if (assets.problem !== undefined) return { totals, problem: assets.problem, runsOut: undefined }
-	const net = cashflow - assets.applied
-	if (net > 0n) {
-		const problem = applySurplus(states, scenario, date, net)
-		return { totals, problem, runsOut: undefined }
-	}
-	if (net < 0n) {
-		const drawn = applyWithdraw(states, scenario, date, -net)
-		if (drawn.problem !== undefined) {
-			return { totals, problem: drawn.problem, runsOut: undefined }
-		}
-		if (drawn.remaining > 0n) {
-			return { totals, problem: undefined, runsOut: { date, unmet: drawn.remaining } }
-		}
-	}
-	return { totals, problem: undefined, runsOut: undefined }
+	return route(states, scenario, date, totals, cashflow - assets.applied)
 }

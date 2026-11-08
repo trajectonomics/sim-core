@@ -1,6 +1,7 @@
 import type { EngineRun } from "../engine/result"
 import type { Baseline, Scenario, Timeline } from "../types"
 import type { Projection, ProjectionProblem } from "../types/projection"
+import { buildLevy } from "./levy"
 import { openingNetWorth } from "./opening"
 import { buildPeriods } from "./periods"
 import { buildRollups } from "./rollups"
@@ -32,17 +33,16 @@ export function buildProjection(
 	if (rollups.problem !== undefined) return { problem: rollups.problem }
 	const unfunded = buildUnfunded(run.totals, end)
 	if (unfunded.problem !== undefined) return { problem: unfunded.problem }
-	const shared = {
+	const levy = buildLevy(run.levy)
+	if (levy.problem !== undefined) return { problem: levy.problem }
+	const projection: Projection = {
 		rows: rows.rows!,
 		annual: rollups.annual!,
 		unfundedContributions: unfunded.amounts!,
+		...(run.runsOut === undefined
+			? {}
+			: { runsOut: { date: run.runsOut.date, unmet: Number(run.runsOut.unmet) } }),
+		...(levy.levy === undefined ? {} : { levy: levy.levy }),
 	}
-	const projection: Projection =
-		run.runsOut === undefined
-			? shared
-			: {
-					...shared,
-					runsOut: { date: run.runsOut.date, unmet: Number(run.runsOut.unmet) },
-				}
 	return { projection }
 }

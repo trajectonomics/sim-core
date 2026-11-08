@@ -31,11 +31,14 @@ export type {
 	AccountAmount,
 	AnnualRollup,
 	InputProblem,
+	LevyMeasureValue,
+	LevyReport,
 	Projection,
 	ProjectionProblem,
 	ProjectionResult,
 	ProjectionRow,
 	RunsOut,
+	SettlementPeriod,
 	ValueOverflowProblem,
 } from "./projection"
 export type { Economy, Scenario } from "./scenario"

@@ -3,6 +3,7 @@ import { indexAccounts } from "./accounts"
 import { checkBaseline } from "./baseline"
 import type { Emit, Path, Problem } from "./codes"
 import { makeGuard } from "./guard"
+import { checkLevyStart } from "./levy-start"
 import { checkScenario } from "./scenario"
 import { isRecord } from "./shape"
 import { checkTimeline } from "./timeline"
@@ -37,5 +38,6 @@ export function check(baseline: unknown, scenario: unknown, timeline: unknown): 
 	if (scenarioOk)
 		guard("scenario", undefined, () => checkScenario(scenario, ["scenario"], accounts, emit))
 	guard("timeline", undefined, () => checkTimeline(timeline, ["timeline"], emit))
+	guard("timeline", undefined, () => checkLevyStart(scenario, timeline, emit))
 	return problems
 }

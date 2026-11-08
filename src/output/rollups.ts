@@ -10,6 +10,7 @@ interface FlowSums {
 	readonly expense: bigint
 	readonly contributions: bigint
 	readonly unfunded: bigint
+	readonly levy: bigint
 }
 
 export interface RollupOutcome {
@@ -22,19 +23,47 @@ function sumFlows(totals: readonly DayTotals[], period: Period): FlowSums {
 	let expense = 0n
 	let contributions = 0n
 	let unfunded = 0n
+	let levy = 0n
 	for (const total of totals) {
 		if (total.date < period.from || total.date > period.to) continue
 		income += total.income
 		expense += total.expense
 		contributions += total.contributions
 		for (const amount of total.unfunded.values()) unfunded += amount
+		levy += total.levy
 	}
-	return { income, expense, contributions, unfunded }
+	return { income, expense, contributions, unfunded, levy }
 }
 
 function unsafe(values: readonly bigint[], date: string): ProjectionProblem | undefined {
 	for (const value of values) if (!isSafeInteger(value)) return overflow(date)
 	return undefined
+}
+
+function rollupOf(
+	period: Period,
+	sums: FlowSums,
+	opening: bigint,
+	closing: bigint,
+	unmet: bigint,
+	hasLevy: boolean,
+): AnnualRollup {
+	const interest = closing - opening - sums.income + sums.expense + sums.levy - unmet
+	return {
+		index: period.index,
+		from: period.from,
+		to: period.to,
+		openingNetWorth: Number(opening),
+		closingNetWorth: Number(closing),
+		income: Number(sums.income),
+		expense: Number(sums.expense),
+		contributions: Number(sums.contributions),
+		unfundedContributions: Number(sums.unfunded),
+		...(hasLevy ? { levy: Number(sums.levy) } : {}),
+		interest: Number(interest),
+		unmet: Number(unmet),
+		partial: period.partial,
+	}
 }
 
 export function buildRollups(
@@ -45,12 +74,13 @@ export function buildRollups(
 	const snapshots = new Map<string, EngineSnapshot>()
 	for (const snapshot of run.snapshots) snapshots.set(snapshot.date, snapshot)
 	const annual: AnnualRollup[] = []
+	const hasLevy = run.levy !== undefined
 	let openingWorth = opening
 	for (const period of periods) {
 		const sums = sumFlows(run.totals, period)
 		const closing = snapshots.get(period.to)!.netWorth
 		const unmet = run.runsOut?.date === period.to ? run.runsOut.unmet : 0n
-		const interest = closing - openingWorth - sums.income + sums.expense - unmet
+		const interest = closing - openingWorth - sums.income + sums.expense + sums.levy - unmet
 		const problem = unsafe(
 			[
 				openingWorth,
@@ -59,26 +89,14 @@ export function buildRollups(
 				sums.expense,
 				sums.contributions,
 				sums.unfunded,
+				sums.levy,
 				interest,
 				unmet,
 			],
 			period.to,
 		)
 		if (problem !== undefined) return { annual: undefined, problem }
-		annual.push({
-			index: period.index,
-			from: period.from,
-			to: period.to,
-			openingNetWorth: Number(openingWorth),
-			closingNetWorth: Number(closing),
-			income: Number(sums.income),
-			expense: Number(sums.expense),
-			contributions: Number(sums.contributions),
-			unfundedContributions: Number(sums.unfunded),
-			interest: Number(interest),
-			unmet: Number(unmet),
-			partial: period.partial,
-		})
+		annual.push(rollupOf(period, sums, openingWorth, closing, unmet, hasLevy))
 		openingWorth = closing
 	}
 	return { annual, problem: undefined }

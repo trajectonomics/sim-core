@@ -35,7 +35,7 @@ A closed rule set in the Scenario that charges an amount for each Settlement per
 _Avoid_: Tax, tax rules, formula callback, plugin
 
 **Settlement period**:
-A twelve-month period set by the Levy's period rule, over which the Levy tallies Flows before it settles. Usually a calendar year. A Settlement period and an Annual roll-up rarely cover the same days, and Levy results are reported per Settlement period.
+A twelve-month period set by the Levy's period rule, over which the Levy tallies Flows before it settles. Usually a calendar year. A Settlement period and an Annual roll-up rarely cover the same days, and Levy results are reported per Settlement period with `settled` and `partial` flags.
 _Avoid_: Tax year, fiscal year, year, Annual roll-up
 
 **Measure**:
@@ -43,15 +43,15 @@ A named value inside a Levy, computed in integer minor units from tallies, const
 _Avoid_: Variable, formula, derived flow
 
 **Tally label**:
-A label on an income Flow, or on a contribution Flow, that a Levy sums over a Settlement period. A Flow with no label is never tallied.
+A label on an income Flow, or on a contribution Flow, that a Levy sums over a Settlement period. A Flow with no label is never tallied. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap.
 _Avoid_: Category, tag, tax category
 
 **Prepayment**:
-An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount. Only the net lands in cash. The period's total is credited against the Levy at Settlement.
+An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount, rounded half up in minor units. Only the net lands in cash. The period's total is credited against the Levy at Settlement.
 _Avoid_: Withholding, prepaid tax
 
 **Settlement**:
-The one date after a Settlement period ends on which the Levy's due amount is reconciled against Prepayment. A balance due is paid like an expense and a refund lands like income. The date comes from the Levy's settlement rule.
+The one date after a Settlement period ends on which the Levy's due amount is reconciled against Prepayment. A balance due is paid like an expense and a refund lands like income. The date comes from the Levy's settlement rule. A period the Projection ends before is still reported, with `settled: false`, and nothing is deducted.
 _Avoid_: Tax settlement, filing, payment
 
 **Carry-in**:
