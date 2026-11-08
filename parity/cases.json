@@ -2457,5 +2457,436 @@
 			"resolution": "day"
 		},
 		"sha256": "30409b12a3d63f637dd95dcfca14523684b0b6a50e5bed1807c42d4e5514aeaf"
+	},
+	{
+		"name": "freelancer-fi",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 15000000
+				},
+				{
+					"account": "tax-reserve",
+					"amount": 2000000
+				},
+				{
+					"account": "ssf",
+					"amount": 8000000
+				},
+				{
+					"account": "equipment-loan",
+					"amount": 9000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "tax-reserve",
+					"kind": "asset",
+					"rate": 100
+				},
+				{
+					"id": "ssf",
+					"kind": "asset",
+					"rate": 450,
+					"lockedUntil": "2036-06-30"
+				},
+				{
+					"id": "equipment-loan",
+					"kind": "liability",
+					"rate": 700
+				},
+				{
+					"id": "brokerage",
+					"kind": "asset",
+					"rate": 600
+				}
+			],
+			"flows": [
+				{
+					"id": "client-retainer",
+					"kind": "income",
+					"earned": true,
+					"amount": 4500000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": "inflation"
+				},
+				{
+					"id": "project-fee",
+					"kind": "income",
+					"earned": true,
+					"amount": 2000000,
+					"frequency": "quarterly",
+					"start": "2026-02-15",
+					"end": "2031-02-15",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "dividend",
+					"kind": "income",
+					"earned": false,
+					"amount": 300000,
+					"frequency": "annual",
+					"start": "2027-04-30",
+					"growth": {
+						"bps": 100
+					}
+				},
+				{
+					"id": "living",
+					"kind": "expense",
+					"amount": 2200000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation"
+				},
+				{
+					"id": "ssf-top-up",
+					"kind": "contribution",
+					"target": "ssf",
+					"amount": 1500000,
+					"frequency": "quarterly",
+					"start": "2026-03-31",
+					"end": "2035-12-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "loan-payment",
+					"kind": "contribution",
+					"target": "equipment-loan",
+					"amount": 350000,
+					"frequency": "monthly",
+					"start": "2026-01-10",
+					"growth": {
+						"bps": 0
+					}
+				}
+			],
+			"cashflow": {
+				"contribute": ["ssf"],
+				"surplus": [
+					{
+						"account": "tax-reserve",
+						"upTo": 5000000
+					},
+					{
+						"account": "brokerage"
+					}
+				],
+				"withdraw": ["cash", "tax-reserve", "brokerage", "ssf"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2051-01-01",
+			"resolution": "day"
+		},
+		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833",
+		"options": {
+			"method": "survival"
+		},
+		"fiSha256": "4067c426c69732159a85b03561c944b3d54c39d5c83fc3878e38e7225910a4b3"
+	},
+	{
+		"name": "thai-employee-fi-buffer",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 5000000
+				},
+				{
+					"account": "emergency-fund",
+					"amount": 30000000
+				},
+				{
+					"account": "rmf",
+					"amount": 20000000
+				},
+				{
+					"account": "mortgage",
+					"amount": 250000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 250
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 50
+				},
+				{
+					"id": "emergency-fund",
+					"kind": "asset",
+					"rate": 150
+				},
+				{
+					"id": "rmf",
+					"kind": "asset",
+					"rate": 500,
+					"lockedUntil": "2046-01-01"
+				},
+				{
+					"id": "mortgage",
+					"kind": "liability",
+					"rate": 450
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"kind": "income",
+					"earned": true,
+					"amount": 6000000,
+					"frequency": "monthly",
+					"start": "2026-01-25",
+					"growth": {
+						"bps": 300
+					}
+				},
+				{
+					"id": "bonus",
+					"kind": "income",
+					"earned": true,
+					"amount": 12000000,
+					"frequency": "once",
+					"start": "2026-03-31",
+					"growth": "inflation"
+				},
+				{
+					"id": "living",
+					"kind": "expense",
+					"amount": 2500000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation"
+				},
+				{
+					"id": "rmf-monthly",
+					"kind": "contribution",
+					"target": "rmf",
+					"amount": 500000,
+					"frequency": "monthly",
+					"start": "2026-01-25",
+					"end": "2045-12-25",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "mortgage-payment",
+					"kind": "contribution",
+					"target": "mortgage",
+					"amount": 1800000,
+					"frequency": "monthly",
+					"start": "2026-01-05",
+					"end": "2050-12-05",
+					"growth": {
+						"bps": 0
+					}
+				}
+			],
+			"cashflow": {
+				"contribute": ["rmf"],
+				"surplus": [
+					{
+						"account": "cash",
+						"upTo": 10000000
+					},
+					{
+						"account": "emergency-fund"
+					}
+				],
+				"withdraw": ["emergency-fund", "cash", "rmf"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2056-01-01",
+			"resolution": "month"
+		},
+		"sha256": "1f54262a5d84382979929adb2675cbef47a848d36ccccce67aa6f87eb6c711d1",
+		"options": {
+			"method": "survival",
+			"minBufferMonths": 6
+		},
+		"fiSha256": "e4773251ec99dbc356bf5f0727fbe6b1028f286169f23dcac3cc31cdf6067aea"
+	},
+	{
+		"name": "freelancer-fi-retirement",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 15000000
+				},
+				{
+					"account": "tax-reserve",
+					"amount": 2000000
+				},
+				{
+					"account": "ssf",
+					"amount": 8000000
+				},
+				{
+					"account": "equipment-loan",
+					"amount": 9000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "tax-reserve",
+					"kind": "asset",
+					"rate": 100
+				},
+				{
+					"id": "ssf",
+					"kind": "asset",
+					"rate": 450,
+					"lockedUntil": "2036-06-30"
+				},
+				{
+					"id": "equipment-loan",
+					"kind": "liability",
+					"rate": 700
+				},
+				{
+					"id": "brokerage",
+					"kind": "asset",
+					"rate": 600
+				}
+			],
+			"flows": [
+				{
+					"id": "client-retainer",
+					"kind": "income",
+					"earned": true,
+					"amount": 4500000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": "inflation"
+				},
+				{
+					"id": "project-fee",
+					"kind": "income",
+					"earned": true,
+					"amount": 2000000,
+					"frequency": "quarterly",
+					"start": "2026-02-15",
+					"end": "2031-02-15",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "dividend",
+					"kind": "income",
+					"earned": false,
+					"amount": 300000,
+					"frequency": "annual",
+					"start": "2027-04-30",
+					"growth": {
+						"bps": 100
+					}
+				},
+				{
+					"id": "living",
+					"kind": "expense",
+					"amount": 2200000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation"
+				},
+				{
+					"id": "ssf-top-up",
+					"kind": "contribution",
+					"target": "ssf",
+					"amount": 1500000,
+					"frequency": "quarterly",
+					"start": "2026-03-31",
+					"end": "2035-12-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "loan-payment",
+					"kind": "contribution",
+					"target": "equipment-loan",
+					"amount": 350000,
+					"frequency": "monthly",
+					"start": "2026-01-10",
+					"growth": {
+						"bps": 0
+					}
+				}
+			],
+			"cashflow": {
+				"contribute": ["ssf"],
+				"surplus": [
+					{
+						"account": "tax-reserve",
+						"upTo": 5000000
+					},
+					{
+						"account": "brokerage"
+					}
+				],
+				"withdraw": ["cash", "tax-reserve", "brokerage", "ssf"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2051-01-01",
+			"resolution": "day"
+		},
+		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833",
+		"options": {
+			"method": "survival",
+			"retirementSpending": {
+				"amount": 2000000,
+				"growth": "inflation"
+			},
+			"minBufferMonths": 3
+		},
+		"fiSha256": "6547005a76b8226eb2e48f43983e4b41c709c1820e184a6cdfb74a62d1a6e7f1"
 	}
 ]

@@ -117,6 +117,10 @@ _Avoid_: Post-retirement expenses, withdrawal rate
 The number of months of expenses the FI method requires as accessible net worth.
 _Avoid_: Emergency fund, cash reserve
 
+**Rule-of-thumb 25× reference**:
+An informational multiple of annual expenses reported beside a reachable FI month. It never decides the FI answer.
+_Avoid_: FI threshold, target net worth
+
 ## Input Conventions
 
 - All dates are `YYYY-MM-DD`, in years 0001-9998. There are no ages in the core; callers convert ages to dates.

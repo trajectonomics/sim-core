@@ -1,6 +1,6 @@
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import { collectDates } from "./dates"
-import { buildEvents, type DatedEvent } from "./events"
+import { buildEvents, flowsAt } from "./events"
 import { type SettlementPeriodPlan, settlementPeriods } from "./levy-plan"
 import { finishTracker } from "./levy-settle"
 import { createTracker } from "./levy-tally"
@@ -25,16 +25,6 @@ function settlementDates(
 	horizon: DateString,
 ): DateString[] {
 	return periods.map((period) => period.settlementDate).filter((date) => date <= horizon)
-}
-
-function eventsFor(
-	events: readonly DatedEvent[],
-	index: number,
-	date: DateString,
-): readonly [number, readonly DatedEvent[]] {
-	let next = index
-	while (next < events.length && events[next]?.date === date) next++
-	return [next, events.slice(index, next)]
 }
 
 function attachLevy(
@@ -71,7 +61,7 @@ export function runEngine(
 	let index = 0
 	const dates = collectDates(events, observations, settlementDates(periods, timeline.horizon))
 	for (const date of dates) {
-		const [next, dayEvents] = eventsFor(events, index, date)
+		const [next, dayEvents] = flowsAt(events, index, date)
 		index = next
 		const result = stepDate(acc, states, scenario, date, dayEvents)
 		if (result !== undefined) return attachLevy(result, tracker, endDate(result, timeline))

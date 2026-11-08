@@ -36,6 +36,7 @@ const CODES = [
 	"DUPLICATE_CARRY_IN",
 	"MISALIGNED_CARRY_IN",
 	"UNKNOWN_TALLY_LABEL",
+	"INVALID_FI_METHOD",
 ] as const
 
 /** The closed set of problem codes. Frozen so consumers cannot mutate it at runtime. */
