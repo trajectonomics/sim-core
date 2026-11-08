@@ -2,7 +2,7 @@
 import { TH_LIKE } from "../levy/th-levy"
 import type { BasisPoints, DateString, Flow, MinorUnits, Resolution } from "../types"
 import { income } from "./test-flows"
-import type { Setup } from "./test-helpers"
+import { emptyCarryIn, type Setup, withCarryIn } from "./test-helpers"
 
 export const SALARY = 10_000_000
 export const NET_500 = 9_500_000
@@ -39,6 +39,6 @@ export function salaryLevySetup(options: SalarySetupOptions = {}): Setup {
 		start: "2026-01-01",
 		horizon: options.horizon ?? "2027-03-31",
 		resolution: options.resolution ?? "day",
-		levy: TH_LIKE,
+		levy: withCarryIn(TH_LIKE, emptyCarryIn("2025-01-01")),
 	}
 }

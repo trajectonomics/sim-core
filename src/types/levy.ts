@@ -1,4 +1,5 @@
 import type { MEASURE_OPS, ROUNDINGS, TALLY_BASES } from "../vocab"
+import type { CarryIn } from "./carry-in"
 import type { BasisPoints, DateString, Growth, MinorUnits } from "./common"
 import type { InputProblem, ValueOverflowProblem } from "./projection"
 
@@ -90,4 +91,6 @@ export interface Levy {
 	readonly measures: readonly Measure[]
 	/** Id of the Measure that is the amount owed before Prepayment. */
 	readonly due: string
+	/** Required for periods that began before `Timeline.start`; see `CarryIn`. */
+	readonly carryIn?: readonly CarryIn[]
 }

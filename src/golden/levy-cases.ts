@@ -1,13 +1,16 @@
+import { emptyCarryIn, withCarryIn } from "../engine/test-helpers"
 import type { Fixture } from "../fixtures/fixture"
 import { TH_LIKE } from "../levy/th-levy"
-import type { BasisPoints, DateString, IncomeFlow, Resolution } from "../types"
+import type { BasisPoints, CarryIn, DateString, IncomeFlow, Resolution } from "../types"
 
 interface SalaryCase {
 	readonly prepaymentBps: BasisPoints
 	readonly horizon: DateString
 	readonly resolution: Resolution
+	readonly start?: DateString
 	readonly end?: DateString
 	readonly withdraw?: readonly string[]
+	readonly carryIn?: readonly CarryIn[]
 }
 
 function salaryFlow(prepaymentBps: BasisPoints, end: DateString | undefined): IncomeFlow {
@@ -39,10 +42,10 @@ function salaryFixture(options: SalaryCase): Fixture {
 				contribute: [],
 				withdraw: options.withdraw ?? ["cash"],
 			},
-			levy: TH_LIKE,
+			levy: withCarryIn(TH_LIKE, ...(options.carryIn ?? [emptyCarryIn("2025-01-01")])),
 		},
 		timeline: {
-			start: "2026-01-01",
+			start: options.start ?? "2026-01-01",
 			horizon: options.horizon,
 			resolution: options.resolution,
 		},
@@ -79,4 +82,18 @@ export const levyUnsettledMonth: Fixture = salaryFixture({
 	prepaymentBps: 500,
 	horizon: "2026-12-31",
 	resolution: "month",
+})
+
+export const levyCarryInDay: Fixture = salaryFixture({
+	prepaymentBps: 500,
+	horizon: "2027-03-31",
+	resolution: "day",
+	start: "2026-06-01",
+	carryIn: [
+		{
+			periodStart: "2026-01-01",
+			tallies: [{ label: "salary", basis: "gross", amount: 50_000_000 }],
+			prepaid: 2_500_000,
+		},
+	],
 })

@@ -3,6 +3,7 @@ import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
 import { capped } from "./contribution-cases"
 import {
+	levyCarryInDay,
 	levyRefundDay,
 	levySalaryDay,
 	levySettledMonth,
@@ -43,4 +44,5 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "levy-refund-day", fixture: levyRefundDay },
 	{ name: "levy-shortfall-day", fixture: levyShortfallDay },
 	{ name: "levy-unsettled-month", fixture: levyUnsettledMonth },
+	{ name: "levy-carry-in-day", fixture: levyCarryInDay },
 ]

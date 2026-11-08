@@ -1,15 +1,18 @@
 import { describe, expect, it } from "bun:test"
 import type { Levy } from "../types"
 import { income } from "./test-flows"
-import { problems } from "./test-helpers"
+import { emptyCarryIn, problems, withCarryIn } from "./test-helpers"
 
-const levy: Levy = {
-	id: "huge",
-	period: { month: 1, day: 1 },
-	settlement: { month: 3, day: 31 },
-	measures: [{ id: "gross", op: "tally", label: "x", basis: "gross" }],
-	due: "gross",
-}
+const levy: Levy = withCarryIn(
+	{
+		id: "huge",
+		period: { month: 1, day: 1 },
+		settlement: { month: 3, day: 31 },
+		measures: [{ id: "gross", op: "tally", label: "x", basis: "gross" }],
+		due: "gross",
+	},
+	emptyCarryIn("2025-01-01"),
+)
 
 describe("unsafe Levy tallies", () => {
 	it("reports a tally that is not a safe integer instead of losing precision", () => {

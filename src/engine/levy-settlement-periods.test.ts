@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import type { Levy } from "../types"
 import { income } from "./test-flows"
-import { amounts, rowAt, run } from "./test-helpers"
+import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
 const zero: Levy = {
 	id: "zero",
@@ -11,13 +11,16 @@ const zero: Levy = {
 	due: "due",
 }
 
-const grossLevy: Levy = {
-	id: "gross",
-	period: { month: 1, day: 1 },
-	settlement: { month: 1, day: 1 },
-	measures: [{ id: "gross", op: "tally", label: "x", basis: "gross" }],
-	due: "gross",
-}
+const grossLevy: Levy = withCarryIn(
+	{
+		id: "gross",
+		period: { month: 1, day: 1 },
+		settlement: { month: 1, day: 1 },
+		measures: [{ id: "gross", op: "tally", label: "x", basis: "gross" }],
+		due: "gross",
+	},
+	emptyCarryIn("2025-01-01"),
+)
 
 describe("Settlement period boundaries", () => {
 	it("settles a period on the next period's start without mixing their Flows", () => {
@@ -38,7 +41,7 @@ describe("Settlement period boundaries", () => {
 			horizon: "2027-01-01",
 			levy: grossLevy,
 		})
-		expect(projection.levy!.periods[0]).toMatchObject({
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			from: "2026-01-01",
 			to: "2026-12-31",
 			settlementDate: "2027-01-01",
@@ -47,7 +50,7 @@ describe("Settlement period boundaries", () => {
 			settlement: 90,
 			settled: true,
 		})
-		expect(projection.levy!.periods[1]).toMatchObject({
+		expect(periodFrom(projection, "2027-01-01")).toMatchObject({
 			from: "2027-01-01",
 			to: "2027-12-31",
 			settlementDate: "2028-01-01",
@@ -60,12 +63,15 @@ describe("Settlement period boundaries", () => {
 	})
 
 	it("runs twelve-month periods from the Levy's period month and day", () => {
-		const levy: Levy = {
-			...zero,
-			id: "april",
-			period: { month: 4, day: 1 },
-			settlement: { month: 6, day: 30 },
-		}
+		const levy: Levy = withCarryIn(
+			{
+				...zero,
+				id: "april",
+				period: { month: 4, day: 1 },
+				settlement: { month: 6, day: 30 },
+			},
+			emptyCarryIn("2025-04-01"),
+		)
 		const projection = run({
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
 			balances: { cash: 0 },
@@ -83,6 +89,7 @@ describe("Settlement period boundaries", () => {
 				period.partial,
 			]),
 		).toEqual([
+			["2025-04-01", "2026-03-31", "2026-06-30", true, false],
 			["2026-04-01", "2027-03-31", "2027-06-30", true, false],
 			["2027-04-01", "2028-03-31", "2028-06-30", true, false],
 			["2028-04-01", "2029-03-31", "2029-06-30", false, true],
@@ -106,7 +113,7 @@ describe("Settlement period boundaries", () => {
 			horizon: "2026-12-31",
 			levy: grossLevy,
 		})
-		expect(projection.levy!.periods[0]?.due).toBe(110)
+		expect(periodFrom(projection, "2026-01-01").due).toBe(110)
 	})
 
 	it("reports a Settlement beyond the last supported year without throwing", () => {
@@ -116,10 +123,13 @@ describe("Settlement period boundaries", () => {
 			surplus: [{ account: "cash" }],
 			start: "9998-01-01",
 			horizon: "9998-12-31",
-			levy: { ...zero, settlement: { month: 12, day: 31 } },
+			levy: withCarryIn(
+				{ ...zero, settlement: { month: 12, day: 31 } },
+				emptyCarryIn("9997-01-01"),
+			),
 		})
-		expect(projection.levy!.periods).toHaveLength(1)
-		expect(projection.levy!.periods[0]).toMatchObject({
+		expect(projection.levy!.periods).toHaveLength(2)
+		expect(periodFrom(projection, "9998-01-01")).toMatchObject({
 			to: "9998-12-31",
 			settlementDate: "9999-12-31",
 			settled: false,

@@ -3,6 +3,21 @@ import { addTo } from "./add"
 import { type SettlementPeriodPlan, settlementPeriodIndexAt } from "./levy-plan"
 import type { LevyTally, LevyTracker } from "./levy-types"
 
+function applyCarryIn(
+	tallies: readonly LevyTally[],
+	periods: readonly SettlementPeriodPlan[],
+	levy: Levy,
+): void {
+	const byStart = new Map(periods.map((period, index) => [period.from, index] as const))
+	for (const record of levy.carryIn ?? []) {
+		const index = byStart.get(record.periodStart)
+		const tally = index === undefined ? undefined : tallies[index]
+		if (tally === undefined) continue
+		for (const item of record.tallies) addTo(tally[item.basis], item.label, BigInt(item.amount))
+		tally.prepaid += BigInt(record.prepaid)
+	}
+}
+
 export function createTracker(
 	levy: Levy,
 	periods: readonly SettlementPeriodPlan[],
@@ -10,6 +25,7 @@ export function createTracker(
 ): LevyTracker {
 	const tallies = periods.map(() => ({ gross: new Map(), funded: new Map(), prepaid: 0n }))
 	const settlementIndex = new Map(periods.map((period) => [period.settlementDate, period.index]))
+	applyCarryIn(tallies, periods, levy)
 	return {
 		levy,
 		inflation,

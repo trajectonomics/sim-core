@@ -1,6 +1,12 @@
-import { addDays, addMonthsClamped } from "../calendar/arith"
-import { formatDate, parseDate } from "../calendar/civil"
-import type { DateString, Levy, MonthDay } from "../types"
+import { addDays } from "../calendar/arith"
+import {
+	dateIn,
+	nextPeriodStart,
+	periodStartAtOrBefore,
+	previousPeriodStart,
+	settlementAfter,
+} from "../levy/periods"
+import type { DateString, Levy } from "../types"
 
 export interface SettlementPeriodPlan {
 	readonly index: number
@@ -9,33 +15,30 @@ export interface SettlementPeriodPlan {
 	readonly settlementDate: DateString
 }
 
-const LAST_DATE: DateString = "9999-12-31"
-
-function dateIn(year: number, monthDay: MonthDay): DateString {
-	if (year > 9999) return LAST_DATE
-	return formatDate({ year, month: monthDay.month, day: monthDay.day })
+/** The first period to report: the one containing `start`, plus an earlier one still settling after it. */
+function firstPeriodStart(start: DateString, levy: Levy): DateString {
+	const current = periodStartAtOrBefore(start, levy.period) ?? dateIn(1, levy.period)
+	const previous = previousPeriodStart(current, levy.period)
+	if (previous === undefined) return current
+	const previousSettlement = settlementAfter(addDays(current, -1), levy.settlement)
+	return previousSettlement >= start ? previous : current
 }
 
-/** The first `settlement` date strictly after `to`. */
-export function settlementAfter(to: DateString, settlement: MonthDay): DateString {
-	const year = parseDate(to).year
-	const sameYear = dateIn(year, settlement)
-	return sameYear > to ? sameYear : dateIn(year + 1, settlement)
-}
-
-/** Twelve-month periods from `start`, with the Settlement date that follows each one. */
+/** Twelve-month periods from the Levy's period rule, through `horizon`, with their Settlements. */
 export function settlementPeriods(
 	start: DateString,
 	horizon: DateString,
 	levy: Levy,
 ): readonly SettlementPeriodPlan[] {
 	const periods: SettlementPeriodPlan[] = []
+	let from = firstPeriodStart(start, levy)
 	for (let index = 0; ; index++) {
-		const from = addMonthsClamped(start, index * 12)
-		const previous = periods[periods.length - 1]
-		if (from > horizon || (previous !== undefined && previous.from === from)) return periods
-		const to = addDays(addMonthsClamped(start, (index + 1) * 12), -1)
+		if (from > horizon) return periods
+		const next = nextPeriodStart(from)
+		const to = addDays(next, -1)
 		periods.push({ index, from, to, settlementDate: settlementAfter(to, levy.settlement) })
+		if (next <= from) return periods
+		from = next
 	}
 }
 

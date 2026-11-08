@@ -1,15 +1,18 @@
 import { describe, expect, it } from "bun:test"
 import type { BasisPoints, Levy, MinorUnits } from "../types"
 import { income } from "./test-flows"
-import { amounts, rowAt, run } from "./test-helpers"
+import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
-const levy: Levy = {
-	id: "zero",
-	period: { month: 1, day: 1 },
-	settlement: { month: 3, day: 31 },
-	measures: [{ id: "due", op: "const", value: 0 }],
-	due: "due",
-}
+const levy: Levy = withCarryIn(
+	{
+		id: "zero",
+		period: { month: 1, day: 1 },
+		settlement: { month: 3, day: 31 },
+		measures: [{ id: "due", op: "const", value: 0 }],
+		due: "due",
+	},
+	emptyCarryIn("2025-01-01"),
+)
 
 function prepaidFor(amount: MinorUnits, prepaymentBps: BasisPoints) {
 	const projection = run({
@@ -23,7 +26,7 @@ function prepaidFor(amount: MinorUnits, prepaymentBps: BasisPoints) {
 		levy,
 	})
 	return {
-		prepaid: projection.levy!.periods[0]!.prepaid,
+		prepaid: periodFrom(projection, "2026-01-01").prepaid,
 		net: amounts(rowAt(projection, "2026-01-01"))["cash"],
 	}
 }

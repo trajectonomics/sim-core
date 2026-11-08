@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { salaryLevySetup } from "./levy-fixture"
 import { expense, income } from "./test-flows"
-import { amounts, rowAt, run } from "./test-helpers"
+import { amounts, periodFrom, rowAt, run } from "./test-helpers"
 
 describe("Levy Prepayment and Settlement", () => {
 	it("takes twelve monthly Prepayments and settles due minus prepaid on 31 March", () => {
@@ -10,7 +10,7 @@ describe("Levy Prepayment and Settlement", () => {
 		const projection = run(salaryLevySetup())
 		const levy = projection.levy!
 		expect(levy.id).toBe("th-like")
-		expect(levy.periods[0]).toMatchObject({
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			from: "2026-01-01",
 			to: "2026-12-31",
 			settlementDate: "2027-03-31",
@@ -20,7 +20,9 @@ describe("Levy Prepayment and Settlement", () => {
 			settled: true,
 			partial: false,
 		})
-		expect(levy.periods[0]?.measures.find((item) => item.id === "income")).toEqual({
+		expect(
+			periodFrom(projection, "2026-01-01").measures.find((item) => item.id === "income"),
+		).toEqual({
 			id: "income",
 			value: 120_000_000,
 		})
@@ -34,7 +36,7 @@ describe("Levy Prepayment and Settlement", () => {
 		// Hand calculation: 12 x 1,000,000 = 12,000,000 prepaid; 11,500,000 due;
 		// refund = 11,500,000 - 12,000,000 = -500,000.
 		const projection = run(salaryLevySetup({ prepaymentBps: 1000 }))
-		const period = projection.levy!.periods[0]!
+		const period = periodFrom(projection, "2026-01-01")
 		expect(period.prepaid).toBe(12_000_000)
 		expect(period.settlement).toBe(-500_000)
 		const settled = rowAt(projection, "2027-03-31")
@@ -57,7 +59,10 @@ describe("Levy Prepayment and Settlement", () => {
 			}),
 		)
 		expect(projection.runsOut).toEqual({ date: "2027-03-31", unmet: 5_500_000 })
-		expect(projection.levy!.periods[0]).toMatchObject({ settled: true, settlement: 5_500_000 })
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
+			settled: true,
+			settlement: 5_500_000,
+		})
 	})
 
 	it("processes a Settlement date even when no Flow lands", () => {
@@ -76,14 +81,14 @@ describe("Levy Prepayment and Settlement", () => {
 		)
 		const row = rowAt(projection, "2027-03-31")
 		expect(amounts(row)).toEqual({ cash: 108_500_000 })
-		expect(projection.levy!.periods[0]?.settled).toBe(true)
+		expect(periodFrom(projection, "2026-01-01").settled).toBe(true)
 	})
 })
 
 describe("unsettled Settlement periods", () => {
 	it("reports settled false when the horizon ends before Settlement", () => {
 		const projection = run(salaryLevySetup({ horizon: "2026-12-31" }))
-		expect(projection.levy!.periods[0]).toMatchObject({
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			prepaid: 6_000_000,
 			due: 11_500_000,
 			settlement: 5_500_000,
@@ -112,7 +117,7 @@ describe("unsettled Settlement periods", () => {
 			}),
 		)
 		expect(projection.runsOut?.date).toBe("2026-06-15")
-		expect(projection.levy!.periods[0]).toMatchObject({
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			prepaid: 2_500_000,
 			due: 1_150_000,
 			settlement: -1_350_000,

@@ -1,15 +1,19 @@
 import { describe, expect, it } from "bun:test"
 import type { Levy } from "../types"
 import { contribution, income } from "./test-flows"
-import { amounts, rowAt, run } from "./test-helpers"
+import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
-const fundedLevy = (label: string): Levy => ({
-	id: "funded-levy",
-	period: { month: 1, day: 1 },
-	settlement: { month: 3, day: 31 },
-	measures: [{ id: "saved", op: "tally", label, basis: "funded" }],
-	due: "saved",
-})
+const fundedLevy = (label: string): Levy =>
+	withCarryIn(
+		{
+			id: "funded-levy",
+			period: { month: 1, day: 1 },
+			settlement: { month: 3, day: 31 },
+			measures: [{ id: "saved", op: "tally", label, basis: "funded" }],
+			due: "saved",
+		},
+		emptyCarryIn("2025-01-01"),
+	)
 
 describe("Levy funded tallies", () => {
 	it("uses the amount applied when a liability payment is capped", () => {
@@ -26,7 +30,7 @@ describe("Levy funded tallies", () => {
 			horizon: "2027-03-31",
 			levy: fundedLevy("fund"),
 		})
-		expect(projection.levy!.periods[0]).toMatchObject({
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			prepaid: 0,
 			due: 30,
 			settlement: 30,
@@ -53,7 +57,7 @@ describe("Levy funded tallies", () => {
 			horizon: "2027-03-31",
 			levy: fundedLevy("fund"),
 		})
-		expect(projection.levy!.periods[0]).toMatchObject({
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			prepaid: 0,
 			due: 100,
 			settlement: 100,
@@ -80,7 +84,11 @@ describe("Levy funded tallies", () => {
 			horizon: "2027-03-31",
 			levy: fundedLevy("b"),
 		})
-		expect(projection.levy!.periods[0]).toMatchObject({ due: 20, settlement: 20, settled: true })
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
+			due: 20,
+			settlement: 20,
+			settled: true,
+		})
 		expect(amounts(rowAt(projection, "2027-03-31"))).toEqual({ cash: 930, debt: 0 })
 	})
 })
