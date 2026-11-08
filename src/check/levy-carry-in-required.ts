@@ -1,5 +1,4 @@
-import { addDays } from "../calendar/arith"
-import { periodStartAtOrBefore, previousPeriodStart, settlementAfter } from "../levy/periods"
+import { carryInPeriods } from "../levy/periods"
 import type { MonthDay } from "../types"
 import type { Emit } from "./codes"
 import { isValidDate } from "./date"
@@ -9,13 +8,7 @@ import { isRecord } from "./shape"
 
 /** Period starts that must have a Carry-in record for this Timeline start. */
 function requiredStarts(start: string, period: MonthDay, settlement: MonthDay): readonly string[] {
-	const current = periodStartAtOrBefore(start, period)
-	if (current === undefined) return []
-	const required = start === current ? [] : [current]
-	const previous = previousPeriodStart(current, period)
-	const previousSettlement = settlementAfter(addDays(current, -1), settlement)
-	if (previous !== undefined && previousSettlement >= start) required.push(previous)
-	return required
+	return carryInPeriods(start, period, settlement).required
 }
 
 function missingStarts(

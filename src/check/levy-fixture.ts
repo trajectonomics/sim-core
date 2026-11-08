@@ -59,7 +59,10 @@ function priorCarryIn(levy: unknown): unknown | undefined {
 	}
 }
 
-/** `check()` after replacing (or removing) one value inside the valid Levy, with an aligned start. */
+/**
+ * `check()` after replacing (or removing) one value inside the valid Levy, with an aligned start.
+ * An empty Carry-in for the prior period is injected; use `checkWith` to test missing records.
+ */
 export function levyProblems(...edits: readonly Edit[]): readonly Problem[] {
 	const edited = edits.reduce<unknown>((value, e) => edit(value, e), LEVY)
 	const prior = priorCarryIn(edited)

@@ -26,6 +26,7 @@ const salary = () =>
 	income("salary", 10_000_000, {
 		frequency: "monthly",
 		start: "2026-01-31",
+		end: "2026-12-31",
 		label: "salary",
 		prepaymentBps: 500,
 	})
@@ -52,7 +53,7 @@ describe("Carry-in", () => {
 		})
 		const june = run({
 			accounts,
-			balances: { cash: 0 },
+			balances: { cash: 47_500_000 },
 			flows: [salary()],
 			surplus: [{ account: "cash" }],
 			withdraw: ["cash"],
@@ -80,6 +81,27 @@ describe("Carry-in", () => {
 			settlement: 114_000_000,
 			settled: true,
 			partial: false,
+		})
+		expect(january.runsOut).toBeUndefined()
+		expect(june.runsOut).toBeUndefined()
+		expect(amounts(rowAt(january, "2027-03-31"))).toEqual({ cash: 0 })
+		expect(amounts(rowAt(june, "2027-03-31"))).toEqual({ cash: 0 })
+	})
+
+	it("ignores a Carry-in record for a period that starts on the Timeline start", () => {
+		const projection = run({
+			accounts,
+			balances: { cash: 0 },
+			surplus: [{ account: "cash" }],
+			withdraw: ["cash"],
+			start: "2026-01-01",
+			horizon: "2026-12-31",
+			levy: levy([empty("2025-01-01"), gross("2026-01-01", 777, 5)]),
+		})
+		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
+			due: 0,
+			prepaid: 0,
+			settlement: 0,
 		})
 	})
 

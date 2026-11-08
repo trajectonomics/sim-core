@@ -34,6 +34,12 @@ describe("check() Carry-in", () => {
 		)
 	})
 
+	it("reports both missing records when the current and earlier periods both need one", () => {
+		const july = { ...(LEVY as object), settlement: { month: 7, day: 31 }, carryIn: [] }
+		const codes = checkWith({ levy: july }, { start: "2026-06-01" }).map((item) => item.code)
+		expect(codes).toEqual(["MISSING_CARRY_IN", "MISSING_CARRY_IN"])
+	})
+
 	it("rejects a duplicate periodStart at the second record", () => {
 		const carryIn = [empty("2025-01-01"), empty("2025-01-01")]
 		expect(checkWith({ levy: levyWith(carryIn) })).toEqual(
@@ -53,6 +59,19 @@ describe("check() Carry-in", () => {
 			{
 				periodStart: "2025-01-01",
 				tallies: [{ label: "mystery", basis: "gross", amount: 1 }],
+				prepaid: 0,
+			},
+		]
+		expect(checkWith({ levy: levyWith(carryIn) })).toEqual(
+			expected("UNKNOWN_TALLY_LABEL", at(0, "tallies", 0, "label")),
+		)
+	})
+
+	it("rejects a known label under a basis the Levy does not read", () => {
+		const carryIn: readonly CarryIn[] = [
+			{
+				periodStart: "2025-01-01",
+				tallies: [{ label: "salary", basis: "funded", amount: 1 }],
 				prepaid: 0,
 			},
 		]

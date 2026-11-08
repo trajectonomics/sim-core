@@ -20,7 +20,10 @@ export interface SalarySetupOptions {
 	readonly withdraw?: readonly string[]
 }
 
-/** One salaried calendar year (2026) under TH_LIKE, settling on 31 March 2027. */
+/**
+ * One salaried calendar year (2026) under TH_LIKE, settling on 31 March 2027.
+ * Includes an empty Carry-in for 2025, which `check()` requires at an aligned start.
+ */
 export function salaryLevySetup(options: SalarySetupOptions = {}): Setup {
 	const prepaymentBps = options.prepaymentBps ?? 500
 	return {
