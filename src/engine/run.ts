@@ -17,7 +17,10 @@ interface Plan {
 function planFor(scenario: Scenario, timeline: Timeline): Plan {
 	if (scenario.levy === undefined) return { periods: [], tracker: undefined }
 	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy)
-	return { periods, tracker: createTracker(scenario.levy, periods, scenario.economy.inflation) }
+	return {
+		periods,
+		tracker: createTracker(scenario.levy, periods, scenario.economy.inflation, timeline.start),
+	}
 }
 
 function settlementDates(

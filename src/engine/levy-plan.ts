@@ -1,11 +1,5 @@
 import { addDays } from "../calendar/arith"
-import {
-	dateIn,
-	nextPeriodStart,
-	periodStartAtOrBefore,
-	previousPeriodStart,
-	settlementAfter,
-} from "../levy/periods"
+import { carryInPeriods, dateIn, nextPeriodStart, settlementAfter } from "../levy/periods"
 import type { DateString, Levy } from "../types"
 
 export interface SettlementPeriodPlan {
@@ -17,11 +11,7 @@ export interface SettlementPeriodPlan {
 
 /** The first period to report: the one containing `start`, plus an earlier one still settling after it. */
 function firstPeriodStart(start: DateString, levy: Levy): DateString {
-	const current = periodStartAtOrBefore(start, levy.period) ?? dateIn(1, levy.period)
-	const previous = previousPeriodStart(current, levy.period)
-	if (previous === undefined) return current
-	const previousSettlement = settlementAfter(addDays(current, -1), levy.settlement)
-	return previousSettlement >= start ? previous : current
+	return carryInPeriods(start, levy.period, levy.settlement).first ?? dateIn(1, levy.period)
 }
 
 /** Twelve-month periods from the Levy's period rule, through `horizon`, with their Settlements. */

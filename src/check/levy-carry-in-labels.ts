@@ -42,7 +42,7 @@ function checkRecord(
 	}
 }
 
-/** Rejects a Carry-in tally whose label and basis no Measure reads. */
+/** Rejects a Carry-in tally whose label and basis pair no Measure reads. */
 export function checkLabels(
 	records: readonly unknown[],
 	levy: Readonly<Record<string, unknown>>,

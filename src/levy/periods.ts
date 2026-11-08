@@ -1,4 +1,4 @@
-import { addMonthsClamped } from "../calendar/arith"
+import { addDays, addMonthsClamped } from "../calendar/arith"
 import { formatDate, parseDate } from "../calendar/civil"
 import type { DateString, MonthDay } from "../types"
 
@@ -34,4 +34,37 @@ export function previousPeriodStart(start: DateString, period: MonthDay): DateSt
 /** First day of the twelve-month period after `start`. */
 export function nextPeriodStart(start: DateString): DateString {
 	return addMonthsClamped(start, 12)
+}
+
+export interface CarryInPeriods {
+	readonly current: DateString | undefined
+	readonly first: DateString | undefined
+	readonly required: readonly DateString[]
+}
+
+/**
+ * The period containing `start`, the first period a Projection must report, and every period
+ * that needs a Carry-in record: the current one when `start` is mid-period, plus a previous one
+ * whose Settlement is on or after `start`.
+ */
+export function carryInPeriods(
+	start: DateString,
+	period: MonthDay,
+	settlement: MonthDay,
+): CarryInPeriods {
+	const current = periodStartAtOrBefore(start, period)
+	if (current === undefined) return { current, first: undefined, required: [] }
+	const previous = previousPeriodStart(current, period)
+	if (previous === undefined) {
+		return { current, first: current, required: start === current ? [] : [current] }
+	}
+	const previousSettles = settlementAfter(addDays(current, -1), settlement) >= start
+	if (!previousSettles) {
+		return { current, first: current, required: start === current ? [] : [current] }
+	}
+	return {
+		current,
+		first: previous,
+		required: start === current ? [previous] : [previous, current],
+	}
 }
