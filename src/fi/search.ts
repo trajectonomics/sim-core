@@ -79,17 +79,18 @@ function inspectCandidate(input: SearchInput, month: string): CandidateOutcome {
 interface Accumulator {
 	buffer?: BufferFailure
 	shortfall?: ShortfallFailure
-	done?: SearchOutcome
+	problem?: ProjectionProblem
+	reachable?: CandidateOutcome & { readonly kind: "reachable" }
+	stop?: boolean
 }
 
 function consume(outcome: CandidateOutcome, acc: Accumulator): void {
-	if (outcome.kind === "problem" || outcome.kind === "reachable") acc.done = outcome
+	if (outcome.kind === "problem") acc.problem ??= outcome.problem
+	else if (outcome.kind === "reachable") acc.reachable = outcome
 	else if (outcome.kind === "buffer") acc.buffer = bestBuffer(acc.buffer, outcome.failure)
 	else if (outcome.kind === "shortfall") {
 		acc.shortfall = bestShortfall(acc.shortfall, outcome.failure)
-		if (outcome.beforeStop) {
-			acc.done = { kind: "unreachable", buffer: acc.buffer, shortfall: acc.shortfall }
-		}
+		if (outcome.beforeStop) acc.stop = true
 	}
 }
 
@@ -98,7 +99,9 @@ export function search(input: SearchInput): SearchOutcome {
 	const acc: Accumulator = {}
 	for (const month of input.candidates) {
 		consume(inspectCandidate(input, month), acc)
-		if (acc.done !== undefined) return acc.done
+		if (acc.reachable !== undefined) return acc.reachable
+		if (acc.stop === true) break
 	}
+	if (acc.problem !== undefined) return { kind: "problem", problem: acc.problem }
 	return { kind: "unreachable", buffer: acc.buffer, shortfall: acc.shortfall }
 }

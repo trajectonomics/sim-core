@@ -63,6 +63,28 @@ describe("overflow as data", () => {
 		})
 	})
 
+	it("keeps scanning for a later candidate after an overflowing one", () => {
+		expect(
+			fi({
+				accounts: [
+					{ id: "cash", kind: "asset", rate: 0 },
+					{ id: "vault", kind: "asset", rate: 5000, lockedUntil: "2099-01-01" },
+				],
+				balances: { cash: 0, vault: Number.MAX_SAFE_INTEGER },
+				flows: [
+					income("jan-pay", 100, { start: "2026-01-01" }),
+					expense("bill", 100, { start: "2027-01-01" }),
+				],
+				surplus: [{ account: "cash" }],
+				withdraw: ["cash"],
+				horizon: "2027-01-01",
+			}),
+		).toMatchObject({
+			ok: true,
+			financialIndependence: { reachable: true, month: "2026-02-01" },
+		})
+	})
+
 	it("returns a problem for an unsafe reference value", () => {
 		expect(
 			fi(
