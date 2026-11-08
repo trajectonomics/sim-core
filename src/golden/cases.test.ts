@@ -50,6 +50,34 @@ describe("shortfall and payoff golden cases", () => {
 		expectOracleMatch(makeFixture(setup), projection)
 	})
 
+	it("lets a debt payment cause a shortfall while an asset target stays unfunded", () => {
+		const setup = {
+			accounts: [
+				cash,
+				{ id: "savings", kind: "asset", rate: 0 },
+				{ id: "loan", kind: "liability", rate: 0 },
+			],
+			balances: { cash: 50, loan: 100, savings: 0 },
+			flows: [contribution("repay", "loan", 100), contribution("save", "savings", 100)],
+			surplus: [{ account: "cash" }],
+			contribute: ["savings"],
+			withdraw: ["cash"],
+			horizon: "2026-01-01",
+		} as const satisfies Parameters<typeof makeFixture>[0]
+		const projection = run(setup)
+		expect(projection.runsOut).toEqual({ date: "2026-01-01", unmet: 50 })
+		expect(amounts(rowAt(projection, "2026-01-01"))).toEqual({ cash: 0, loan: 0, savings: 0 })
+		expect(projection.unfundedContributions).toEqual([{ account: "savings", amount: 100 }])
+		expect(projection.annual[0]).toMatchObject({
+			openingNetWorth: -50,
+			closingNetWorth: 0,
+			contributions: 100,
+			unfundedContributions: 100,
+			unmet: 50,
+		})
+		expectOracleMatch(makeFixture(setup), projection)
+	})
+
 	it("caps two asset targets in contribute order", () => {
 		const setup = {
 			accounts: [cash, { id: "a", kind: "asset", rate: 0 }, { id: "b", kind: "asset", rate: 0 }],

@@ -21,9 +21,15 @@ const leapTie: Fixture = {
 	timeline: { start: "2027-02-28", horizon: "2029-03-01", resolution: "day" },
 }
 
-/** Two asset targets share a tight income; the lower priority target is partly unfunded. */
+/** Debt is paid first, then two asset targets share the rest; the lower priority is partly unfunded. */
 const capped: Fixture = {
-	baseline: { schemaVersion: 1, balances: [{ account: "savings", amount: 0 }] },
+	baseline: {
+		schemaVersion: 1,
+		balances: [
+			{ account: "savings", amount: 0 },
+			{ account: "loan", amount: 500 },
+		],
+	},
 	scenario: {
 		schemaVersion: 2,
 		currency: "THB",
@@ -32,6 +38,7 @@ const capped: Fixture = {
 			{ id: "cash", kind: "asset", rate: 0 },
 			{ id: "savings", kind: "asset", rate: 200 },
 			{ id: "other", kind: "asset", rate: 300 },
+			{ id: "loan", kind: "liability", rate: 100 },
 		],
 		flows: [
 			{
@@ -42,6 +49,15 @@ const capped: Fixture = {
 				frequency: "monthly",
 				start: "2026-01-31",
 				growth: { bps: 50 },
+			},
+			{
+				id: "repay",
+				kind: "contribution",
+				target: "loan",
+				amount: 400,
+				frequency: "monthly",
+				start: "2026-01-31",
+				growth: { bps: 0 },
 			},
 			{
 				id: "save-savings",

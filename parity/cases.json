@@ -319,6 +319,10 @@
 				{
 					"account": "savings",
 					"amount": 0
+				},
+				{
+					"account": "loan",
+					"amount": 500
 				}
 			]
 		},
@@ -343,6 +347,11 @@
 					"id": "other",
 					"kind": "asset",
 					"rate": 300
+				},
+				{
+					"id": "loan",
+					"kind": "liability",
+					"rate": 100
 				}
 			],
 			"flows": [
@@ -355,6 +364,17 @@
 					"start": "2026-01-31",
 					"growth": {
 						"bps": 50
+					}
+				},
+				{
+					"id": "repay",
+					"kind": "contribution",
+					"target": "loan",
+					"amount": 400,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
 					}
 				},
 				{
@@ -395,6 +415,6 @@
 			"horizon": "2026-06-30",
 			"resolution": "month"
 		},
-		"sha256": "00f52be0ca46010c8437307f276cbc2da7d888abf6da352967e71c7659ad2099"
+		"sha256": "205ae5c1e87b815ee4436a2fa8ae17740aa406df496c18276acdf76b9d67da8e"
 	}
 ]

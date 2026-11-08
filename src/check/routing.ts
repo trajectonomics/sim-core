@@ -2,7 +2,9 @@ import type { AccountIndex, Emit, Path } from "./codes"
 import { isRecord } from "./shape"
 
 /** Account ids in `cashflow.contribute`, or `undefined` when the list is unusable. */
-function routedIds(cashflow: Readonly<Record<string, unknown>>): ReadonlySet<string> | undefined {
+function routedContributeIds(
+	cashflow: Readonly<Record<string, unknown>>,
+): ReadonlySet<string> | undefined {
 	const contribute = cashflow["contribute"]
 	if (!Array.isArray(contribute)) return undefined
 	const routed = new Set<string>()
@@ -29,7 +31,7 @@ export function checkContributionRouting(
 	emit: Emit,
 ): void {
 	if (!Array.isArray(flows) || !isRecord(cashflow)) return
-	const routed = routedIds(cashflow)
+	const routed = routedContributeIds(cashflow)
 	if (routed === undefined) return
 	for (let index = 0; index < flows.length; index++) {
 		if (isUnroutedAsset(flows[index], routed, accounts)) {

@@ -175,8 +175,8 @@ describe("asset contribution allocation order", () => {
 	})
 })
 
-describe("unfunded totals across years", () => {
-	it("rolls unfunded amounts up per year and in total, sorted by account", () => {
+describe("unfunded totals across annual roll-ups", () => {
+	it("rolls unfunded amounts up per annual roll-up and in total, sorted by account", () => {
 		const projection = run({
 			accounts: [cash, savings, other],
 			balances: { cash: 0, savings: 0, other: 0 },
@@ -190,7 +190,7 @@ describe("unfunded totals across years", () => {
 			horizon: "2027-12-31",
 		})
 		expect(projection.unfundedContributions).toEqual([{ account: "other", amount: 120 }])
-		expect(projection.annual.map((year) => year.unfundedContributions)).toEqual([60, 60])
-		expect(projection.annual.map((year) => year.contributions)).toEqual([100, 100])
+		expect(projection.annual.map((rollup) => rollup.unfundedContributions)).toEqual([60, 60])
+		expect(projection.annual.map((rollup) => rollup.contributions)).toEqual([100, 100])
 	})
 })
