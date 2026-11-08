@@ -42,7 +42,7 @@ export interface LevyMeasureValue {
 	readonly value: MinorUnits
 }
 
-export interface LevyPeriod {
+export interface SettlementPeriod {
 	readonly from: DateString
 	readonly to: DateString
 	readonly settlementDate: DateString
@@ -56,7 +56,7 @@ export interface LevyPeriod {
 
 export interface LevyReport {
 	readonly id: string
-	readonly periods: readonly LevyPeriod[]
+	readonly periods: readonly SettlementPeriod[]
 }
 
 export interface Projection {

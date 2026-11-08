@@ -4,7 +4,7 @@ import type { ProjectionProblem } from "../types/projection"
 import { talliesOf } from "./levy-tally"
 import type {
 	EngineLevyMeasure,
-	EngineLevyPeriod,
+	EngineSettlementPeriod,
 	LevyFinish,
 	LevyTracker,
 	SettlementOutcome,
@@ -23,7 +23,7 @@ function measureValues(
 }
 
 interface Evaluation {
-	readonly period: EngineLevyPeriod | undefined
+	readonly period: EngineSettlementPeriod | undefined
 	readonly problem: ProjectionProblem | undefined
 }
 
@@ -40,7 +40,7 @@ function evaluatePeriod(
 	const result = evaluateMeasures(tracker.levy, talliesOf(tally), context)
 	if (!result.ok) return { period: undefined, problem: result.problem }
 	const due = BigInt(result.due)
-	const period: EngineLevyPeriod = {
+	const period: EngineSettlementPeriod = {
 		from: plan.from,
 		to: plan.to,
 		settlementDate: plan.settlementDate,
@@ -68,7 +68,7 @@ export function settleAt(tracker: LevyTracker, date: DateString): SettlementOutc
 
 /** Evaluates every period that started by `runEnd` but never settled, in period order. */
 export function finishTracker(tracker: LevyTracker, runEnd: DateString): LevyFinish {
-	const periods: EngineLevyPeriod[] = []
+	const periods: EngineSettlementPeriod[] = []
 	for (const plan of tracker.periods) {
 		if (plan.from > runEnd) break
 		const existing = tracker.results[plan.index]

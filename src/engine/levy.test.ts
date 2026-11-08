@@ -1,18 +1,13 @@
 import { describe, expect, it } from "bun:test"
 import type { Levy } from "../types"
-import {
-	DUE_2026,
-	NET_500,
-	NET_1000,
-	PREPAID_500,
-	PREPAID_1000,
-	salaryLevySetup,
-} from "./levy-fixture"
+import { salaryLevySetup } from "./levy-fixture"
 import { contribution, expense, income } from "./test-flows"
 import { amounts, rowAt, run } from "./test-helpers"
 
 describe("Levy Prepayment and Settlement", () => {
 	it("takes twelve monthly Prepayments and settles due minus prepaid on 31 March", () => {
+		// Hand calculation: 12 x 500,000 = 6,000,000 prepaid; TH_LIKE due = 11,500,000;
+		// settlement = 11,500,000 - 6,000,000 = 5,500,000.
 		const projection = run(salaryLevySetup())
 		const levy = projection.levy!
 		expect(levy.id).toBe("th-like")
@@ -20,9 +15,9 @@ describe("Levy Prepayment and Settlement", () => {
 			from: "2026-01-01",
 			to: "2026-12-31",
 			settlementDate: "2027-03-31",
-			prepaid: 12 * PREPAID_500,
-			due: DUE_2026,
-			settlement: DUE_2026 - 12 * PREPAID_500,
+			prepaid: 6_000_000,
+			due: 11_500_000,
+			settlement: 5_500_000,
 			settled: true,
 			partial: false,
 		})
@@ -31,21 +26,20 @@ describe("Levy Prepayment and Settlement", () => {
 			value: 120_000_000,
 		})
 		const start = rowAt(projection, "2026-01-31")
-		expect(amounts(start)).toEqual({ cash: NET_500 })
+		expect(amounts(start)).toEqual({ cash: 9_500_000 })
 		const settled = rowAt(projection, "2027-03-31")
-		expect(amounts(settled)).toEqual({ cash: 15 * NET_500 - (DUE_2026 - 12 * PREPAID_500) })
+		expect(amounts(settled)).toEqual({ cash: 137_000_000 })
 	})
 
 	it("refunds an over-Prepayment through the surplus steps", () => {
+		// Hand calculation: 12 x 1,000,000 = 12,000,000 prepaid; 11,500,000 due;
+		// refund = 11,500,000 - 12,000,000 = -500,000.
 		const projection = run(salaryLevySetup({ prepaymentBps: 1000 }))
 		const period = projection.levy!.periods[0]!
-		expect(period.prepaid).toBe(12 * PREPAID_1000)
-		expect(period.settlement).toBe(DUE_2026 - 12 * PREPAID_1000)
-		expect(period.settlement).toBeLessThan(0)
+		expect(period.prepaid).toBe(12_000_000)
+		expect(period.settlement).toBe(-500_000)
 		const settled = rowAt(projection, "2027-03-31")
-		expect(amounts(settled)).toEqual({
-			cash: 15 * NET_1000 - (DUE_2026 - 12 * PREPAID_1000),
-		})
+		expect(amounts(settled)).toEqual({ cash: 135_500_000 })
 	})
 
 	it("drains the withdraw list for a balance due and records a Shortfall", () => {
@@ -82,13 +76,15 @@ describe("Levy Prepayment and Settlement", () => {
 			}),
 		)
 		const row = rowAt(projection, "2027-03-31")
-		expect(amounts(row)).toEqual({ cash: 12 * NET_500 - 5_500_000 })
+		expect(amounts(row)).toEqual({ cash: 108_500_000 })
 		expect(projection.levy!.periods[0]?.settled).toBe(true)
 	})
 })
 
 describe("Levy tallies", () => {
 	it("uses the funded amount when a contribution is capped", () => {
+		// #18 adds the Available cashflow cap for asset contributions; the funded path is the same,
+		// and this case uses the cap the engine has today: a liability's amount owed.
 		const levy: Levy = {
 			id: "funded-levy",
 			period: { month: 1, day: 1 },
@@ -151,16 +147,16 @@ describe("unsettled Settlement periods", () => {
 	it("reports settled false when the horizon ends before Settlement", () => {
 		const projection = run(salaryLevySetup({ horizon: "2026-12-31" }))
 		expect(projection.levy!.periods[0]).toMatchObject({
-			prepaid: 12 * PREPAID_500,
-			due: DUE_2026,
+			prepaid: 6_000_000,
+			due: 11_500_000,
 			settlement: 5_500_000,
 			settled: false,
 			partial: false,
 		})
-		expect(amounts(rowAt(projection, "2026-12-31"))).toEqual({ cash: 12 * NET_500 })
+		expect(amounts(rowAt(projection, "2026-12-31"))).toEqual({ cash: 114_000_000 })
 		expect(projection.annual[0]).toMatchObject({
-			levy: 12 * PREPAID_500,
-			closingNetWorth: 12 * NET_500,
+			levy: 6_000_000,
+			closingNetWorth: 114_000_000,
 		})
 	})
 
@@ -180,13 +176,13 @@ describe("unsettled Settlement periods", () => {
 		)
 		expect(projection.runsOut?.date).toBe("2026-06-15")
 		expect(projection.levy!.periods[0]).toMatchObject({
-			prepaid: 5 * PREPAID_500,
+			prepaid: 2_500_000,
 			due: 1_150_000,
-			settlement: 1_150_000 - 5 * PREPAID_500,
+			settlement: -1_350_000,
 			settled: false,
 			partial: true,
 		})
-		expect(projection.annual[0]?.levy).toBe(5 * PREPAID_500)
+		expect(projection.annual[0]?.levy).toBe(2_500_000)
 	})
 })
 

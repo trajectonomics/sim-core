@@ -1,6 +1,6 @@
 import type { BasisPoints, DateString, Levy } from "../types"
 import type { ProjectionProblem } from "../types/projection"
-import type { LevyPeriodPlan } from "./levy-plan"
+import type { SettlementPeriodPlan } from "./levy-plan"
 
 export interface LevyTally {
 	readonly gross: Map<string, bigint>
@@ -13,7 +13,7 @@ export interface EngineLevyMeasure {
 	readonly value: bigint
 }
 
-export interface EngineLevyPeriod {
+export interface EngineSettlementPeriod {
 	readonly from: DateString
 	readonly to: DateString
 	readonly settlementDate: DateString
@@ -27,15 +27,15 @@ export interface EngineLevyPeriod {
 
 export interface EngineLevy {
 	readonly id: string
-	readonly periods: readonly EngineLevyPeriod[]
+	readonly periods: readonly EngineSettlementPeriod[]
 }
 
 export interface LevyTracker {
 	readonly levy: Levy
 	readonly inflation: BasisPoints
-	readonly periods: readonly LevyPeriodPlan[]
+	readonly periods: readonly SettlementPeriodPlan[]
 	readonly tallies: readonly LevyTally[]
-	readonly results: (EngineLevyPeriod | undefined)[]
+	readonly results: (EngineSettlementPeriod | undefined)[]
 	readonly settlementIndex: ReadonlyMap<DateString, number>
 }
 

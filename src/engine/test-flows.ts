@@ -1,6 +1,7 @@
 /** TEST-ONLY flow builders. */
 import type {
 	AccountId,
+	BasisPoints,
 	ContributionFlow,
 	DateString,
 	ExpenseFlow,
@@ -16,7 +17,7 @@ export interface FlowOptions {
 	readonly frequency?: Frequency
 	readonly growth?: Growth
 	readonly label?: string
-	readonly prepaymentBps?: number
+	readonly prepaymentBps?: BasisPoints
 }
 
 interface FlowBase {

@@ -2,7 +2,7 @@ import { addDays, addMonthsClamped } from "../calendar/arith"
 import { formatDate, parseDate } from "../calendar/civil"
 import type { DateString, Levy, MonthDay } from "../types"
 
-export interface LevyPeriodPlan {
+export interface SettlementPeriodPlan {
 	readonly index: number
 	readonly from: DateString
 	readonly to: DateString
@@ -24,12 +24,12 @@ export function settlementAfter(to: DateString, settlement: MonthDay): DateStrin
 }
 
 /** Twelve-month periods from `start`, with the Settlement date that follows each one. */
-export function levyPeriods(
+export function settlementPeriods(
 	start: DateString,
 	horizon: DateString,
 	levy: Levy,
-): readonly LevyPeriodPlan[] {
-	const periods: LevyPeriodPlan[] = []
+): readonly SettlementPeriodPlan[] {
+	const periods: SettlementPeriodPlan[] = []
 	for (let index = 0; ; index++) {
 		const from = addMonthsClamped(start, index * 12)
 		const previous = periods[periods.length - 1]
@@ -40,7 +40,10 @@ export function levyPeriods(
 }
 
 /** Index of the period containing `date`, or -1 before the first period. */
-export function periodIndexAt(periods: readonly LevyPeriodPlan[], date: DateString): number {
+export function settlementPeriodIndexAt(
+	periods: readonly SettlementPeriodPlan[],
+	date: DateString,
+): number {
 	let low = 0
 	let high = periods.length - 1
 	let found = -1

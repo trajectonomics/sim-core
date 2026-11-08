@@ -1,5 +1,6 @@
 import type { AccountId, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
+import { addTo } from "./add"
 import type { ContributionEntry } from "./aggregate"
 import { minBigInt } from "./min"
 import { mutate } from "./mutate"
@@ -19,10 +20,6 @@ interface TargetResult {
 	readonly problem: ProjectionProblem | undefined
 }
 
-function addFunded(funded: Map<string, bigint>, label: string, amount: bigint): void {
-	funded.set(label, (funded.get(label) ?? 0n) + amount)
-}
-
 /** Splits the amount actually applied across the entries, in engine (date, id) order. */
 function allocate(
 	entries: readonly ContributionEntry[],
@@ -34,7 +31,7 @@ function allocate(
 		if (remaining === 0n) break
 		const applied = minBigInt(entry.amount, remaining)
 		remaining -= applied
-		if (entry.label !== undefined && applied > 0n) addFunded(funded, entry.label, applied)
+		if (entry.label !== undefined && applied > 0n) addTo(funded, entry.label, applied)
 	}
 	return funded
 }
@@ -55,6 +52,11 @@ function totalOf(entries: readonly ContributionEntry[]): bigint {
 	return total
 }
 
+/**
+ * Applies one target's same-date contributions. Asset targets are not yet capped by Available
+ * cashflow (#18); funded tallies already follow the amount actually applied, so that cap will
+ * carry into them without a tally change.
+ */
 function applyTarget(
 	states: StateMap,
 	target: AccountId,
@@ -87,7 +89,7 @@ export function applyContributions(
 		const result = applyTarget(states, target, groups.get(target) ?? [], date)
 		if (result.problem !== undefined) return { outflow, funded, problem: result.problem }
 		outflow += result.outflow
-		for (const [label, amount] of result.funded) addFunded(funded, label, amount)
+		for (const [label, amount] of result.funded) addTo(funded, label, amount)
 	}
 	return { outflow, funded, problem: undefined }
 }

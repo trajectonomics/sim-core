@@ -1,10 +1,11 @@
 import type { BasisPoints, DateString, Levy, Tallies } from "../types"
-import { type LevyPeriodPlan, periodIndexAt } from "./levy-plan"
+import { addTo } from "./add"
+import { type SettlementPeriodPlan, settlementPeriodIndexAt } from "./levy-plan"
 import type { LevyTally, LevyTracker } from "./levy-types"
 
 export function createTracker(
 	levy: Levy,
-	periods: readonly LevyPeriodPlan[],
+	periods: readonly SettlementPeriodPlan[],
 	inflation: BasisPoints,
 ): LevyTracker {
 	const tallies = periods.map(() => ({ gross: new Map(), funded: new Map(), prepaid: 0n }))
@@ -30,10 +31,6 @@ export function talliesOf(tally: LevyTally): Tallies {
 	return { gross: numberMap(tally.gross), funded: numberMap(tally.funded) }
 }
 
-function addTo(map: Map<string, bigint>, label: string, amount: bigint): void {
-	map.set(label, (map.get(label) ?? 0n) + amount)
-}
-
 /** Adds one Occurrence's income labels and Prepayment to the period containing `date`. */
 export function addFlowTallies(
 	tracker: LevyTracker,
@@ -41,7 +38,7 @@ export function addFlowTallies(
 	gross: ReadonlyMap<string, bigint>,
 	prepaid: bigint,
 ): void {
-	const tally = tracker.tallies[periodIndexAt(tracker.periods, date)]
+	const tally = tracker.tallies[settlementPeriodIndexAt(tracker.periods, date)]
 	if (tally === undefined) return
 	for (const [label, amount] of gross) addTo(tally.gross, label, amount)
 	tally.prepaid += prepaid
@@ -53,7 +50,7 @@ export function addFundedTallies(
 	date: DateString,
 	funded: ReadonlyMap<string, bigint>,
 ): void {
-	const tally = tracker.tallies[periodIndexAt(tracker.periods, date)]
+	const tally = tracker.tallies[settlementPeriodIndexAt(tracker.periods, date)]
 	if (tally === undefined) return
 	for (const [label, amount] of funded) addTo(tally.funded, label, amount)
 }

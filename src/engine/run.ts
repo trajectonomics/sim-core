@@ -1,7 +1,7 @@
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import { collectDates } from "./dates"
 import { buildEvents, type DatedEvent } from "./events"
-import { type LevyPeriodPlan, levyPeriods } from "./levy-plan"
+import { type SettlementPeriodPlan, settlementPeriods } from "./levy-plan"
 import { finishTracker } from "./levy-settle"
 import { createTracker } from "./levy-tally"
 import type { LevyTracker } from "./levy-types"
@@ -10,17 +10,20 @@ import { type RunAccumulator, stepDate } from "./run-step"
 import { createStates } from "./state"
 
 interface Plan {
-	readonly periods: readonly LevyPeriodPlan[]
+	readonly periods: readonly SettlementPeriodPlan[]
 	readonly tracker: LevyTracker | undefined
 }
 
 function planFor(scenario: Scenario, timeline: Timeline): Plan {
 	if (scenario.levy === undefined) return { periods: [], tracker: undefined }
-	const periods = levyPeriods(timeline.start, timeline.horizon, scenario.levy)
+	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy)
 	return { periods, tracker: createTracker(scenario.levy, periods, scenario.economy.inflation) }
 }
 
-function settlementDates(periods: readonly LevyPeriodPlan[], horizon: DateString): DateString[] {
+function settlementDates(
+	periods: readonly SettlementPeriodPlan[],
+	horizon: DateString,
+): DateString[] {
 	return periods.map((period) => period.settlementDate).filter((date) => date <= horizon)
 }
 

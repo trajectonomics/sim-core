@@ -1,6 +1,6 @@
-import type { EngineLevy, EngineLevyPeriod } from "../engine/levy-types"
+import type { EngineLevy, EngineSettlementPeriod } from "../engine/levy-types"
 import { isSafeInteger, overflow } from "../engine/overflow"
-import type { LevyMeasureValue, LevyPeriod, LevyReport, ProjectionProblem } from "../types"
+import type { LevyMeasureValue, LevyReport, ProjectionProblem, SettlementPeriod } from "../types"
 
 export interface LevyOutcome {
 	readonly levy: LevyReport | undefined
@@ -12,11 +12,11 @@ function safe(values: readonly bigint[]): boolean {
 	return true
 }
 
-function measuresOf(period: EngineLevyPeriod): readonly LevyMeasureValue[] {
+function measuresOf(period: EngineSettlementPeriod): readonly LevyMeasureValue[] {
 	return period.measures.map((measure) => ({ id: measure.id, value: Number(measure.value) }))
 }
 
-function periodOf(period: EngineLevyPeriod): LevyPeriod | undefined {
+function settlementPeriodOf(period: EngineSettlementPeriod): SettlementPeriod | undefined {
 	if (!safe([period.prepaid, period.due, period.settlement])) return undefined
 	if (!safe(period.measures.map((measure) => measure.value))) return undefined
 	return {
@@ -35,9 +35,9 @@ function periodOf(period: EngineLevyPeriod): LevyPeriod | undefined {
 /** Converts the engine's bigint Levy results to reported minor units. */
 export function buildLevy(run: EngineLevy | undefined): LevyOutcome {
 	if (run === undefined) return { levy: undefined, problem: undefined }
-	const periods: LevyPeriod[] = []
+	const periods: SettlementPeriod[] = []
 	for (const period of run.periods) {
-		const reported = periodOf(period)
+		const reported = settlementPeriodOf(period)
 		if (reported === undefined) {
 			return { levy: undefined, problem: overflow(period.settlementDate) }
 		}

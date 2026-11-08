@@ -1,5 +1,6 @@
 import { roundHalfUp } from "../money/round"
 import type { AccountId, BasisPoints, IncomeFlow } from "../types"
+import { addTo } from "./add"
 import { amountAt } from "./amount"
 import type { DatedEvent } from "./events"
 
@@ -17,10 +18,6 @@ export interface DayFlows {
 	/** Planned gross income by Tally label. */
 	readonly gross: ReadonlyMap<string, bigint>
 	readonly prepaid: bigint
-}
-
-function addTo(map: Map<string, bigint>, label: string, amount: bigint): void {
-	map.set(label, (map.get(label) ?? 0n) + amount)
 }
 
 function prepaidAmount(amount: bigint, bps: number): bigint {

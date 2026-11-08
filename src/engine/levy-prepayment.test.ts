@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import type { Levy } from "../types"
+import type { BasisPoints, Levy, MinorUnits } from "../types"
 import { income } from "./test-flows"
 import { amounts, rowAt, run } from "./test-helpers"
 
@@ -11,7 +11,7 @@ const levy: Levy = {
 	due: "due",
 }
 
-function prepaidFor(amount: number, prepaymentBps: number) {
+function prepaidFor(amount: MinorUnits, prepaymentBps: BasisPoints) {
 	const projection = run({
 		accounts: [{ id: "cash", kind: "asset", rate: 0 }],
 		balances: { cash: 0 },

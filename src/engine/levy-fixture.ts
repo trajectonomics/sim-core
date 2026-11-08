@@ -1,6 +1,6 @@
 /** TEST-ONLY hand-computed salary Scenario for the Levy engine tests. */
 import { TH_LIKE } from "../levy/th-levy"
-import type { DateString, Flow, MinorUnits, Resolution } from "../types"
+import type { BasisPoints, DateString, Flow, MinorUnits, Resolution } from "../types"
 import { income } from "./test-flows"
 import type { Setup } from "./test-helpers"
 
@@ -12,7 +12,7 @@ export const PREPAID_1000 = 1_000_000
 export const DUE_2026 = 11_500_000
 
 export interface SalarySetupOptions {
-	readonly prepaymentBps?: number
+	readonly prepaymentBps?: BasisPoints
 	readonly flows?: readonly Flow[]
 	readonly balances?: Readonly<Record<string, MinorUnits>>
 	readonly horizon?: DateString

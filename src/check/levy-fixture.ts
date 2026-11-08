@@ -1,11 +1,11 @@
 /** TEST-ONLY: a small valid Levy and helpers to run `check()` on edited copies of it. */
 
-import { daysInMonth } from "../calendar/civil"
 import { check } from "../check"
 import { thaiEmployee } from "../fixtures/thai-employee"
 import { type Edit, edit } from "../testing"
 import type { DateString, Timeline } from "../types"
 import type { Problem } from "./codes"
+import { isMonthDay } from "./month-day"
 
 export const LEVY: unknown = {
 	id: "levy",
@@ -22,28 +22,15 @@ export const LEVY: unknown = {
 	due: "owed",
 }
 
-function periodOf(levy: unknown): unknown {
+function periodRuleOf(levy: unknown): unknown {
 	if (typeof levy !== "object" || levy === null || !("period" in levy)) return undefined
 	return levy.period
 }
 
-function isCalendarDate(value: unknown): value is { readonly month: number; readonly day: number } {
-	if (typeof value !== "object" || value === null) return false
-	const { month, day } = value as { readonly month?: unknown; readonly day?: unknown }
-	return (
-		Number.isSafeInteger(month) &&
-		Number.isSafeInteger(day) &&
-		(month as number) >= 1 &&
-		(month as number) <= 12 &&
-		(day as number) >= 1 &&
-		(day as number) <= daysInMonth(2001, month as number)
-	)
-}
-
 /** The Timeline start that a Levy's period rule requires, in the fixture's start year. */
 function alignedStart(base: DateString, levy: unknown): DateString {
-	const period = periodOf(levy)
-	if (!isCalendarDate(period)) return base
+	const period = periodRuleOf(levy)
+	if (!isMonthDay(period)) return base
 	const year = base.slice(0, 4)
 	return `${year}-${String(period.month).padStart(2, "0")}-${String(period.day).padStart(2, "0")}`
 }
