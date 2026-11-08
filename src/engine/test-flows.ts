@@ -15,6 +15,8 @@ export interface FlowOptions {
 	readonly end?: DateString
 	readonly frequency?: Frequency
 	readonly growth?: Growth
+	readonly label?: string
+	readonly prepaymentBps?: number
 }
 
 interface FlowBase {
@@ -38,7 +40,13 @@ function base(id: string, amount: MinorUnits, options: FlowOptions): FlowBase {
 }
 
 export function income(id: string, amount: MinorUnits, options: FlowOptions = {}): IncomeFlow {
-	return { ...base(id, amount, options), kind: "income", earned: true }
+	return {
+		...base(id, amount, options),
+		kind: "income",
+		earned: true,
+		...(options.label === undefined ? {} : { label: options.label }),
+		...(options.prepaymentBps === undefined ? {} : { prepaymentBps: options.prepaymentBps }),
+	}
 }
 
 export function expense(id: string, amount: MinorUnits, options: FlowOptions = {}): ExpenseFlow {
@@ -51,5 +59,10 @@ export function contribution(
 	amount: MinorUnits,
 	options: FlowOptions = {},
 ): ContributionFlow {
-	return { ...base(id, amount, options), kind: "contribution", target }
+	return {
+		...base(id, amount, options),
+		kind: "contribution",
+		target,
+		...(options.label === undefined ? {} : { label: options.label }),
+	}
 }

@@ -6,6 +6,7 @@ import type {
 	BasisPoints,
 	DateString,
 	Flow,
+	Levy,
 	MinorUnits,
 	Resolution,
 	Scenario,
@@ -25,6 +26,7 @@ export interface Setup {
 	readonly horizon?: DateString
 	readonly resolution?: Resolution
 	readonly inflation?: BasisPoints
+	readonly levy?: Levy
 }
 
 export function makeFixture(setup: Setup): Fixture {
@@ -35,6 +37,7 @@ export function makeFixture(setup: Setup): Fixture {
 		accounts: setup.accounts,
 		flows: setup.flows ?? [],
 		cashflow: { surplus: setup.surplus, withdraw: setup.withdraw ?? [] },
+		...(setup.levy === undefined ? {} : { levy: setup.levy }),
 	}
 	const timeline: Timeline = {
 		start: setup.start ?? "2026-01-01",

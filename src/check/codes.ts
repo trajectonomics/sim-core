@@ -31,6 +31,7 @@ const CODES = [
 	"MEASURE_CYCLE",
 	"FIELD_NOT_ALLOWED",
 	"LEVY_REQUIRED",
+	"START_NOT_PERIOD_START",
 ] as const
 
 /** The closed set of problem codes. Frozen so consumers cannot mutate it at runtime. */

@@ -58,9 +58,14 @@ describe("balances and conservation", () => {
 	it("conserves net worth in every annual roll-up", () => {
 		for (const fixture of [freelancer, thaiEmployee]) {
 			for (const year of projected(fixture).annual) {
-				expect(year.openingNetWorth + year.income + year.interest - year.expense - year.unmet).toBe(
-					year.closingNetWorth,
-				)
+				expect(
+					year.openingNetWorth +
+						year.income +
+						year.interest -
+						year.expense -
+						(year.levy ?? 0) +
+						year.unmet,
+				).toBe(year.closingNetWorth)
 			}
 		}
 	})

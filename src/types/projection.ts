@@ -25,6 +25,8 @@ export interface AnnualRollup {
 	readonly income: MinorUnits
 	readonly expense: MinorUnits
 	readonly contributions: MinorUnits
+	/** Prepayment plus Settlements net of refunds; present only when the Scenario has a Levy. */
+	readonly levy?: MinorUnits
 	readonly interest: MinorUnits
 	readonly unmet: MinorUnits
 	readonly partial: boolean
@@ -35,10 +37,33 @@ export interface RunsOut {
 	readonly unmet: MinorUnits
 }
 
+export interface LevyMeasureValue {
+	readonly id: string
+	readonly value: MinorUnits
+}
+
+export interface LevyPeriod {
+	readonly from: DateString
+	readonly to: DateString
+	readonly settlementDate: DateString
+	readonly measures: readonly LevyMeasureValue[]
+	readonly prepaid: MinorUnits
+	readonly due: MinorUnits
+	readonly settlement: MinorUnits
+	readonly settled: boolean
+	readonly partial: boolean
+}
+
+export interface LevyReport {
+	readonly id: string
+	readonly periods: readonly LevyPeriod[]
+}
+
 export interface Projection {
 	readonly rows: readonly ProjectionRow[]
 	readonly annual: readonly AnnualRollup[]
 	readonly runsOut?: RunsOut
+	readonly levy?: LevyReport
 }
 
 export interface InputProblem {
