@@ -1,5 +1,6 @@
 export type { Account, AssetRule, LiabilityRule } from "./account"
 export type { Balance, Baseline } from "./baseline"
+export type { CarryIn, CarryInTally } from "./carry-in"
 export type { Cashflow, SurplusStep } from "./cashflow"
 export type {
 	AccountId,

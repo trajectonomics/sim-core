@@ -32,7 +32,10 @@ const CODES = [
 	"MEASURE_CYCLE",
 	"FIELD_NOT_ALLOWED",
 	"LEVY_REQUIRED",
-	"START_NOT_PERIOD_START",
+	"MISSING_CARRY_IN",
+	"DUPLICATE_CARRY_IN",
+	"MISALIGNED_CARRY_IN",
+	"UNKNOWN_TALLY_LABEL",
 ] as const
 
 /** The closed set of problem codes. Frozen so consumers cannot mutate it at runtime. */

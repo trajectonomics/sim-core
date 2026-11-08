@@ -20,6 +20,7 @@ export const LEVY: unknown = {
 		{ id: "pick", op: "pick", a: "income", b: "cap", then: "owed", else: "cap" },
 	],
 	due: "owed",
+	carryIn: [{ periodStart: "2025-01-01", tallies: [], prepaid: 0 }],
 }
 
 function periodRuleOf(levy: unknown): unknown {
@@ -44,10 +45,26 @@ export function checkWith(
 	return check(baseline, { ...scenario, ...patch }, { ...timeline, ...timelinePatch })
 }
 
+/** An empty Carry-in for the period before the aligned start year. */
+function priorCarryIn(levy: unknown): unknown | undefined {
+	const period = periodRuleOf(levy)
+	if (!isMonthDay(period)) return undefined
+	const year = Number(thaiEmployee.timeline.start.slice(0, 4)) - 1
+	const month = String(period.month).padStart(2, "0")
+	const day = String(period.day).padStart(2, "0")
+	return {
+		periodStart: `${String(year).padStart(4, "0")}-${month}-${day}`,
+		tallies: [],
+		prepaid: 0,
+	}
+}
+
 /** `check()` after replacing (or removing) one value inside the valid Levy, with an aligned start. */
 export function levyProblems(...edits: readonly Edit[]): readonly Problem[] {
-	const levy = edits.reduce<unknown>((value, e) => edit(value, e), LEVY)
-	return checkWith({ levy }, { start: alignedStart(thaiEmployee.timeline.start, levy) })
+	const edited = edits.reduce<unknown>((value, e) => edit(value, e), LEVY)
+	const prior = priorCarryIn(edited)
+	const levy = prior === undefined ? edited : { ...(edited as object), carryIn: [prior] }
+	return checkWith({ levy }, { start: alignedStart(thaiEmployee.timeline.start, edited) })
 }
 
 /** Flows of the Thai employee scenario with `change` merged into the flow at `index`. */

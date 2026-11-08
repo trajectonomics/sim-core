@@ -4,6 +4,7 @@ import type {
 	Account,
 	AccountId,
 	BasisPoints,
+	CarryIn,
 	DateString,
 	Flow,
 	Levy,
@@ -13,7 +14,12 @@ import type {
 	SurplusStep,
 	Timeline,
 } from "../types"
-import type { Projection, ProjectionProblem, ProjectionRow } from "../types/projection"
+import type {
+	Projection,
+	ProjectionProblem,
+	ProjectionRow,
+	SettlementPeriod,
+} from "../types/projection"
 import { project } from "./project"
 
 export interface Setup {
@@ -65,6 +71,21 @@ export function problems(setup: Setup): readonly ProjectionProblem[] {
 	const result = project(baseline, scenario, timeline)
 	if (result.ok) throw new Error("Expected a projection failure")
 	return result.problems
+}
+
+/** An empty Carry-in record for a period that the Timeline start cut off. */
+export function emptyCarryIn(periodStart: DateString): CarryIn {
+	return { periodStart, tallies: [], prepaid: 0 }
+}
+
+export function withCarryIn(levy: Levy, ...records: readonly CarryIn[]): Levy {
+	return { ...levy, carryIn: records }
+}
+
+export function periodFrom(projection: Projection, from: DateString): SettlementPeriod {
+	const period = projection.levy?.periods.find((item) => item.from === from)
+	if (period === undefined) throw new Error(`Missing Settlement period ${from}`)
+	return period
 }
 
 export function rowAt(projection: Projection, date: DateString): ProjectionRow {
