@@ -19,3 +19,6 @@ Projections must be byte-identical across runtimes, and a V8/JavaScriptCore comp
 
 - Rates must be greater than -10000 bps (the root does not exist at or below it); `check()` enforces it.
 - Interest for the same inputs differs by a unit or two from a naive monthly-compounding calculator. That is intended.
+- A Return-series run rounds once per held Return row rather than once per span, because a span
+  return is not an effective annual rate; see ADR-0005. Every run without a series rounds exactly as
+  above.

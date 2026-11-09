@@ -59,7 +59,7 @@ The tallies and Prepayment already recorded for a Settlement period that began b
 _Avoid_: Year-to-date, opening income
 
 **Account**:
-A named balance with an explicit rule in the Scenario: `kind` (`asset` or `liability`), effective annual rate in basis points (one year grows the balance by exactly the rate), optional `lockedUntil`. Every account with a balance must have a rule. A liability's balance is the positive amount owed.
+A named balance with an explicit rule in the Scenario: `kind` (`asset` or `liability`), effective annual rate in basis points (one year grows the balance by exactly the rate, unless a Return series covers those dates), optional `lockedUntil`. Every account with a balance must have a rule. A liability's balance is the positive amount owed. A Return series replaces the rate for the dates it covers; the rate stays required and validated.
 _Avoid_: Wallet, holding
 
 **Flow**:
@@ -120,6 +120,56 @@ _Avoid_: Emergency fund, cash reserve
 **Rule-of-thumb 25× reference**:
 An informational multiple of annual expenses reported beside a reachable FI month. It never decides the FI answer.
 _Avoid_: FI threshold, target net worth
+
+## Market Paths and Stochastic Runs
+
+**Span return**:
+The return in basis points over one Return row's counted days. Not an annual rate: a +2% month is a span return of 200 bps, not an effective annual rate of 200 bps.
+_Avoid_: Period return, monthly rate, sampled rate
+
+**Return row**:
+One dated span return for one Account. Its window runs from its `from` to the next row's `from`, the last row to the Timeline's `horizon`, and its day count is fixed at run start.
+_Avoid_: Period, month row
+
+**Return series**:
+The Return rows for one Account, ascending and contiguous over a Timeline. While it applies it replaces the Account's rate.
+_Avoid_: Rate override, return stream
+
+**Return model**:
+A joint bucket table of month span returns, one entry per Account in the model. It carries no fitted distribution: lognormal, historical bootstrap and a hand-written table all arrive as bucket tables.
+_Avoid_: Distribution, market model
+
+**Market bucket**:
+One month's span returns for every Account in a Return model, with an integer weight; the weights sum to exactly 2^32, which is what makes the draw unbiased without rejection.
+_Avoid_: Sample, scenario
+
+**Market path**:
+One complete set of Return series covering a Timeline: one draw of a Return model. It is not a Scenario.
+_Avoid_: Scenario, simulation, run
+
+**Seed**:
+Exactly 16 lower-case hex digits that fix every Market path in a run, echoed verbatim in the result.
+_Avoid_: Random seed, salt
+
+**Outcome distribution**:
+The output of a stochastic run over N Market paths: an Annual roll-up grid with Percentiles, a Runs-out histogram and a Success probability. It is not a Projection, which is the deterministic output.
+_Avoid_: Stochastic projection, simulation run, forecast
+
+**Percentile**:
+The nearest-rank value at a level in 1..99 across a roll-up's sample, so it is always a value some Market path produced. There is no interpolation.
+_Avoid_: Quantile, interpolated percentile
+
+**Success probability**:
+The share of Market paths with no Shortfall through the horizon, in basis points. It does not include the minimum buffer.
+_Avoid_: Confidence, pass rate
+
+**FI survival share**:
+The share of Market paths that pass the FI test and also meet the minimum buffer at the dates the FI method checks. Stricter than Success probability, and never the same field.
+_Avoid_: Success probability, confidence
+
+**Probability threshold**:
+The FI survival share a probability-threshold FI method requires, in basis points from 1 to 10000.
+_Avoid_: Confidence level, target
 
 ## Input Conventions
 
