@@ -32,7 +32,7 @@ export function levyPlan(scenario: Scenario, timeline: Timeline): LevyPlan {
 	if (scenario.levy === undefined) return { tracker: undefined, settlementDates: [] }
 	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy)
 	return {
-		tracker: createTracker(scenario.levy, periods, scenario.economy.inflation),
+		tracker: createTracker(scenario.levy, periods, scenario.economy.inflation, timeline.start),
 		settlementDates: periods
 			.map((period) => period.settlementDate)
 			.filter((date) => date <= timeline.horizon),
