@@ -11,19 +11,39 @@ The opening snapshot: balances per account at the Timeline start. Nothing else.
 _Avoid_: Initial state, starting ledger, opening balance
 
 **Scenario**:
-The complete, self-contained set of rules and plan applied to a Baseline: currency, economy, accounts, flows, and cashflow routing. Not a diff; callers build variants by editing a copy.
+The complete, self-contained set of rules and plan applied to a Baseline: currency, economy, accounts, flows, cashflow routing, and an optional Levy and Calendar. Not a diff; callers build variants by editing a copy.
 _Avoid_: What-if model, fork, experiment
 
 **Timeline**:
 The run parameters `{ start, horizon, resolution }`. `start` is the date the Baseline balances are measured at. `resolution` (`day` or `month`) only selects which rows the Projection reports; it never changes the numbers.
 _Avoid_: Date list, time steps
 
+**Calendar**:
+The Scenario's optional rule for when money may move: a `dayRule` and an explicit list of Holidays. When it is absent, every Due date is a Landed date.
+_Avoid_: Business calendar, holiday calendar, timezone
+
+**Business day**:
+A date that is not Saturday, Sunday, or a Holiday. A Landed date is a Business day, except at the lower edge of the supported years, where no earlier date exists.
+_Avoid_: Working day, weekday, banking day
+
+**Holiday**:
+A date the Calendar lists as closed. Nothing lands and no Settlement falls on it.
+_Avoid_: Public holiday, bank holiday, non-working day
+
+**Due date**:
+The date a Flow's recurrence or a Levy's settlement rule names, before the Calendar moves it. The Levy's `due` values are amounts, not dates.
+_Avoid_: Scheduled date, planned date, effective date
+
+**Landed date**:
+The date money moves: the Occurrence date. A Flow's Due date moved forward to a Business day, and likewise a Settlement's.
+_Avoid_: Value date, posting date, actual date
+
 **Projection**:
 The deterministic output of a Baseline, Scenario and Timeline: states and cashflows over the horizon.
 _Avoid_: Forecast, prediction, simulation run
 
 **Occurrence**:
-A date on which at least one Flow lands or a Settlement falls. Only Occurrences change balances; the Timeline's `start` and `horizon` are both inclusive.
+A date on which at least one Flow lands or a Settlement falls; its dates are Landed dates. Only Occurrences change balances; the Timeline's `start` and `horizon` are both inclusive.
 _Avoid_: Tick, step, period
 
 **Annual roll-up**:
@@ -51,11 +71,11 @@ An amount taken at source from an income Flow, as a share in basis points of eac
 _Avoid_: Withholding, prepaid tax
 
 **Settlement**:
-The one date after a Settlement period ends on which the Levy's due amount is reconciled against Prepayment. A balance due is paid like an expense and a refund lands like income. The date comes from the Levy's settlement rule. A period the Projection ends before is still reported, with `settled: false`, and nothing is deducted.
+The one date after a Settlement period ends on which the Levy's due amount is reconciled against Prepayment. A balance due is paid like an expense and a refund lands like income. The date is the settlement rule's date moved forward to the next Business day, so a Settlement always falls after the period it closes. A period the Projection ends before is still reported, with `settled: false`, and nothing is deducted.
 _Avoid_: Tax settlement, filing, payment
 
 **Carry-in**:
-The tallies and Prepayment already recorded for a Settlement period that began before `start`, supplied by the caller because the Baseline holds balances only. It covers the period containing `start` and any earlier period whose Settlement falls after `start`.
+The tallies and Prepayment already recorded for a Settlement period that began before `start`, supplied by the caller because the Baseline holds balances only. It covers the period containing `start` and any earlier period whose Settlement falls after `start`, and it covers money that landed before `start`, not money that was due before it.
 _Avoid_: Year-to-date, opening income
 
 **Account**:
