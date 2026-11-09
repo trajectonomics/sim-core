@@ -1,3 +1,4 @@
+import { resolvedCalendar } from "../calendar/resolve"
 import { check } from "../check"
 import { checkFinancialIndependenceOptions } from "../check/financial-independence"
 import { buildEvents } from "../engine/events"
@@ -51,13 +52,14 @@ export function financialIndependence(
 			financialIndependence: { reachable: false, definition, binding: "noCandidateMonth" },
 		}
 	}
-	const events = buildEvents(scenario, timeline)
-	const prefix = baselinePrefix(baseline, scenario, timeline, events, candidates)
+	const calendar = resolvedCalendar(scenario)
+	const events = buildEvents(scenario, timeline, calendar)
+	const prefix = baselinePrefix(baseline, scenario, timeline, events, candidates, calendar)
 	const scanned =
 		prefix.problem === undefined
 			? candidates
 			: candidates.filter((month) => prefix.stoppedAt !== undefined && month <= prefix.stoppedAt)
-	const plan = levyPlan(scenario, timeline)
+	const plan = levyPlan(scenario, timeline, calendar)
 	const outcome = search({
 		scenario,
 		timeline,
@@ -65,9 +67,10 @@ export function financialIndependence(
 		candidates: scanned,
 		events,
 		prefix,
-		expenses: expenseWindow(scenario, timeline, options, candidates[0]!),
+		expenses: expenseWindow(scenario, timeline, options, candidates[0]!, calendar),
 		settlementDates: plan.settlementDates,
 		minBufferMonths: options.minBufferMonths ?? 0,
+		calendar,
 	})
 	if (outcome.kind === "problem") return { ok: false, problems: [outcome.problem] }
 	if (outcome.kind === "reachable") {

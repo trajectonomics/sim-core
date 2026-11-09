@@ -1,3 +1,5 @@
+import type { ResolvedCalendar } from "../calendar/business"
+import { resolvedCalendar } from "../calendar/resolve"
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import { collectDates } from "./dates"
 import { buildEvents, flowsAt } from "./events"
@@ -14,9 +16,13 @@ interface Plan {
 	readonly tracker: LevyTracker | undefined
 }
 
-function planFor(scenario: Scenario, timeline: Timeline): Plan {
+function planFor(
+	scenario: Scenario,
+	timeline: Timeline,
+	calendar: ResolvedCalendar | undefined,
+): Plan {
 	if (scenario.levy === undefined) return { periods: [], tracker: undefined }
-	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy)
+	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy, calendar)
 	return {
 		periods,
 		tracker: createTracker(scenario.levy, periods, scenario.economy.inflation, timeline.start),
@@ -53,8 +59,9 @@ export function runEngine(
 	observations: readonly DateString[],
 ): EngineResult {
 	const states = createStates(baseline, scenario, timeline.start)
-	const events = buildEvents(scenario, timeline)
-	const { periods, tracker } = planFor(scenario, timeline)
+	const calendar = resolvedCalendar(scenario)
+	const events = buildEvents(scenario, timeline, calendar)
+	const { periods, tracker } = planFor(scenario, timeline, calendar)
 	const acc: RunAccumulator = {
 		snapshots: [],
 		totals: [],

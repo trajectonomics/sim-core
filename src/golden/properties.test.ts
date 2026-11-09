@@ -7,6 +7,7 @@ import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
 import type { Account } from "../types"
 import type { Projection } from "../types/projection"
+import { calendarShiftDay } from "./calendar-cases"
 
 function projected(fixture: Fixture): Projection {
 	const result = project(fixture.baseline, fixture.scenario, fixture.timeline)
@@ -114,5 +115,51 @@ describe("timing", () => {
 		const elapsed = performance.now() - started
 		expect(projection.rows).toHaveLength(10_958)
 		expect(elapsed).toBeLessThan(1000)
+	})
+})
+
+describe("the Calendar moves money and nothing else", () => {
+	it("is unchanged when the Holiday list is reversed", () => {
+		const holidays = [...(calendarShiftDay.scenario.calendar?.holidays ?? [])].reverse()
+		const reversed: Fixture = {
+			...calendarShiftDay,
+			scenario: { ...calendarShiftDay.scenario, calendar: { dayRule: "next", holidays } },
+		}
+		expect(projected(reversed)).toEqual(projected(calendarShiftDay))
+	})
+
+	it("is unchanged by the exact rule, which is what an absent Calendar means", () => {
+		const { calendar: _dropped, ...withoutCalendar } = calendarShiftDay.scenario
+		const exact: Fixture = {
+			...calendarShiftDay,
+			scenario: { ...calendarShiftDay.scenario, calendar: { dayRule: "exact", holidays: [] } },
+		}
+		const plain: Fixture = { ...calendarShiftDay, scenario: withoutCalendar }
+		expect(projected(exact)).toEqual(projected(plain))
+		expect(projected(plain)).not.toEqual(projected(calendarShiftDay))
+	})
+
+	it("reports the same rows on shared dates at day and month resolution", () => {
+		const monthly = projected(withResolution(calendarShiftDay, "month"))
+		const daily = projected(withResolution(calendarShiftDay, "day"))
+		for (const row of monthly.rows) {
+			expect(daily.rows.find((item) => item.date === row.date)).toEqual(row)
+		}
+	})
+
+	it("is unchanged when flows, accounts and opening balances are reversed", () => {
+		const reordered: Fixture = {
+			baseline: {
+				...calendarShiftDay.baseline,
+				balances: [...calendarShiftDay.baseline.balances].reverse(),
+			},
+			scenario: {
+				...calendarShiftDay.scenario,
+				accounts: [...calendarShiftDay.scenario.accounts].reverse(),
+				flows: [...calendarShiftDay.scenario.flows].reverse(),
+			},
+			timeline: calendarShiftDay.timeline,
+		}
+		expect(projected(reordered)).toEqual(projected(calendarShiftDay))
 	})
 })

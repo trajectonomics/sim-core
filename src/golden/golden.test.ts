@@ -6,6 +6,7 @@ import type { Fixture } from "../fixtures/fixture"
 import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
 import type { Projection } from "../types/projection"
+import { calendarShiftDay } from "./calendar-cases"
 import { oracleView } from "./oracle-view"
 
 function runFixture(fixture: Fixture): Projection {
@@ -37,6 +38,10 @@ describe("golden fixtures match the independent oracle", () => {
 
 	it("thai employee", () => {
 		expectOracleMatch(thaiEmployee, runFixture(thaiEmployee))
+	})
+
+	it("calendar shift", () => {
+		expectOracleMatch(calendarShiftDay, runFixture(calendarShiftDay))
 	})
 })
 

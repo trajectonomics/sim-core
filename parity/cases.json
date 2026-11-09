@@ -2459,6 +2459,142 @@
 		"sha256": "30409b12a3d63f637dd95dcfca14523684b0b6a50e5bed1807c42d4e5514aeaf"
 	},
 	{
+		"name": "calendar-shift-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 30000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"amount": 1000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true
+				},
+				{
+					"id": "living",
+					"amount": 400000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation",
+					"kind": "expense"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"calendar": {
+				"dayRule": "next",
+				"holidays": ["2026-04-06", "2026-12-25", "2027-01-01"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2028-03-31",
+			"resolution": "day"
+		},
+		"sha256": "5e2ad27eaae3301d344a9417f60b00c493ce7447a23a1b52367b044b01ba506c"
+	},
+	{
+		"name": "calendar-fi",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 30000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 2,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"amount": 1000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true
+				},
+				{
+					"id": "living",
+					"amount": 400000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation",
+					"kind": "expense"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"calendar": {
+				"dayRule": "next",
+				"holidays": ["2026-04-06", "2026-12-25", "2027-01-01"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2040-01-01",
+			"resolution": "month"
+		},
+		"sha256": "4c88b1fe7e41f362ed84a86c94a388432a0fb30f4fbfd5051d4dfdc37545a5fa",
+		"options": {
+			"method": "survival"
+		},
+		"fiSha256": "a52cf174b94d10ff4ef71b04e5f4487449006ee8bab0f7ec4bb059b93ef10f71"
+	},
+	{
 		"name": "freelancer-fi",
 		"baseline": {
 			"schemaVersion": 1,

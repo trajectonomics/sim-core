@@ -1,3 +1,4 @@
+import { resolvedCalendar } from "../calendar/resolve"
 import { carryInPeriods } from "../levy/periods"
 import type { MonthDay } from "../types"
 import type { Emit } from "./codes"
@@ -7,12 +8,18 @@ import { isMonthDay } from "./month-day"
 import { isRecord } from "./shape"
 
 /** Period starts that must have a Carry-in record for this Timeline start. */
-function requiredStarts(start: string, period: MonthDay, settlement: MonthDay): readonly string[] {
-	return carryInPeriods(start, period, settlement).required
+function requiredStarts(
+	start: string,
+	period: MonthDay,
+	settlement: MonthDay,
+	scenario: unknown,
+): readonly string[] {
+	return carryInPeriods(start, period, settlement, resolvedCalendar(scenario)).required
 }
 
 function missingStarts(
 	records: readonly unknown[],
+	scenario: unknown,
 	start: string,
 	period: MonthDay,
 	settlement: MonthDay,
@@ -22,7 +29,9 @@ function missingStarts(
 		const item: unknown = records[index]
 		if (isRecord(item) && typeof item["periodStart"] === "string") present.add(item["periodStart"])
 	}
-	return requiredStarts(start, period, settlement).filter((required) => !present.has(required))
+	return requiredStarts(start, period, settlement, scenario).filter(
+		(required) => !present.has(required),
+	)
 }
 
 function run(scenario: unknown, timeline: unknown, emit: Emit): void {
@@ -36,7 +45,7 @@ function run(scenario: unknown, timeline: unknown, emit: Emit): void {
 	if (!isValidDate(start)) return
 	const records = recordsOf(levy)
 	if (records === undefined && Object.hasOwn(levy, "carryIn")) return
-	const missing = missingStarts(records ?? [], start, period, settlement)
+	const missing = missingStarts(records ?? [], scenario, start, period, settlement)
 	for (let index = 0; index < missing.length; index++) {
 		emit("MISSING_CARRY_IN", ["scenario", "levy", "carryIn"])
 	}

@@ -1,10 +1,11 @@
-import { addMonthsClamped, growthYears } from "../calendar/arith"
+import { addMonthsClamped } from "../calendar/arith"
+import type { ResolvedCalendar } from "../calendar/business"
 import { occurrences } from "../calendar/occurrence"
 import { amountAt } from "../engine/amount"
 import type { DatedEvent } from "../engine/events"
 import type { DateString, Scenario, Timeline } from "../types"
 import type { SurvivalOptions } from "../types/financial-independence"
-import { retirementFlow } from "./candidate-flows"
+import { retirementMeasurements } from "./retirement-spending"
 
 const LAST_SUPPORTED_DATE = "9998-12-31"
 
@@ -13,19 +14,28 @@ export interface ExpenseWindow {
 	readonly cumulative: readonly bigint[]
 }
 
-type Measurement = { readonly date: DateString; readonly amount: bigint }
-
-type Retirement = NonNullable<SurvivalOptions["retirementSpending"]>
+interface Measurement {
+	readonly date: DateString
+	readonly amount: bigint
+}
 
 function originalExpenses(
 	scenario: Scenario,
 	timeline: Timeline,
 	through: DateString,
+	calendar: ResolvedCalendar | undefined,
 ): readonly Measurement[] {
 	const measurements: Measurement[] = []
 	for (const flow of scenario.flows) {
 		if (flow.kind !== "expense") continue
-		const found = occurrences(flow.start, flow.frequency, flow.end, timeline.start, through)
+		const found = occurrences(
+			flow.start,
+			flow.frequency,
+			flow.end,
+			timeline.start,
+			through,
+			calendar,
+		)
 		for (const occurrence of found) {
 			const event: DatedEvent = { date: occurrence.date, flow, years: occurrence.years }
 			measurements.push({
@@ -33,22 +43,6 @@ function originalExpenses(
 				amount: amountAt(event, scenario.economy.inflation),
 			})
 		}
-	}
-	return measurements
-}
-
-function retirementExpenses(
-	timeline: Timeline,
-	retirement: Retirement,
-	firstCandidate: DateString,
-	through: DateString,
-	inflation: number,
-): readonly Measurement[] {
-	const flow = retirementFlow(timeline, retirement.amount, retirement.growth)
-	const measurements: Measurement[] = []
-	for (let date = firstCandidate; date <= through; date = addMonthsClamped(date, 1)) {
-		const event: DatedEvent = { date, flow, years: growthYears(timeline.start, date) }
-		measurements.push({ date, amount: amountAt(event, inflation) })
 	}
 	return measurements
 }
@@ -71,19 +65,21 @@ export function expenseWindow(
 	timeline: Timeline,
 	options: SurvivalOptions,
 	firstCandidate: DateString,
+	calendar: ResolvedCalendar | undefined,
 ): ExpenseWindow {
 	const extended = addMonthsClamped(timeline.horizon, 12)
 	const through = extended > LAST_SUPPORTED_DATE ? LAST_SUPPORTED_DATE : extended
 	const retirement = options.retirementSpending
 	const measurements =
 		retirement === undefined
-			? originalExpenses(scenario, timeline, through)
-			: retirementExpenses(
+			? originalExpenses(scenario, timeline, through, calendar)
+			: retirementMeasurements(
 					timeline,
 					retirement,
 					firstCandidate,
 					through,
 					scenario.economy.inflation,
+					calendar,
 				)
 	return buildWindow(measurements)
 }

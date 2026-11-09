@@ -5,6 +5,7 @@ import { makeFixture } from "../engine/test-helpers"
 import type { Fixture } from "../fixtures/fixture"
 import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
+import { oracleCalendar } from "../golden/oracle-calendar"
 import { oracleCutFlows } from "../golden/oracle-fi"
 import { financialIndependence } from "../index"
 import type { SurvivalOptions } from "../types"
@@ -15,12 +16,13 @@ function fi(fixture: Fixture, options: SurvivalOptions = { method: "survival" })
 }
 
 function rewritten(fixture: Fixture, month: string): Fixture {
+	const calendar = oracleCalendar(fixture)
 	return {
 		...fixture,
 		scenario: {
 			...fixture.scenario,
 			flows: fixture.scenario.flows.flatMap((flow) =>
-				flow.kind === "income" && flow.earned ? oracleCutFlows(flow, month) : [flow],
+				flow.kind === "income" && flow.earned ? oracleCutFlows(flow, month, calendar) : [flow],
 			),
 		},
 	}

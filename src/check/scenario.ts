@@ -1,4 +1,5 @@
 import { checkAccounts } from "./accounts"
+import { checkCalendar } from "./calendar"
 import { checkCashflow } from "./cashflow"
 import type { AccountIndex, Check, Emit, Path } from "./codes"
 import { checkFlows } from "./flows"
@@ -26,6 +27,7 @@ export function checkScenario(
 		flows: req((v, p, e) => checkFlows(v, p, accounts, e, hasLevy)),
 		cashflow: req((v, p, e) => checkCashflow(v, p, accounts, e)),
 		levy: opt(checkLevy),
+		calendar: opt(checkCalendar),
 	}
 	const checked = checkShape(value, path, shape, emit)
 	checkContributionRouting(checked?.["flows"], checked?.["cashflow"], accounts, path, emit)

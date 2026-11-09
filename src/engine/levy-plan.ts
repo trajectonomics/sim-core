@@ -1,17 +1,27 @@
 import { addDays } from "../calendar/arith"
-import { carryInPeriods, dateIn, nextPeriodStart, settlementAfter } from "../levy/periods"
+import { landedDate, type ResolvedCalendar } from "../calendar/business"
+import { carryInPeriods, dateIn, nextPeriodStart, settlementDueAfter } from "../levy/periods"
 import type { DateString, Levy } from "../types"
 
 export interface SettlementPeriodPlan {
 	readonly index: number
 	readonly from: DateString
 	readonly to: DateString
+	/** The date the settlement rule names, which `const` Measures grow to. */
+	readonly dueSettlementDate: DateString
+	/** The Landed date the Levy reconciles and money moves on. */
 	readonly settlementDate: DateString
 }
 
 /** The first period to report: the one containing `start`, plus an earlier one still settling after it. */
-function firstPeriodStart(start: DateString, levy: Levy): DateString {
-	return carryInPeriods(start, levy.period, levy.settlement).first ?? dateIn(1, levy.period)
+function firstPeriodStart(
+	start: DateString,
+	levy: Levy,
+	calendar: ResolvedCalendar | undefined,
+): DateString {
+	return (
+		carryInPeriods(start, levy.period, levy.settlement, calendar).first ?? dateIn(1, levy.period)
+	)
 }
 
 /** Twelve-month periods from the Levy's period rule, through `horizon`, with their Settlements. */
@@ -19,14 +29,17 @@ export function settlementPeriods(
 	start: DateString,
 	horizon: DateString,
 	levy: Levy,
+	calendar: ResolvedCalendar | undefined,
 ): readonly SettlementPeriodPlan[] {
 	const periods: SettlementPeriodPlan[] = []
-	let from = firstPeriodStart(start, levy)
+	let from = firstPeriodStart(start, levy, calendar)
 	for (let index = 0; ; index++) {
 		if (from > horizon) return periods
 		const next = nextPeriodStart(from)
 		const to = addDays(next, -1)
-		periods.push({ index, from, to, settlementDate: settlementAfter(to, levy.settlement) })
+		const dueSettlementDate = settlementDueAfter(to, levy.settlement)
+		const settlementDate = landedDate(dueSettlementDate, calendar)
+		periods.push({ index, from, to, dueSettlementDate, settlementDate })
 		if (next <= from) return periods
 		from = next
 	}
