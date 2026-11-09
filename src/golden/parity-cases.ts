@@ -2,6 +2,7 @@ import type { Fixture } from "../fixtures/fixture"
 import { freelancer } from "../fixtures/freelancer"
 import { thaiEmployee } from "../fixtures/thai-employee"
 import type { SurvivalOptions } from "../types"
+import { calendarFiMonth, calendarShiftDay } from "./calendar-cases"
 import { capped } from "./contribution-cases"
 import {
 	levyCarryInDay,
@@ -47,6 +48,8 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "levy-shortfall-day", fixture: levyShortfallDay },
 	{ name: "levy-unsettled-month", fixture: levyUnsettledMonth },
 	{ name: "levy-carry-in-day", fixture: levyCarryInDay },
+	{ name: "calendar-shift-day", fixture: calendarShiftDay },
+	{ name: "calendar-fi", fixture: calendarFiMonth, options: { method: "survival" } },
 	{ name: "freelancer-fi", fixture: freelancer, options: { method: "survival" } },
 	{
 		name: "thai-employee-fi-buffer",

@@ -1,3 +1,4 @@
+import type { ResolvedCalendar } from "../calendar/business"
 import { collectDates } from "../engine/dates"
 import { type DatedEvent, flowsAt } from "../engine/events"
 import { settlementPeriods } from "../engine/levy-plan"
@@ -28,9 +29,13 @@ export interface LevyPlan {
 }
 
 /** The Levy tracker and settled dates for a timeline, sharing `runEngine`'s period plan. */
-export function levyPlan(scenario: Scenario, timeline: Timeline): LevyPlan {
+export function levyPlan(
+	scenario: Scenario,
+	timeline: Timeline,
+	calendar: ResolvedCalendar | undefined,
+): LevyPlan {
 	if (scenario.levy === undefined) return { tracker: undefined, settlementDates: [] }
-	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy)
+	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy, calendar)
 	return {
 		tracker: createTracker(scenario.levy, periods, scenario.economy.inflation, timeline.start),
 		settlementDates: periods
@@ -68,9 +73,10 @@ export function baselinePrefix(
 	timeline: Timeline,
 	events: readonly DatedEvent[],
 	candidates: readonly DateString[],
+	calendar: ResolvedCalendar | undefined,
 ): Prefix {
 	const states = createStates(baseline, scenario, timeline.start)
-	const plan = levyPlan(scenario, timeline)
+	const plan = levyPlan(scenario, timeline, calendar)
 	const tracker = plan.tracker
 	const wanted = new Set(candidates)
 	const points = new Map<DateString, PrefixPoint>()

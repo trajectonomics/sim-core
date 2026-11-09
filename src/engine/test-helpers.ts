@@ -4,6 +4,7 @@ import type {
 	Account,
 	AccountId,
 	BasisPoints,
+	Calendar,
 	CarryIn,
 	DateString,
 	Flow,
@@ -34,6 +35,7 @@ export interface Setup {
 	readonly resolution?: Resolution
 	readonly inflation?: BasisPoints
 	readonly levy?: Levy
+	readonly calendar?: Calendar
 }
 
 export function makeFixture(setup: Setup): Fixture {
@@ -49,6 +51,7 @@ export function makeFixture(setup: Setup): Fixture {
 			withdraw: setup.withdraw ?? [],
 		},
 		...(setup.levy === undefined ? {} : { levy: setup.levy }),
+		...(setup.calendar === undefined ? {} : { calendar: setup.calendar }),
 	}
 	const timeline: Timeline = {
 		start: setup.start ?? "2026-01-01",

@@ -22,6 +22,11 @@ function measureValues(
 	return values
 }
 
+/** Reports the date the engine acted on: a Measure failing at a Due date is reported on the Landed one. */
+function landedProblem(problem: ProjectionProblem, date: DateString): ProjectionProblem {
+	return "date" in problem ? { ...problem, date } : problem
+}
+
 interface Evaluation {
 	readonly period: EngineSettlementPeriod | undefined
 	readonly problem: ProjectionProblem | undefined
@@ -36,9 +41,10 @@ function evaluatePeriod(
 	const plan = tracker.periods[index]
 	const tally = tracker.tallies[index]
 	if (plan === undefined || tally === undefined) return { period: undefined, problem: undefined }
-	const context = { date: plan.settlementDate, inflation: tracker.inflation }
+	const context = { date: plan.dueSettlementDate, inflation: tracker.inflation }
 	const result = evaluateMeasures(tracker.levy, talliesOf(tally), context)
-	if (!result.ok) return { period: undefined, problem: result.problem }
+	if (!result.ok)
+		return { period: undefined, problem: landedProblem(result.problem, plan.settlementDate) }
 	const due = BigInt(result.due)
 	const period: EngineSettlementPeriod = {
 		from: plan.from,

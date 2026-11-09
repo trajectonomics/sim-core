@@ -1,4 +1,5 @@
 import type { Account } from "./account"
+import type { Calendar } from "./calendar"
 import type { Cashflow } from "./cashflow"
 import type { BasisPoints } from "./common"
 import type { Flow } from "./flow"
@@ -16,4 +17,5 @@ export interface Scenario {
 	readonly flows: readonly Flow[]
 	readonly cashflow: Cashflow
 	readonly levy?: Levy
+	readonly calendar?: Calendar
 }

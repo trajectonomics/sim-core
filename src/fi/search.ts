@@ -1,4 +1,5 @@
 import { addMonthsClamped } from "../calendar/arith"
+import type { ResolvedCalendar } from "../calendar/business"
 import type { DatedEvent } from "../engine/events"
 import type { DateString, Scenario, Timeline } from "../types"
 import type { SurvivalOptions, TwentyFiveTimesReference } from "../types/financial-independence"
@@ -21,6 +22,7 @@ export interface SearchInput {
 	readonly expenses: ExpenseWindow
 	readonly settlementDates: readonly DateString[]
 	readonly minBufferMonths: number
+	readonly calendar: ResolvedCalendar | undefined
 }
 
 export type SearchOutcome =
@@ -54,7 +56,7 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 	}
 	const point = input.prefix.points.get(month)
 	if (point === undefined) return { kind: "skip" }
-	const events = candidateFlows(input.events, input.timeline, month, input.options)
+	const events = candidateFlows(input.events, input.timeline, month, input.options, input.calendar)
 	const walked = walkCandidate({
 		scenario: input.scenario,
 		timeline: input.timeline,

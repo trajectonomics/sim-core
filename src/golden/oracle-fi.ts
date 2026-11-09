@@ -1,6 +1,12 @@
 import type { Fixture } from "../fixtures/fixture"
 import type { DateString, ExpenseFlow, Flow, Growth, SurvivalOptions, Timeline } from "../types"
-import { oracleAddDays, oracleAddMonthsClamped, oracleGrowthYears } from "./oracle-date"
+import {
+	type OracleCalendar,
+	oracleCalendar,
+	oracleLand,
+	oracleLastBusinessDayBefore,
+} from "./oracle-calendar"
+import { oracleAddMonthsClamped, oracleGrowthYears } from "./oracle-date"
 import { oracleGrow } from "./oracle-money"
 
 /** The oracle covers the survival walk; the buffer is covered by hand-computed fixtures. */
@@ -19,10 +25,18 @@ function months(timeline: Timeline): readonly DateString[] {
 	return result
 }
 
-export function oracleCutFlows(flow: Flow, month: DateString): readonly Flow[] {
-	if (flow.frequency === "once") return flow.start >= month ? [] : [flow]
-	if (flow.start >= month) return []
-	const end = oracleAddDays(month, -1)
+/**
+ * The equivalent candidate Scenario's version of `flow` for `month`: its Due dates are capped at the
+ * last Due date whose Landed date is before `month`, because the prefix already applied those.
+ */
+export function oracleCutFlows(
+	flow: Flow,
+	month: DateString,
+	calendar: OracleCalendar | undefined,
+): readonly Flow[] {
+	if (oracleLand(flow.start, calendar) >= month) return []
+	if (flow.frequency === "once") return [flow]
+	const end = oracleLastBusinessDayBefore(month, calendar)
 	if (flow.end !== undefined && flow.end <= end) return [flow]
 	return [{ ...flow, end }]
 }
@@ -57,9 +71,11 @@ function retirementFlows(
 function rewritten(fixture: Fixture, month: DateString, options: OracleFiOptions): Fixture {
 	const { timeline, scenario } = fixture
 	const retirement = options.retirementSpending
+	const calendar = oracleCalendar(fixture)
 	const kept = scenario.flows.flatMap((flow) => {
-		if (flow.kind === "income" && flow.earned) return oracleCutFlows(flow, month)
-		if (flow.kind === "expense" && retirement !== undefined) return oracleCutFlows(flow, month)
+		if (flow.kind === "income" && flow.earned) return oracleCutFlows(flow, month, calendar)
+		if (flow.kind === "expense" && retirement !== undefined)
+			return oracleCutFlows(flow, month, calendar)
 		return [flow]
 	})
 	const added =

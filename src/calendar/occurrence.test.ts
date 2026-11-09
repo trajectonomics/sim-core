@@ -2,6 +2,15 @@ import { describe, expect, it } from "bun:test"
 import type { Frequency } from "../types"
 import { occurrences } from "./occurrence"
 
+/** The window, with no Calendar: these cases pin today's behaviour. */
+const withoutCalendar = (
+	start: string,
+	frequency: Frequency,
+	end: string | undefined,
+	from: string,
+	to: string,
+) => occurrences(start, frequency, end, from, to, undefined)
+
 const DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 const STEPS: Readonly<Record<string, readonly [string, number]>> = {
 	daily: ["day", 1],
@@ -107,7 +116,7 @@ describe("occurrences", () => {
 		for (const frequency of frequencies) {
 			for (const start of starts) {
 				const end = frequency === "once" ? start : "2026-06-30"
-				const got = occurrences(start, frequency, end, "2024-01-15", "2026-05-31")
+				const got = withoutCalendar(start, frequency, end, "2024-01-15", "2026-05-31")
 				expect(got.map((item) => item.date)).toEqual(
 					bruteForce(start, frequency, end, "2024-01-15", "2026-05-31"),
 				)
@@ -116,7 +125,7 @@ describe("occurrences", () => {
 	})
 
 	it("matches a brute-force growth-anniversary count", () => {
-		const got = occurrences("2024-02-29", "monthly", undefined, "2024-01-01", "2029-01-01")
+		const got = withoutCalendar("2024-02-29", "monthly", undefined, "2024-01-01", "2029-01-01")
 		for (const item of got) {
 			let years = 0
 			while (clampAdd("2024-02-29", (years + 1) * 12) <= item.date) years++
@@ -127,18 +136,20 @@ describe("occurrences", () => {
 
 describe("occurrence edge cases", () => {
 	it("clamps a day-31 monthly flow in leap and non-leap Februaries", () => {
-		expect(occurrences("2024-01-31", "monthly", undefined, "2024-01-01", "2024-04-30")).toEqual([
-			{ date: "2024-01-31", years: 0 },
-			{ date: "2024-02-29", years: 0 },
-			{ date: "2024-03-31", years: 0 },
-			{ date: "2024-04-30", years: 0 },
-		])
-		const nonLeap = occurrences("2023-01-31", "monthly", undefined, "2023-01-01", "2023-03-31")
+		expect(withoutCalendar("2024-01-31", "monthly", undefined, "2024-01-01", "2024-04-30")).toEqual(
+			[
+				{ date: "2024-01-31", years: 0 },
+				{ date: "2024-02-29", years: 0 },
+				{ date: "2024-03-31", years: 0 },
+				{ date: "2024-04-30", years: 0 },
+			],
+		)
+		const nonLeap = withoutCalendar("2023-01-31", "monthly", undefined, "2023-01-01", "2023-03-31")
 		expect(nonLeap.map((item) => item.date)).toEqual(["2023-01-31", "2023-02-28", "2023-03-31"])
 	})
 
 	it("keeps a Feb 29 annual flow clamped and counts growth years", () => {
-		const got = occurrences("2024-02-29", "annual", undefined, "2024-01-01", "2029-01-01")
+		const got = withoutCalendar("2024-02-29", "annual", undefined, "2024-01-01", "2029-01-01")
 		expect(got).toEqual([
 			{ date: "2024-02-29", years: 0 },
 			{ date: "2025-02-28", years: 1 },
@@ -150,18 +161,18 @@ describe("occurrence edge cases", () => {
 
 	it("skips occurrences before the timeline and ignores a once flow before it", () => {
 		expect(
-			occurrences("2025-01-31", "monthly", undefined, "2025-03-15", "2025-04-30").map(
+			withoutCalendar("2025-01-31", "monthly", undefined, "2025-03-15", "2025-04-30").map(
 				(item) => item.date,
 			),
 		).toEqual(["2025-03-31", "2025-04-30"])
-		expect(occurrences("2024-12-31", "once", undefined, "2025-01-01", "2025-12-31")).toEqual([])
+		expect(withoutCalendar("2024-12-31", "once", undefined, "2025-01-01", "2025-12-31")).toEqual([])
 	})
 
 	it("includes both start and horizon, and treats end inclusively", () => {
-		expect(occurrences("2026-01-01", "once", undefined, "2026-01-01", "2026-01-01")).toEqual([
+		expect(withoutCalendar("2026-01-01", "once", undefined, "2026-01-01", "2026-01-01")).toEqual([
 			{ date: "2026-01-01", years: 0 },
 		])
-		const weekly = occurrences("2026-01-01", "weekly", "2026-01-15", "2026-01-01", "2027-01-01")
+		const weekly = withoutCalendar("2026-01-01", "weekly", "2026-01-15", "2026-01-01", "2027-01-01")
 		expect(weekly.map((item) => item.date)).toEqual(["2026-01-01", "2026-01-08", "2026-01-15"])
 	})
 })

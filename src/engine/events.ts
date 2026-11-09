@@ -1,3 +1,4 @@
+import type { ResolvedCalendar } from "../calendar/business"
 import { occurrences } from "../calendar/occurrence"
 import type { DateString, Flow, Scenario, Timeline } from "../types"
 import { compareIds } from "./order"
@@ -8,8 +9,12 @@ export interface DatedEvent {
 	readonly years: number
 }
 
-/** All flow occurrences in the timeline, sorted by date then flow id. */
-export function buildEvents(scenario: Scenario, timeline: Timeline): readonly DatedEvent[] {
+/** All flow Occurrences in the timeline, on their Landed dates, sorted by date then flow id. */
+export function buildEvents(
+	scenario: Scenario,
+	timeline: Timeline,
+	calendar: ResolvedCalendar | undefined,
+): readonly DatedEvent[] {
 	const events: DatedEvent[] = []
 	for (const flow of scenario.flows) {
 		const found = occurrences(
@@ -18,6 +23,7 @@ export function buildEvents(scenario: Scenario, timeline: Timeline): readonly Da
 			flow.end,
 			timeline.start,
 			timeline.horizon,
+			calendar,
 		)
 		for (const occurrence of found) {
 			events.push({ date: occurrence.date, flow, years: occurrence.years })

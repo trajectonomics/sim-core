@@ -1,5 +1,6 @@
 import type { Fixture } from "../fixtures/fixture"
 import type { DateString, Flow, Frequency } from "../types"
+import { type OracleCalendar, oracleCalendar, oracleLand } from "./oracle-calendar"
 import { oracleAddDays, oracleAddMonthsClamped, oracleGrowthYears } from "./oracle-date"
 import { oracleGrow } from "./oracle-money"
 
@@ -29,30 +30,50 @@ function eventDate(start: DateString, frequency: Frequency, index: number): Date
 	return oracleAddDays(start, index * (stepDays(frequency) ?? 1))
 }
 
-function rangeEvents(flow: Flow, from: DateString, last: DateString): OracleEvent[] {
+function rangeEvents(
+	flow: Flow,
+	from: DateString,
+	horizon: DateString,
+	last: DateString,
+	calendar: OracleCalendar | undefined,
+): OracleEvent[] {
 	const events: OracleEvent[] = []
 	for (let index = 0; ; index++) {
-		const date = eventDate(flow.start, flow.frequency, index)
-		if (date > last) return events
-		if (date >= from) events.push({ date, flow, years: oracleGrowthYears(flow.start, date) })
+		const due = eventDate(flow.start, flow.frequency, index)
+		if (due > last) return events
+		const date = oracleLand(due, calendar)
+		if (date > horizon) return events
+		if (date >= from) events.push({ date, flow, years: oracleGrowthYears(flow.start, due) })
 	}
 }
 
-function onceEvents(flow: Flow, from: DateString, last: DateString): OracleEvent[] {
-	if (flow.start < from || flow.start > last) return []
-	return [{ date: flow.start, flow, years: 0 }]
+function onceEvents(
+	flow: Flow,
+	from: DateString,
+	horizon: DateString,
+	last: DateString,
+	calendar: OracleCalendar | undefined,
+): OracleEvent[] {
+	if (flow.start > last) return []
+	const date = oracleLand(flow.start, calendar)
+	if (date < from || date > horizon) return []
+	return [{ date, flow, years: 0 }]
 }
 
 export function oracleEvents(
 	flows: readonly Flow[],
 	start: DateString,
 	horizon: DateString,
+	calendar: OracleCalendar | undefined,
 ): readonly OracleEvent[] {
 	const events: OracleEvent[] = []
 	for (const flow of flows) {
 		const last = flow.end !== undefined && flow.end < horizon ? flow.end : horizon
-		if (flow.frequency === "once") events.push(...onceEvents(flow, start, last))
-		else events.push(...rangeEvents(flow, start, last))
+		events.push(
+			...(flow.frequency === "once"
+				? onceEvents(flow, start, horizon, last, calendar)
+				: rangeEvents(flow, start, horizon, last, calendar)),
+		)
 	}
 	return events
 }
@@ -68,8 +89,9 @@ export function oracleEventsByDate(
 	fixture: Fixture,
 ): ReadonlyMap<DateString, readonly OracleEvent[]> {
 	const { scenario, timeline } = fixture
+	const calendar = oracleCalendar(fixture)
 	const byDate = new Map<DateString, OracleEvent[]>()
-	for (const event of oracleEvents(scenario.flows, timeline.start, timeline.horizon)) {
+	for (const event of oracleEvents(scenario.flows, timeline.start, timeline.horizon, calendar)) {
 		const list = byDate.get(event.date) ?? []
 		list.push(event)
 		byDate.set(event.date, list)

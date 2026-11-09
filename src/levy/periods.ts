@@ -1,4 +1,5 @@
 import { addDays, addMonthsClamped } from "../calendar/arith"
+import { landedDate, type ResolvedCalendar } from "../calendar/business"
 import { formatDate, parseDate } from "../calendar/civil"
 import type { DateString, MonthDay } from "../types"
 
@@ -10,11 +11,20 @@ export function dateIn(year: number, monthDay: MonthDay): DateString {
 	return formatDate({ year, month: monthDay.month, day: monthDay.day })
 }
 
-/** The first `settlement` date strictly after `to`. */
-export function settlementAfter(to: DateString, settlement: MonthDay): DateString {
+/** The Due date: the first `settlement` date strictly after `to`. */
+export function settlementDueAfter(to: DateString, settlement: MonthDay): DateString {
 	const year = parseDate(to).year
 	const sameYear = dateIn(year, settlement)
 	return sameYear > to ? sameYear : dateIn(year + 1, settlement)
+}
+
+/** The Landed Settlement date: the Due date moved forward to the next Business day. */
+export function settlementAfter(
+	to: DateString,
+	settlement: MonthDay,
+	calendar: ResolvedCalendar | undefined,
+): DateString {
+	return landedDate(settlementDueAfter(to, settlement), calendar)
 }
 
 /** The start of the period containing `date`, or undefined before year 1. */
@@ -51,6 +61,7 @@ export function carryInPeriods(
 	start: DateString,
 	period: MonthDay,
 	settlement: MonthDay,
+	calendar: ResolvedCalendar | undefined,
 ): CarryInPeriods {
 	const current = periodStartAtOrBefore(start, period)
 	if (current === undefined) return { current, first: undefined, required: [] }
@@ -58,7 +69,7 @@ export function carryInPeriods(
 	if (previous === undefined) {
 		return { current, first: current, required: start === current ? [] : [current] }
 	}
-	const previousSettles = settlementAfter(addDays(current, -1), settlement) >= start
+	const previousSettles = settlementAfter(addDays(current, -1), settlement, calendar) >= start
 	if (!previousSettles) {
 		return { current, first: current, required: start === current ? [] : [current] }
 	}
