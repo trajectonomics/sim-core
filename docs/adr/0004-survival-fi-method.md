@@ -71,3 +71,6 @@ test's behaviour changes.
 - `FinancialIndependenceOptions` is validated separately, with problems at `["options", ...]`.
 - Invalid input and overflow remain data (`ok: false`), never exceptions.
 - Day and month resolutions produce the same FI answer; only `project()` rows differ.
+- **With a Calendar**, the stop mechanics and the retirement expense dates are Landed dates:
+  earned-income occurrences are removed by the date they land on, and the monthly retirement
+  expense moves to its next Business day like any other Due date.
