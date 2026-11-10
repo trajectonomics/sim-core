@@ -4,7 +4,12 @@ import type { AccountState, StateMap } from "../engine/state"
 export function cloneStates(states: StateMap): StateMap {
 	const cloned = new Map<string, AccountState>()
 	for (const [id, state] of states) {
-		cloned.set(id, { rule: state.rule, balance: state.balance, asOf: state.asOf })
+		cloned.set(id, {
+			rule: state.rule,
+			balance: state.balance,
+			asOf: state.asOf,
+			principalDays: state.principalDays,
+		})
 	}
 	return cloned
 }

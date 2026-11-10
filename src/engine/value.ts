@@ -1,6 +1,7 @@
 import { countedDays } from "../calendar/counted"
 import { grow } from "../money/growth"
-import type { DateString } from "../types"
+import { accrualParts, capitaliseThrough, type NominalRule } from "../money/nominal"
+import type { Account, DateString } from "../types"
 import { walkRows } from "./span"
 import type { AccountState, StateMap } from "./state"
 
@@ -11,8 +12,15 @@ export interface ValueParts {
 	readonly amount: bigint
 }
 
-/** Read-only valuation; it never commits the account. An effective Account is all capitalised. */
-export function valueParts(state: AccountState, date: DateString): ValueParts {
+/** The nominal rule of an Account, or `undefined` when its rate is effective annual. */
+export function nominalRule(rule: Account): NominalRule | undefined {
+	return rule.compounding === undefined
+		? undefined
+		: { rate: rule.rate, compounding: rule.compounding }
+}
+
+/** A Return series replaces the rate, so an Account holding one takes this path. */
+function effectiveParts(state: AccountState, date: DateString): ValueParts {
 	const series = state.series
 	const amount =
 		series === undefined
@@ -21,6 +29,24 @@ export function valueParts(state: AccountState, date: DateString): ValueParts {
 				: grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
 			: walkRows(state.balance, state.asOf, date, series)
 	return { capitalised: amount, accruedInterest: 0n, amount }
+}
+
+/**
+ * Read-only for the running period: it never commits the partial interest it reports. It does
+ * commit completed capitalisations, which are result-neutral and keep a read on a long gap linear.
+ */
+export function valueParts(state: AccountState, date: DateString): ValueParts {
+	const rule = state.series === undefined ? nominalRule(state.rule) : undefined
+	if (rule === undefined) return effectiveParts(state, date)
+	const settled = capitaliseThrough(
+		{ principal: state.balance, principalDays: state.principalDays, asOf: state.asOf },
+		rule,
+		date,
+	)
+	state.balance = settled.principal
+	state.principalDays = settled.principalDays
+	state.asOf = settled.asOf
+	return accrualParts(settled, rule, date)
 }
 
 export function valuation(state: AccountState, date: DateString): bigint {

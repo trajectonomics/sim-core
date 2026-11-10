@@ -5,8 +5,11 @@ import type { ResolvedReturns, ResolvedSeries } from "./returns"
 export interface AccountState {
 	readonly rule: Account
 	readonly series?: ResolvedSeries
+	/** An effective Account's value, or a nominal Account's capitalised balance. */
 	balance: bigint
 	asOf: DateString
+	/** A nominal Account's exact capitalised-days numerator; always 0 for an effective Account. */
+	principalDays: bigint
 }
 
 export type StateMap = ReadonlyMap<AccountId, AccountState>
@@ -23,7 +26,12 @@ export function createStates(
 	const states = new Map<AccountId, AccountState>()
 	const rules = [...scenario.accounts].sort((a, b) => compareIds(a.id, b.id))
 	for (const rule of rules) {
-		const base = { rule, balance: BigInt(opening.get(rule.id) ?? 0), asOf: start }
+		const base = {
+			rule,
+			balance: BigInt(opening.get(rule.id) ?? 0),
+			asOf: start,
+			principalDays: 0n,
+		}
 		const resolved = series?.get(rule.id)
 		states.set(rule.id, resolved === undefined ? base : { ...base, series: resolved })
 	}
