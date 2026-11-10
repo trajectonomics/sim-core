@@ -11,7 +11,7 @@ The opening snapshot: balances per account at the Timeline start. Nothing else.
 _Avoid_: Initial state, starting ledger, opening balance
 
 **Scenario**:
-The complete, self-contained set of rules and plan applied to a Baseline: currency, economy, accounts, flows, cashflow routing, and an optional Levy and Calendar. Not a diff; callers build variants by editing a copy.
+The complete, self-contained set of rules and plan applied to a Baseline: currency, economy, accounts, flows, cashflow routing, and optional Levies and a Calendar. Not a diff; callers build variants by editing a copy.
 _Avoid_: What-if model, fork, experiment
 
 **Timeline**:
@@ -51,7 +51,7 @@ Totals over one twelve-month period of a Projection, running from an anniversary
 _Avoid_: Year, fiscal year
 
 **Levy**:
-A closed rule set in the Scenario that charges an amount for each Settlement period from that period's Flows: a period rule, a settlement rule and a graph of Measures. The core does not know what a Levy represents; callers, or a rule-set emitter such as tax-core, author it as data.
+A closed rule set in the Scenario that charges an amount for each Settlement period from that period's Flows: a period rule, a settlement rule and a graph of Measures. A Scenario may hold several Levies, each with its own periods, Settlements and Carry-in; they share Tally labels but never read each other. The core does not know what a Levy represents; callers, or a rule-set emitter such as tax-core, author it as data.
 _Avoid_: Tax, tax rules, formula callback, plugin
 
 **Settlement period**:
@@ -59,19 +59,27 @@ A twelve-month period set by the Levy's period rule, over which the Levy tallies
 _Avoid_: Tax year, fiscal year, year, Annual roll-up
 
 **Measure**:
-A named value inside a Levy, computed in integer minor units from tallies, constants and other Measures. The Measures form an acyclic graph, and the Levy names the Measure that is due.
+A named value inside a Levy, or inside a Derived amount, computed in integer minor units from tallies (Levy only), Flow amounts (Derived amount only), constants and other Measures. The Measures form an acyclic graph, and the Levy names the Measure that is due.
 _Avoid_: Variable, formula, derived flow
+
+**Dated constant**:
+A `const` Measure whose value steps on given dates: a starting value and a list of `{ from, value }`. A Settlement period uses the last step on or before the period's last day, not its Settlement date. It cannot also grow by a rate.
+_Avoid_: Time-varying parameter, schedule
+
+**Derived amount**:
+A Flow amount computed on each Occurrence from other Flows instead of fixed: a Measure graph over the planned gross amounts that other Flows land on the same Landed date (0 for a Flow that does not land then), before Prepayment and any cap. The Flows form an acyclic graph. A negative result or an overflow is reported, never clamped. A Derived amount that reads earned income falls to 0 once earned income stops in the FI test.
+_Avoid_: Percentage flow, formula flow, linked flow
 
 **Tally label**:
 A label on an income Flow, or on a contribution Flow, that a Levy sums over a Settlement period. A Flow with no label is never tallied. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap.
 _Avoid_: Category, tag, tax category
 
 **Prepayment**:
-An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount, rounded half up in minor units. Only the net lands in cash. The period's total is credited against the Levy at Settlement.
+An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount, rounded half up in minor units. A Flow names the Levy each share is credited to; the shares sum to at most 10000 basis points and are rounded cumulatively in Scenario Levy order, so together they never exceed the gross. Only the net lands in cash. A Levy's period total is credited against it at Settlement.
 _Avoid_: Withholding, prepaid tax
 
 **Settlement**:
-The one date after a Settlement period ends on which the Levy's due amount is reconciled against Prepayment. A balance due is paid like an expense and a refund lands like income. The date is the settlement rule's date moved forward to the next Business day, so a Settlement always falls after the period it closes. A period the Projection ends before is still reported, with `settled: false`, and nothing is deducted.
+The one date after a Settlement period ends on which the Levy's due amount is reconciled against Prepayment. A balance due is paid like an expense and a refund lands like income. The date is the settlement rule's date moved forward to the next Business day, so a Settlement always falls after the period it closes. Settlements of several Levies on one Landed date are summed into one movement. A period the Projection ends before is still reported, with `settled: false`, and nothing is deducted.
 _Avoid_: Tax settlement, filing, payment
 
 **Carry-in**:
