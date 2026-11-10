@@ -1,12 +1,6 @@
-import { resolvedCalendar } from "../calendar/resolve"
-import { buildEvents } from "../engine/events"
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
-import type { SurvivalOptions } from "../types/financial-independence"
-import { candidateMonths } from "./candidates"
-import { expenseWindow } from "./expenses"
-import { baselinePrefix, levyPlan } from "./prefix"
-import { requirementTable } from "./required"
-import { scanGrid } from "./scan-grid"
+import type { FinancialIndependenceOptions } from "../types/financial-independence"
+import { inputFor, planBase, prefixFor } from "./plan-base"
 import type { SearchInput } from "./search"
 
 /** Everything a scan needs except the candidate months it will visit. */
@@ -23,35 +17,16 @@ export function planScan(
 	baseline: Baseline,
 	scenario: Scenario,
 	timeline: Timeline,
-	options: SurvivalOptions,
+	options: FinancialIndependenceOptions,
 ): ScanPlan | undefined {
-	const candidates = candidateMonths(timeline)
-	if (candidates.length === 0) return undefined
-	const calendar = resolvedCalendar(scenario)
-	const events = buildEvents(scenario, timeline, calendar)
-	const prefix = baselinePrefix(baseline, scenario, timeline, events, candidates, calendar)
+	const base = planBase(baseline, scenario, timeline, options)
+	if (base === undefined) return undefined
+	const prefix = prefixFor(base)
 	const scanned =
 		prefix.problem === undefined
-			? candidates
-			: candidates.filter((month) => prefix.stoppedAt !== undefined && month <= prefix.stoppedAt)
-	const levy = levyPlan(scenario, timeline, calendar)
-	const expenses = expenseWindow(scenario, timeline, options, candidates[0]!, calendar)
-	return {
-		input: {
-			scenario,
-			prefix,
-			requirement: requirementTable(expenses, options.minBufferMonths ?? 0),
-			grid: scanGrid(
-				events,
-				timeline,
-				options,
-				candidates[0]!,
-				levy.settlementDates,
-				calendar,
-				scenario.economy.inflation,
-			),
-		},
-		candidates,
-		scanned,
-	}
+			? base.candidates
+			: base.candidates.filter(
+					(month) => prefix.stoppedAt !== undefined && month <= prefix.stoppedAt,
+				)
+	return { input: inputFor(base, prefix), candidates: base.candidates, scanned }
 }

@@ -3,7 +3,7 @@ import { amountAt } from "../engine/amount"
 import type { DatedEvent } from "../engine/events"
 import { compareIds } from "../engine/order"
 import type { BasisPoints, DateString, Timeline } from "../types"
-import type { SurvivalOptions } from "../types/financial-independence"
+import type { FinancialIndependenceOptions } from "../types/financial-independence"
 import { retirementEvents, uniqueRetirementId } from "./retirement-spending"
 
 export interface ScanGrid {
@@ -56,7 +56,7 @@ function uniqueDates(
 export function scanGrid(
 	events: readonly DatedEvent[],
 	timeline: Timeline,
-	options: SurvivalOptions,
+	options: FinancialIndependenceOptions,
 	firstMonth: DateString,
 	settlementDates: readonly DateString[],
 	calendar: ResolvedCalendar | undefined,

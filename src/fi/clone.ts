@@ -9,6 +9,7 @@ export function cloneStates(states: StateMap): StateMap {
 			balance: state.balance,
 			asOf: state.asOf,
 			capitalisedDays: state.capitalisedDays,
+			...(state.series === undefined ? {} : { series: state.series }),
 		})
 	}
 	return cloned

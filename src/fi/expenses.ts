@@ -4,7 +4,7 @@ import { occurrences } from "../calendar/occurrence"
 import { amountAt } from "../engine/amount"
 import type { DatedEvent } from "../engine/events"
 import type { DateString, Scenario, Timeline } from "../types"
-import type { SurvivalOptions } from "../types/financial-independence"
+import type { FinancialIndependenceOptions } from "../types/financial-independence"
 import { retirementMeasurements } from "./retirement-spending"
 
 const LAST_SUPPORTED_DATE = "9998-12-31"
@@ -63,7 +63,7 @@ function buildWindow(measurements: readonly Measurement[]): ExpenseWindow {
 export function expenseWindow(
 	scenario: Scenario,
 	timeline: Timeline,
-	options: SurvivalOptions,
+	options: FinancialIndependenceOptions,
 	firstCandidate: DateString,
 	calendar: ResolvedCalendar | undefined,
 ): ExpenseWindow {
