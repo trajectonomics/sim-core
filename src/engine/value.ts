@@ -1,11 +1,16 @@
 import { countedDays } from "../calendar/counted"
 import { grow } from "../money/growth"
 import type { DateString } from "../types"
+import { walkRows } from "./span"
 import type { AccountState, StateMap } from "./state"
 
 /** Read-only valuation; it never commits the account. */
 export function valuation(state: AccountState, date: DateString): bigint {
-	return grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
+	const series = state.series
+	if (series === undefined) {
+		return grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
+	}
+	return walkRows(state.balance, state.asOf, date, series)
 }
 
 function signedValue(state: AccountState, date: DateString): bigint {

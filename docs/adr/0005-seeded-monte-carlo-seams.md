@@ -70,8 +70,12 @@ rate-0 case, where the factor is the identity.
 
 A span return is bounded to `-9999..10000` bps. The bound cannot keep the arithmetic fully neutral:
 because a split is linear in `r`, a row cut by a mid-row Flow gains a second-order term,
-`(1 + r·h₁/D)(1 + r·h₂/D) = 1 + r + r²·h₁h₂/D²`. At realistic monthly returns that term is
-negligible; it is recorded as a limit rather than fixed.
+`(1 + r·h₁/D)(1 + r·h₂/D) = 1 + r + r²·h₁h₂/D²`. The number is small but not zero: a 1,000 bps
+row on 100,000 minor units split exactly at its midpoint gives `105,000 × 1.05 = 110,250`, where
+the unsplit row gives `100,000 × 1.1 = 110,000`, so the term is 250 minor units
+(`r²·h₁h₂/D² = 0.01 × 0.25 = 0.0025`). At realistic monthly returns it is negligible relative to
+the balance; it is recorded as a limit rather than fixed, and
+`src/golden/return-cases.test.ts` pins the number.
 
 ## Returns as a run input
 
@@ -93,7 +97,7 @@ caller whose bucket count does not divide 2^32 apportions the remainder itself. 
 smallest `i` with `draw32 < cumulative[i]`, found by binary search, so a zero weight is never drawn
 and no modulo bias, rejection loop or float appears.
 
-One draw per row serves every Account, and each Market path has its own stream, so consumption
+One draw per row serves every Account, and each Market path has its own sequence, so consumption
 never depends on when a path dies.
 
 ## The generator
@@ -234,3 +238,110 @@ behind a closed enum of one, not hooks.
   until an entry point exists.
 - The FI probability case measures a different quantity from the Outcome distribution's success
   probability, and the two must never share a field name or a glossary term.
+
+## Appendix: the SplitMix64 specification and its vectors
+
+This appendix stands alone: an implementer needs no reference source. It fixes the generator, the
+path-seed rule, the draw and bucket rule, and the recorded vectors that a second implementation is
+checked against. It is asserted under Bun only — the module is not exported, so it is not in
+`dist` and `scripts/parity-check.mjs` cannot reach it — and no cross-runtime guarantee is claimed
+for it until an entry point exists.
+
+### The generator
+
+The state `s` is an unsigned 64-bit integer. The increment is the Weyl constant
+`γ = 0x9E3779B97F4A7C15`. One step produces the next state and one 64-bit word:
+
+```
+nextState = asUintN(64, s + γ)
+word      = mix(nextState)
+```
+
+`asUintN(64, x)` is `BigInt.asUintN(64, x)`: it keeps the low 64 bits of `x`, so the result is in
+`[0, 2^64)`. `mix` is two xorshift-multiply rounds and a final xorshift, each multiplication masked
+the same way:
+
+```
+mix(z):
+  z = asUintN(64, (z XOR (z >> 30)) × 0xBF58476D1CE4E5B9)
+  z = asUintN(64, (z XOR (z >> 27)) × 0x94D049BB133111EB)
+  z = z XOR (z >> 31)
+```
+
+Every value the shifts are applied to is already in `[0, 2^64)`, so a language whose integer shift
+arithmetic-fills the sign bit computes the same word. `mix` is a bijection on 64-bit words: each
+`x >> k XOR x` and each multiplication by an odd constant is invertible modulo 2^64.
+
+The first output of a fresh sequence seeded with `seed` is
+`firstSplitMixOutput(seed) = mix(asUintN(64, seed + γ))`; the sequence continues from `nextState`.
+There is no bad state: the additive increment means state `0` is a fine seed — it is the first
+recorded seed — and every state is a window on the same 2^64 cycle.
+
+### Path seeds
+
+Path `i`'s own sequence starts at
+
+```
+pathSeed(i) = firstSplitMixOutput(asUintN(64, seed XOR firstSplitMixOutput(i)))
+```
+
+`firstSplitMixOutput` is a bijection, so `firstSplitMixOutput(i)` is injective in `i`, the XOR with
+a fixed seed stays injective, and the outer `firstSplitMixOutput` is injective too: path seeds never
+collide. They are windows on one 2^64 cycle, not independent sequences. At 10,000 paths × 1,200 draws
+the chance that two paths' windows overlap is about
+`(10,000² / 2) × (2 × 1,200) / 2^64 ≈ 1e-8`, stated as a figure, never as "independent". No
+consumption order can make one path's draws depend on another's, and a path's draws never depend
+on the path count: path `i`'s sequence is fixed by the caller's seed and `i` alone.
+
+Path `i`'s first draw is `firstSplitMixOutput(pathSeed(i))`, and its sequence continues from there.
+The caller's seed is exactly 16 lower-case hex digits and is echoed verbatim.
+
+### The draw and the bucket
+
+A draw takes the **high** 32 bits of a word: `draw32 = Number(word >> 32n)`, in `[0, 2^32)`. The
+high half is the better distributed of the two, so no low-bit defect can bias the pick.
+
+A Return model's buckets carry weights `w₀ … w_{k-1}` that are non-negative integers and whose
+**BigInt** sum is exactly `2^32`; a caller whose bucket count does not divide `2^32` apportions the
+remainder itself. Let `cumulative[i] = w₀ + … + w_i`. The bucket is the smallest `i` with
+`draw32 < cumulative[i]`, found by binary search over `k ≤ 512` entries. A zero weight leaves
+`cumulative[i] = cumulative[i-1]`, so such an `i` is never the smallest one that matches: a
+zero-weight bucket is never drawn. There is no modulo, rejection loop or float, so the mapping is
+exact and platform-independent. One draw per Return row serves every Account, because a Market
+bucket is one market month for all of them.
+
+The table's constructor refuses a weight that is not a non-negative safe integer, and a total other
+than `2^32`, by throwing. Its caller validates the caller's input first and reports
+`INVALID_WEIGHT` or `RETURN_WEIGHT_TOTAL`, so the primitive never sees a bad table at run time.
+Those codes, with the entry point that reports them, are the two-tier rule in Caps above.
+
+### Vectors
+
+Eight consecutive 64-bit words per seed, each as 16 lower-case hex digits, with the 32-bit draw
+beside it:
+
+| # | seed `0000000000000000` | draw32 | seed `0123456789abcdef` | draw32 |
+| --- | --- | --- | --- | --- |
+| 1 | `e220a8397b1dcdaf` | `e220a839` | `157a3807a48faa9d` | `157a3807` |
+| 2 | `6e789e6aa1b965f4` | `6e789e6a` | `d573529b34a1d093` | `d573529b` |
+| 3 | `06c45d188009454f` | `06c45d18` | `2f90b72e996dccbe` | `2f90b72e` |
+| 4 | `f88bb8a8724c81ec` | `f88bb8a8` | `a2d419334c4667ec` | `a2d41933` |
+| 5 | `1b39896a51a8749b` | `1b39896a` | `01404ce914938008` | `01404ce9` |
+| 6 | `53cb9f0c747ea2ea` | `53cb9f0c` | `14bc574c2a2b4c72` | `14bc574c` |
+| 7 | `2c829abe1f4532e1` | `2c829abe` | `b8fc5b1060708c05` | `b8fc5b10` |
+| 8 | `c584133ac916ab3c` | `c584133a` | `8931545f4f9ea651` | `8931545f` |
+
+The first four path seeds, from the rule above:
+
+| seed | `i = 0` | `i = 1` | `i = 2` | `i = 3` |
+| --- | --- | --- | --- | --- |
+| `0000000000000000` | `a706dd2f4d197e6f` | `5e41ab087439611e` | `64684c4f0fd784b4` | `bccdfd9c96a18897` |
+| `0123456789abcdef` | `13182864bd1a9954` | `4a0fab93cd1a3b84` | `3fd33b672dcc6f2c` | `0abde63e2b24f505` |
+
+The vectors are produced by an independent oracle, `src/golden/oracle-prng.ts`, which implements
+the same specification a second time — modulo-2^64 rather than `asUintN`, a round loop rather than
+named shifts — and imports nothing from `engine/` or `money/`. `src/golden/prng-cases.ts` records
+the tables above, and `src/prng/*.test.ts` asserts the primitive and the oracle against them, plus
+prefix stability and the bucket boundaries. The first four words of seed `0` are the published
+SplitMix64 reference vectors, so an implementer can check the specification against a source it
+already trusts before checking the rest.

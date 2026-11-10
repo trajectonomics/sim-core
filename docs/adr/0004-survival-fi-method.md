@@ -64,6 +64,45 @@ test's behaviour changes.
   at `9998-12-31`, the last year the core accepts. Near that edge the window can be shorter than
   twelve months rather than leave the supported calendar.
 
+## The probability-threshold case (reserved, unbuilt)
+
+`FinancialIndependenceOptions` is a discriminated union on `method`. `survival` is the only value
+built today; `probabilityThreshold` is the reserved second case, specified in full in ADR-0005 and
+delivered by #67. It does not change the survival test: it asks that test of every Market path and
+turns the answers into a share.
+
+- **Options.** `method: "probabilityThreshold"`, `thresholdBps` (`1..10000`, so a 100% target is
+  expressible), `paths` (`1..200`) and `seed` (16 lower-case hex digits, echoed verbatim), reusing
+  `retirementSpending` and `minBufferMonths`. `FinancialIndependenceDefinition` stops carrying the
+  literal `1` and becomes a per-method union.
+- **A path counts at candidate M** when earned income stops at M, the path has no Shortfall
+  through the horizon (inclusive of a Shortfall on the horizon), and the minimum buffer holds on
+  the terms above: after that date's Flows; at M even when no Occurrence lands there; at every
+  Occurrence after M; and at the horizon; with `required(D) = ceil(minBufferMonths × E(D) / 12)`
+  and `E(D)` not truncated at the horizon; `minBufferMonths: 0` is treated as omitted. A buffer
+  breach fails the path and the walk continues, so a later Shortfall can win the binding exactly
+  as in the survival method.
+- **The FI month** is the earliest M whose FI survival share — survived paths divided by `paths` —
+  reaches `thresholdBps`. Every candidate shares the same N paths by seed and index: common random
+  numbers, or the monthly shares would not be comparable. The scan stays ascending rather than
+  binary, because the survival method's monotonicity is not assumed.
+- **Ordering and result.** The binding order above applies. When the candidate grid is non-empty
+  and no month reaches the threshold, `FiBinding` reports `"thresholdNotReached"` and the result
+  carries `bestMonth { month, fiSurvivalBps }` — highest share, ties to the earliest month —
+  instead of `bestCase`, whose ordering ranks a single Run-out date and a single unmet amount that
+  a distribution does not have. Because `FinancialIndependence.reference` measures one date's
+  unlocked assets and expenses, the probability case's reachable variant drops it: a 25× multiple
+  of one month says nothing about a path set.
+- **Validation** sits at `["options", ...]` like the survival case. `thresholdBps` follows
+  `scalars.rate`: a non-integer is `NOT_SAFE_INTEGER`, an integer outside `1..10000` is
+  `RATE_OUT_OF_RANGE`. `paths` outside `1..200` is `INVALID_PATH_COUNT` and a malformed `seed` is
+  `INVALID_SEED`; both arrive with the case, per ADR-0005's two-tier rule. An unknown `method`
+  stays `INVALID_FI_METHOD`, which already exists.
+- **Cost gate.** At roughly 12 ms a bare run, 720 candidates × 200 paths is 144,000 runs, so the
+  case ships only after #19 or a comparable optimisation, or with a measured budget recorded
+  against the 60 s bar. The 200-path cap is the method's own: the Outcome distribution's is 10,000,
+  and the two never share an option type.
+
 ## Considered options
 
 - **Binary search over months.** Assumes survival is monotonic in M. Retirement spending can make
