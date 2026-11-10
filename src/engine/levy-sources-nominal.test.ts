@@ -69,6 +69,34 @@ describe("Levy tally sources on a nominal Account", () => {
 		expect(amounts(rowAt(projection, "2026-03-31"))["deposit"]).toBe(102_998)
 	})
 
+	it("splits a Settlement period whose end falls between capitalisation dates", () => {
+		// Quarterly at 1,200 bps, period 15 Feb to 14 Feb. The capitalisations are 484, 1,005,
+		// 3,135, 3,229 and 3,326 on 100,000 → 114,201 by 31 Mar 2027; the 14 Feb value adds the
+		// 1,663 accrued from 31 Dec, so the first period takes 12,538 and the second 5,089.
+		const projection = run({
+			accounts: [
+				{
+					id: "deposit",
+					kind: "asset",
+					rate: 1200,
+					compounding: "quarterly",
+					returnLabel: "interest",
+				},
+			],
+			balances: { deposit: 100_000 },
+			surplus: [{ account: "deposit" }],
+			start: "2026-02-15",
+			horizon: "2027-06-30",
+			resolution: "month",
+			levy: withCarryIn(
+				{ ...returnsLevy, period: { month: 2, day: 15 }, settlement: { month: 6, day: 30 } },
+				emptyCarryIn("2025-02-15"),
+			),
+		})
+		expect(values(projection, "interest")).toEqual([0, 12_538, 5_089])
+		expect(amounts(rowAt(projection, "2027-06-30"))["deposit"]).toBe(117_627)
+	})
+
 	it("adds a contribution to basis through the nominal commit", () => {
 		// Without the nominal commit booking basis, a 75,000 sale would look like a 25,000 gain.
 		const projection = run({
