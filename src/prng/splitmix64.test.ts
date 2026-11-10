@@ -4,7 +4,7 @@ import { PRNG_VECTORS } from "../golden/prng-cases"
 import { draw32 } from "./bucket"
 import { firstSplitMixOutput, nextSplitMix } from "./splitmix64"
 
-function stream(seed: bigint, count: number): readonly bigint[] {
+function wordsFor(seed: bigint, count: number): readonly bigint[] {
 	const words: bigint[] = []
 	let state = seed
 	for (let index = 0; index < count; index++) {
@@ -22,7 +22,7 @@ function label(seed: bigint): string {
 describe("SplitMix64", () => {
 	for (const vector of PRNG_VECTORS) {
 		it(`reproduces the ADR's eight words for seed ${label(vector.seed)}`, () => {
-			expect(stream(vector.seed, 8)).toEqual(vector.words)
+			expect(wordsFor(vector.seed, 8)).toEqual(vector.words)
 		})
 
 		it(`agrees with the independent oracle for seed ${label(vector.seed)}`, () => {
@@ -36,7 +36,7 @@ describe("SplitMix64", () => {
 		expect(firstSplitMixOutput(0n)).toBe(0xe220a8397b1dcdafn)
 	})
 
-	it("gives the first draw of a stream seeded with firstSplitMixOutput", () => {
+	it("gives the first draw of a sequence seeded with firstSplitMixOutput", () => {
 		for (const seed of [0n, 0x0123456789abcdefn, 0xffffffffffffffffn]) {
 			const step = nextSplitMix(seed)
 			expect(firstSplitMixOutput(seed)).toBe(step.word)

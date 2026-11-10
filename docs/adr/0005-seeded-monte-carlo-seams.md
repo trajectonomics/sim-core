@@ -97,7 +97,7 @@ caller whose bucket count does not divide 2^32 apportions the remainder itself. 
 smallest `i` with `draw32 < cumulative[i]`, found by binary search, so a zero weight is never drawn
 and no modulo bias, rejection loop or float appears.
 
-One draw per row serves every Account, and each Market path has its own stream, so consumption
+One draw per row serves every Account, and each Market path has its own sequence, so consumption
 never depends on when a path dies.
 
 ## The generator
@@ -272,14 +272,14 @@ Every value the shifts are applied to is already in `[0, 2^64)`, so a language w
 arithmetic-fills the sign bit computes the same word. `mix` is a bijection on 64-bit words: each
 `x >> k XOR x` and each multiplication by an odd constant is invertible modulo 2^64.
 
-The first output of a fresh stream seeded with `seed` is
-`firstSplitMixOutput(seed) = mix(asUintN(64, seed + γ))`; the stream continues from `nextState`.
+The first output of a fresh sequence seeded with `seed` is
+`firstSplitMixOutput(seed) = mix(asUintN(64, seed + γ))`; the sequence continues from `nextState`.
 There is no bad state: the additive increment means state `0` is a fine seed — it is the first
 recorded seed — and every state is a window on the same 2^64 cycle.
 
 ### Path seeds
 
-Path `i`'s own stream starts at
+Path `i`'s own sequence starts at
 
 ```
 pathSeed(i) = firstSplitMixOutput(asUintN(64, seed XOR firstSplitMixOutput(i)))
@@ -287,13 +287,13 @@ pathSeed(i) = firstSplitMixOutput(asUintN(64, seed XOR firstSplitMixOutput(i)))
 
 `firstSplitMixOutput` is a bijection, so `firstSplitMixOutput(i)` is injective in `i`, the XOR with
 a fixed seed stays injective, and the outer `firstSplitMixOutput` is injective too: path seeds never
-collide. They are windows on one 2^64 cycle, not independent streams. At 10,000 paths × 1,200 draws
+collide. They are windows on one 2^64 cycle, not independent sequences. At 10,000 paths × 1,200 draws
 the chance that two paths' windows overlap is about
 `(10,000² / 2) × (2 × 1,200) / 2^64 ≈ 1e-8`, stated as a figure, never as "independent". No
 consumption order can make one path's draws depend on another's, and a path's draws never depend
-on the path count: path `i`'s stream is fixed by the caller's seed and `i` alone.
+on the path count: path `i`'s sequence is fixed by the caller's seed and `i` alone.
 
-Path `i`'s first draw is `firstSplitMixOutput(pathSeed(i))`, and its stream continues from there.
+Path `i`'s first draw is `firstSplitMixOutput(pathSeed(i))`, and its sequence continues from there.
 The caller's seed is exactly 16 lower-case hex digits and is echoed verbatim.
 
 ### The draw and the bucket

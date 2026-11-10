@@ -12,7 +12,7 @@ const BUCKETS: readonly { readonly returnsBps: number; readonly weight: number }
 
 const TABLE = bucketTable(BUCKETS.map((bucket) => bucket.weight))
 
-/** One draw per Return row from path `index`'s own stream, which every Account shares. */
+/** One draw per Return row from path `index`'s own sequence, which every Account shares. */
 function rowsFor(seed: bigint, index: number, count: number): readonly number[] {
 	let state = pathSeed(seed, index)
 	const rows: number[] = []
@@ -34,7 +34,7 @@ describe("Market path seeds", () => {
 		})
 	}
 
-	it("never collides two paths of one run", () => {
+	it("never collides two paths of one set", () => {
 		const seeds = new Set(Array.from({ length: 100 }, (_, index) => pathSeed(0n, index)))
 		expect(seeds.size).toBe(100)
 	})
@@ -43,13 +43,13 @@ describe("Market path seeds", () => {
 describe("prefix stability", () => {
 	const seed = 0x0123456789abcdefn
 
-	it("keeps the first ten path seeds when the run grows to 100 paths", () => {
+	it("keeps the first ten path seeds when the set grows to 100 paths", () => {
 		const ten = Array.from({ length: 10 }, (_, index) => pathSeed(seed, index))
 		const hundred = Array.from({ length: 100 }, (_, index) => pathSeed(seed, index))
 		expect(hundred.slice(0, 10)).toEqual(ten)
 	})
 
-	it("generates the same rows for path 3 in a 10-path and a 100-path run", () => {
+	it("generates the same rows for path 3 in a 10-path and a 100-path set", () => {
 		const ten = Array.from({ length: 10 }, (_, index) => rowsFor(seed, index, 24))
 		const hundred = Array.from({ length: 100 }, (_, index) => rowsFor(seed, index, 24))
 		expect(hundred[3]).toEqual(ten[3])

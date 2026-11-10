@@ -18,12 +18,12 @@ function mix(value: bigint): bigint {
 	return z ^ (z >> 31n)
 }
 
-/** The first output of a fresh stream seeded with `seed`, written modulo 2^64. */
+/** The first output of a fresh sequence seeded with `seed`, written modulo 2^64. */
 export function oracleFirstOutput(seed: bigint): bigint {
 	return mix(wrap(seed + GAMMA))
 }
 
-/** `count` consecutive outputs of a stream seeded with `seed`. */
+/** `count` consecutive outputs of a sequence seeded with `seed`. */
 export function oracleWords(seed: bigint, count: number): readonly bigint[] {
 	const words: bigint[] = []
 	let state = wrap(seed)

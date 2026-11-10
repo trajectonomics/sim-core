@@ -6,7 +6,6 @@ import type { Returns } from "./returns"
 import { createStates } from "./state"
 import { expense } from "./test-flows"
 import { makeFixture } from "./test-helpers"
-import { netWorth } from "./value"
 
 const fixture = makeFixture({
 	accounts: [{ id: "cash", kind: "asset", rate: 1000 }],
@@ -64,8 +63,11 @@ describe("the seam spike", () => {
 		expect(plainDay?.totals).toEqual(TOTALS)
 		expect(seriesDay?.totals).toEqual(TOTALS)
 
-		// 110,000 − 10,000: the series is a whole first row, not 1,000 bps over 180 days.
-		expect(netWorth(series, "2023-06-30")).toBe(100000n)
-		expect(netWorth(plain, "2023-06-30")).not.toBe(100000n)
+		// The series commits the whole first row: 110,000 − 10,000 = 100,000. A 1,000 bps rate
+		// over the same 180 counted days is not a 1,000 bps span return, so the plain run differs.
+		expect(series.get("cash")?.balance).toBe(100000n)
+		expect(plain.get("cash")?.balance).not.toBe(100000n)
+		expect(plain.get("cash")?.asOf).toBe("2023-06-30")
+		expect(series.get("cash")?.asOf).toBe("2023-06-30")
 	})
 })

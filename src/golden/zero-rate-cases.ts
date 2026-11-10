@@ -17,7 +17,7 @@ const MONTH_STARTS: readonly string[] = [
 ]
 
 /** A year whose every Account rate is 0, with contributions, a liability and a late Shortfall. */
-export const zeroRateRun: Fixture = {
+export const zeroRateFixture: Fixture = {
 	baseline: {
 		schemaVersion: 1,
 		balances: [

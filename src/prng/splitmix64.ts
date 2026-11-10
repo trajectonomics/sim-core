@@ -11,12 +11,12 @@ function mix(value: bigint): bigint {
 	return second ^ (second >> 31n)
 }
 
-/** The first output of a fresh SplitMix64 stream seeded with `seed`. */
+/** The first output of a fresh SplitMix64 sequence seeded with `seed`. */
 export function firstSplitMixOutput(seed: bigint): bigint {
 	return mix(BigInt.asUintN(64, seed + GAMMA))
 }
 
-/** Advances the stream once; `state` and `word` are 64-bit unsigned. */
+/** Advances the sequence once; `state` and `word` are 64-bit unsigned. */
 export function nextSplitMix(state: bigint): SplitMixStep {
 	const next = BigInt.asUintN(64, state + GAMMA)
 	return { state: next, word: mix(next) }

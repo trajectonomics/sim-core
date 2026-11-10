@@ -13,7 +13,7 @@ import type { DateString, Timeline } from "../types"
 import type { Projection } from "../types/projection"
 import { oracleResolveRows, oracleSpanGrow } from "./oracle-returns"
 import { handRows, handRowsReturns } from "./return-cases"
-import { zeroRateReturns, zeroRateRun } from "./zero-rate-cases"
+import { zeroRateFixture, zeroRateReturns } from "./zero-rate-cases"
 
 const HAND = handRowsReturns.series[0] as ReturnSeries
 const ROWS = oracleResolveRows(HAND.rows, handRows.timeline.horizon)
@@ -81,15 +81,19 @@ describe("the oracle's row walk", () => {
 	})
 })
 
-describe("a zero-rate Return series run", () => {
+describe("a Return series over an all-zero-rate fixture", () => {
 	it("reproduces project() on the same fixture", () => {
-		const expected = project(zeroRateRun.baseline, zeroRateRun.scenario, zeroRateRun.timeline)
+		const expected = project(
+			zeroRateFixture.baseline,
+			zeroRateFixture.scenario,
+			zeroRateFixture.timeline,
+		)
 		if (!expected.ok) throw new Error(JSON.stringify(expected.problems))
-		expect(seriesProjection(zeroRateRun, zeroRateReturns)).toEqual(expected.projection)
+		expect(seriesProjection(zeroRateFixture, zeroRateReturns)).toEqual(expected.projection)
 	})
 
 	it("keeps the Shortfall the fixture was built for", () => {
-		const built = seriesProjection(zeroRateRun, zeroRateReturns)
+		const built = seriesProjection(zeroRateFixture, zeroRateReturns)
 		expect(built.runsOut?.date).toBe("2026-12-31")
 		expect(built.runsOut?.unmet).toBeGreaterThan(0)
 	})
