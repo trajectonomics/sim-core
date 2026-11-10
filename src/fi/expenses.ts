@@ -1,62 +1,63 @@
 import { addMonthsClamped } from "../calendar/arith"
 import type { ResolvedCalendar } from "../calendar/business"
-import { occurrences } from "../calendar/occurrence"
-import { amountAt } from "../engine/amount"
+import { plannedAmounts } from "../engine/derive"
 import type { DatedEvent } from "../engine/events"
+import { buildEvents } from "../engine/events"
 import type { DateString, Scenario, Timeline } from "../types"
 import type { FinancialIndependenceOptions } from "../types/financial-independence"
+import type { ProjectionProblem } from "../types/projection"
 import { retirementMeasurements } from "./retirement-spending"
 
 const LAST_SUPPORTED_DATE = "9998-12-31"
 
-export interface ExpenseWindow {
-	readonly dates: readonly DateString[]
-	readonly cumulative: readonly bigint[]
+import type { WindowOutcome } from "./expense-window"
+import { buildWindow, expenseBetween } from "./expense-window"
+
+export type { ExpenseWindow, Measured, WindowOutcome } from "./expense-window"
+export { expenseBetween }
+
+function byDate(events: readonly DatedEvent[]): Map<DateString, DatedEvent[]> {
+	const days = new Map<DateString, DatedEvent[]>()
+	for (const event of events) {
+		const day = days.get(event.date) ?? []
+		day.push(event)
+		days.set(event.date, day)
+	}
+	return days
 }
 
-interface Measurement {
-	readonly date: DateString
-	readonly amount: bigint
+/** One amount per Landed date, which is what an expense window sums over. */
+function expensesOf(planned: ReturnType<typeof plannedAmounts>, events: readonly DatedEvent[]) {
+	if (!planned.ok) return planned
+	let amount = 0n
+	for (const event of events) {
+		if (event.flow.kind !== "expense") continue
+		amount += event.amount ?? planned.planned.derived.get(event.flow.id) ?? 0n
+	}
+	return { ok: true as const, amount }
 }
 
+/** Expense amounts through `through`; a Derived expense is evaluated on its own Landed date. */
 function originalExpenses(
 	scenario: Scenario,
 	timeline: Timeline,
 	through: DateString,
 	calendar: ResolvedCalendar | undefined,
-): readonly Measurement[] {
+): readonly Measurement[] | ProjectionProblem {
+	const events = buildEvents(scenario, { ...timeline, horizon: through }, calendar)
 	const measurements: Measurement[] = []
-	for (const flow of scenario.flows) {
-		if (flow.kind !== "expense") continue
-		const found = occurrences(
-			flow.start,
-			flow.frequency,
-			flow.end,
-			timeline.start,
-			through,
-			calendar,
-		)
-		for (const occurrence of found) {
-			const event: DatedEvent = { date: occurrence.date, flow, years: occurrence.years }
-			measurements.push({
-				date: occurrence.date,
-				amount: amountAt(event, scenario.economy.inflation),
-			})
-		}
+	for (const [date, day] of byDate(events)) {
+		const planned = plannedAmounts(day, scenario.flows, date, scenario.economy.inflation)
+		const measured = expensesOf(planned, day)
+		if (!measured.ok) return measured.problem
+		measurements.push({ date, amount: measured.amount })
 	}
 	return measurements
 }
 
-function buildWindow(measurements: readonly Measurement[]): ExpenseWindow {
-	const sorted = [...measurements].sort((left, right) =>
-		left.date < right.date ? -1 : left.date > right.date ? 1 : 0,
-	)
-	const dates = sorted.map((measurement) => measurement.date)
-	const cumulative: bigint[] = [0n]
-	for (const measurement of sorted) {
-		cumulative.push(cumulative[cumulative.length - 1]! + measurement.amount)
-	}
-	return { dates, cumulative }
+interface Measurement {
+	readonly date: DateString
+	readonly amount: bigint
 }
 
 /** Post-stop expense amounts from the first candidate through a full extra year past the horizon. */
@@ -66,7 +67,7 @@ export function expenseWindow(
 	options: FinancialIndependenceOptions,
 	firstCandidate: DateString,
 	calendar: ResolvedCalendar | undefined,
-): ExpenseWindow {
+): WindowOutcome {
 	const extended = addMonthsClamped(timeline.horizon, 12)
 	const through = extended > LAST_SUPPORTED_DATE ? LAST_SUPPORTED_DATE : extended
 	const retirement = options.retirementSpending
@@ -81,27 +82,6 @@ export function expenseWindow(
 					scenario.economy.inflation,
 					calendar,
 				)
-	return buildWindow(measurements)
-}
-
-function lowerBound(dates: readonly DateString[], target: DateString): number {
-	let low = 0
-	let high = dates.length
-	while (low < high) {
-		const middle = Math.floor((low + high) / 2)
-		if (dates[middle]! < target) low = middle + 1
-		else high = middle
-	}
-	return low
-}
-
-/** Sum of measurement amounts in `[from, toExclusive)`. */
-export function expenseBetween(
-	window: ExpenseWindow,
-	from: DateString,
-	toExclusive: DateString,
-): bigint {
-	const low = lowerBound(window.dates, from)
-	const high = lowerBound(window.dates, toExclusive)
-	return window.cumulative[high]! - window.cumulative[low]!
+	if ("code" in measurements) return { ok: false, problem: measurements }
+	return { ok: true, window: buildWindow(measurements) }
 }

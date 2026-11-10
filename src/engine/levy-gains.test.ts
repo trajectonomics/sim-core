@@ -165,6 +165,32 @@ describe("Levy gains tally", () => {
 		expect(gained(projection, "2026-01-01")).toBe(8_000)
 	})
 
+	it("books one realised gain into every Levy's own period", () => {
+		const second = withCarryIn(
+			{ ...gainsLevy, id: "second", settlement: { month: 6, day: 30 } },
+			emptyCarryIn("2025-01-01"),
+		)
+		const projection = run({
+			accounts: [brokerage],
+			balances: { brokerage: 120_000 },
+			basis: { brokerage: 100_000 },
+			flows: [expense("sell", 60_000, { start: "2026-06-01" })],
+			surplus: [{ account: "brokerage" }],
+			withdraw: ["brokerage"],
+			start: "2026-01-01",
+			horizon: "2026-12-31",
+			levies: [empty, second],
+		})
+		const measured = projection.levies?.map(
+			(report) =>
+				report.periods
+					.find((period) => period.from === "2026-01-01")
+					?.measures.find((measure) => measure.id === "gain")?.value,
+		)
+		// A 60,000 sale uses 50,000 of the pooled basis, so both Levies see the same 10,000.
+		expect(measured).toEqual([10_000, 10_000])
+	})
+
 	it("gives the same Levy for day and month resolution and for any order", () => {
 		const base = {
 			accounts: [brokerage, { id: "cash", kind: "asset", rate: 0 }] as const,
@@ -182,12 +208,12 @@ describe("Levy gains tally", () => {
 		}
 		const day = run({ ...base, resolution: "day" })
 		const month = run({ ...base, resolution: "month" })
-		expect(day.levy).toEqual(month.levy)
+		expect(day.levies).toEqual(month.levies)
 		const reversed = run({
 			...base,
 			accounts: [...base.accounts].reverse(),
 			balances: { cash: 0, brokerage: 100_000 },
 		})
-		expect(reversed.levy).toEqual(day.levy)
+		expect(reversed.levies).toEqual(day.levies)
 	})
 })

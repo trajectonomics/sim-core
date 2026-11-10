@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
+import { TH_LIKE } from "../levy/th-levy"
 import { salaryLevySetup } from "./levy-fixture"
-import { expense, income } from "./test-flows"
+import { expense, income, prepays } from "./test-flows"
 import { amounts, periodFrom, rowAt, run } from "./test-helpers"
 
 describe("Levy Prepayment and Settlement", () => {
@@ -8,7 +9,7 @@ describe("Levy Prepayment and Settlement", () => {
 		// Hand calculation: 12 x 500,000 = 6,000,000 prepaid; TH_LIKE due = 11,500,000;
 		// settlement = 11,500,000 - 6,000,000 = 5,500,000.
 		const projection = run(salaryLevySetup())
-		const levy = projection.levy!
+		const levy = projection.levies![0]!
 		expect(levy.id).toBe("th-like")
 		expect(periodFrom(projection, "2026-01-01")).toMatchObject({
 			from: "2026-01-01",
@@ -52,7 +53,7 @@ describe("Levy Prepayment and Settlement", () => {
 						start: "2026-01-31",
 						end: "2026-12-31",
 						label: "salary",
-						prepaymentBps: 500,
+						prepayments: prepays(TH_LIKE.id, 500),
 					}),
 				],
 				withdraw: [],
@@ -74,7 +75,7 @@ describe("Levy Prepayment and Settlement", () => {
 						start: "2026-01-31",
 						end: "2026-12-31",
 						label: "salary",
-						prepaymentBps: 500,
+						prepayments: prepays(TH_LIKE.id, 500),
 					}),
 				],
 			}),
@@ -110,7 +111,7 @@ describe("unsettled Settlement periods", () => {
 						frequency: "monthly",
 						start: "2026-01-31",
 						label: "salary",
-						prepaymentBps: 500,
+						prepayments: prepays(TH_LIKE.id, 500),
 					}),
 					expense("bill", 100_000_000, { start: "2026-06-15" }),
 				],
@@ -132,7 +133,7 @@ describe("resolution", () => {
 	it("gives the same Levy numbers at day and month resolution", () => {
 		const daily = run(salaryLevySetup({ resolution: "day" }))
 		const monthly = run(salaryLevySetup({ resolution: "month" }))
-		expect(monthly.levy).toEqual(daily.levy)
+		expect(monthly.levies).toEqual(daily.levies)
 		expect(monthly.annual).toEqual(daily.annual)
 	})
 })

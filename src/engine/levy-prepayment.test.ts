@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import type { BasisPoints, Levy, MinorUnits } from "../types"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
 const levy: Levy = withCarryIn(
@@ -18,7 +18,7 @@ function prepaidFor(amount: MinorUnits, prepaymentBps: BasisPoints) {
 	const projection = run({
 		accounts: [{ id: "cash", kind: "asset", rate: 0 }],
 		balances: { cash: 0 },
-		flows: [income("pay", amount, { prepaymentBps })],
+		flows: [income("pay", amount, { prepayments: prepays("zero", prepaymentBps) })],
 		surplus: [{ account: "cash" }],
 		withdraw: ["cash"],
 		start: "2026-01-01",

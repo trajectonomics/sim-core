@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
+import { TH_LIKE } from "../levy/th-levy"
 import { salaryLevySetup } from "./levy-fixture"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { run } from "./test-helpers"
 
 describe("Levy in Annual roll-ups", () => {
@@ -73,7 +74,7 @@ describe("Levy in Annual roll-ups", () => {
 						start: "2026-01-31",
 						end: "2026-12-31",
 						label: "salary",
-						prepaymentBps: 500,
+						prepayments: prepays(TH_LIKE.id, 500),
 					}),
 				],
 				withdraw: [],
@@ -106,7 +107,7 @@ describe("Levy in Annual roll-ups", () => {
 			surplus: [{ account: "cash" }],
 			horizon: "2026-06-01",
 		})
-		expect(projection.levy).toBeUndefined()
+		expect(projection.levies).toBeUndefined()
 		expect(projection.annual[0]).not.toHaveProperty("levy")
 	})
 })

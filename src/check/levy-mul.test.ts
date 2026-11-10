@@ -13,7 +13,7 @@ const measures: readonly unknown[] = [
 const mulProblems = (...edits: readonly Edit[]) =>
 	levyProblems([["measures"], measures], [["due"], "m"], ...edits)
 
-const at = (key: string) => ["scenario", "levy", "measures", 2, key] as const
+const at = (key: string) => ["scenario", "levies", 0, "measures", 2, key] as const
 
 describe("check() mul Measure op", () => {
 	it("accepts a mul of two Measures with an integer denominator and a rounding", () => {

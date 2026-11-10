@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { createStates } from "../engine/state"
 import { makeFixture } from "../engine/test-helpers"
-import { cloneStates, cloneTracker } from "./clone"
+import { cloneLevySet, cloneStates } from "./clone"
 
 const fixture = makeFixture({
 	accounts: [
@@ -18,19 +18,23 @@ describe("the FI candidate clone", () => {
 		const states = createStates(fixture.baseline, fixture.scenario, fixture.timeline.start)
 		const original = states.get("deposit")?.returns
 		if (original === undefined) throw new Error("The deposit should track returns")
-		original.attributed = 5n
-		original.through = "2026-06-30"
+		original.attributed.set("levy", 5n)
+		original.through.set("levy", "2026-06-30")
 
 		const cloned = cloneStates(states)
 		const copy = cloned.get("deposit")?.returns
-		expect(copy).toEqual({ label: "interest", base: 1_000n, attributed: 5n, through: "2026-06-30" })
+		if (copy === undefined) throw new Error("The clone should track returns")
 		expect(copy).not.toBe(original)
+		expect(copy.attributed.get("levy")).toBe(5n)
+		expect(copy.through.get("levy")).toBe("2026-06-30")
 
-		if (copy !== undefined) copy.attributed = 9n
-		expect(original.attributed).toBe(5n)
+		copy.attributed.set("levy", 9n)
+		copy.through.set("levy", "2026-12-31")
+		expect(original.attributed.get("levy")).toBe(5n)
+		expect(original.through.get("levy")).toBe("2026-06-30")
 	})
 
 	it("keeps a scenario without a Levy cloneable", () => {
-		expect(cloneTracker(undefined)).toBeUndefined()
+		expect(cloneLevySet(undefined)).toBeUndefined()
 	})
 })

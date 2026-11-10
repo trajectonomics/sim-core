@@ -1,5 +1,5 @@
 import type { DateString, Scenario } from "../types"
-import type { LevyTracker } from "./levy-types"
+import type { LevySet } from "./levy-set"
 import type { DateOutcome, DayTotals } from "./occurrence"
 import type { StateMap } from "./state"
 import { applySurplus } from "./surplus"
@@ -12,14 +12,14 @@ export function route(
 	date: DateString,
 	totals: DayTotals,
 	net: bigint,
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 ): DateOutcome {
 	if (net > 0n) {
-		const problem = applySurplus(states, scenario, date, net, tracker)
+		const problem = applySurplus(states, scenario, date, net, levies)
 		return { totals, problem, runsOut: undefined }
 	}
 	if (net < 0n) {
-		const drawn = applyWithdraw(states, scenario, date, -net, tracker)
+		const drawn = applyWithdraw(states, scenario, date, -net, levies)
 		if (drawn.problem !== undefined) return { totals, problem: drawn.problem, runsOut: undefined }
 		if (drawn.remaining > 0n) {
 			return { totals, problem: undefined, runsOut: { date, unmet: drawn.remaining } }

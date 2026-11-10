@@ -35,7 +35,7 @@ const gainsLevy: Levy = withCarryIn(
 
 function values(projection: Projection, id: string): readonly MinorUnits[] {
 	return (
-		projection.levy?.periods.map((period) => {
+		projection.levies?.[0]?.periods.map((period) => {
 			const found = period.measures.find((item) => item.id === id)
 			if (found === undefined) throw new Error(`Missing ${id}`)
 			return found.value

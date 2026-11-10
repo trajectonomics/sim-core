@@ -2,7 +2,7 @@ import { roundHalfUp } from "../money/round"
 import type { DateString } from "../types"
 import { addTo } from "./add"
 import { settlementPeriodIndexAt } from "./levy-plan"
-import type { LevyTracker } from "./levy-types"
+import type { LevySet } from "./levy-set"
 import type { AccountState } from "./state"
 
 /** The share of pooled basis a withdrawal uses, rounded half up and never above the basis. */
@@ -18,11 +18,12 @@ function labelOf(state: AccountState): string | undefined {
 
 /**
  * Books one commit against a gain-tracked Account's pooled basis. Money entering adds basis;
- * growth never does; a withdrawal realises `withdrawn − basis taken` in the period of `date`.
+ * growth never does; a withdrawal realises `withdrawn − basis taken` once, and every Levy tallies
+ * it in its own period containing `date`.
  */
 export function commitGains(
 	state: AccountState,
-	tracker: LevyTracker,
+	levies: LevySet,
 	date: DateString,
 	delta: bigint,
 	valueBefore: bigint,
@@ -36,7 +37,9 @@ export function commitGains(
 	const withdrawn = -delta
 	const taken = basisTaken(state.basis, withdrawn, valueBefore)
 	state.basis -= taken
-	const index = settlementPeriodIndexAt(tracker.periods, date)
-	const tally = tracker.tallies[index]
-	if (tally !== undefined) addTo(tally.gains, label, withdrawn - taken)
+	for (const tracker of levies.trackers) {
+		const index = settlementPeriodIndexAt(tracker.periods, date)
+		const tally = tracker.tallies[index]
+		if (tally !== undefined) addTo(tally.gains, label, withdrawn - taken)
+	}
 }

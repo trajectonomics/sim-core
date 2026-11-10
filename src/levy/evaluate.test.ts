@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test"
-import type { Growth, LevyContext, Measure } from "../types"
+import type { Growth, LevyContext, LevyMeasure } from "../types"
 import { evaluateMeasures } from "./evaluate"
 import { CONTEXT, dueOf, levyOf, talliesOf } from "./test-levy"
 
-const two: Measure = { id: "two", op: "const", value: 2 }
-const five: Measure = { id: "five", op: "const", value: 5 }
-const neg: Measure = { id: "neg", op: "const", value: -3 }
+const two: LevyMeasure = { id: "two", op: "const", value: 2 }
+const five: LevyMeasure = { id: "five", op: "const", value: 5 }
+const neg: LevyMeasure = { id: "neg", op: "const", value: -3 }
 
 function due(op: "add" | "sub" | "min" | "max", a: string, b: string): number | undefined {
 	const result = dueOf([two, five, neg, { id: "r", op, a, b }], "r")
@@ -22,8 +22,8 @@ describe("evaluateMeasures operations", () => {
 
 	it("picks then when a > b and else otherwise, including when equal", () => {
 		const pick = (a: string, b: string) => {
-			// biome-ignore lint/suspicious/noThenProperty: `then` is a Measure operand key, not a thenable
-			const measure: Measure = { id: "r", op: "pick", a, b, then: "two", else: "five" }
+			// biome-ignore lint/suspicious/noThenProperty: `then` is a LevyMeasure operand key, not a thenable
+			const measure: LevyMeasure = { id: "r", op: "pick", a, b, then: "two", else: "five" }
 			return dueOf([two, five, measure], "r")
 		}
 		expect(pick("five", "two")).toMatchObject({ due: 2 })
@@ -32,7 +32,7 @@ describe("evaluateMeasures operations", () => {
 	})
 
 	it("sums gross for income labels and funded for contribution labels separately", () => {
-		const measures: Measure[] = [
+		const measures: LevyMeasure[] = [
 			{ id: "g", op: "tally", label: "wage", basis: "gross" },
 			{ id: "f", op: "tally", label: "wage", basis: "funded" },
 			{ id: "r", op: "sub", a: "g", b: "f" },
@@ -42,7 +42,7 @@ describe("evaluateMeasures operations", () => {
 		expect(result).toMatchObject({ ok: true, due: 650 })
 	})
 
-	it("returns every Measure value in Levy order, even when declared before its operands", () => {
+	it("returns every LevyMeasure value in Levy order, even when declared before its operands", () => {
 		const result = dueOf([{ id: "r", op: "add", a: "two", b: "five" }, two, five], "r")
 		expect(result.ok && [...result.values]).toEqual([
 			["r", 7],
@@ -54,7 +54,7 @@ describe("evaluateMeasures operations", () => {
 
 describe("evaluateMeasures const growth", () => {
 	const grown = (value: number, asOf: string, date: string, growth: Growth) => {
-		const measure: Measure = { id: "c", op: "const", value, asOf, growth }
+		const measure: LevyMeasure = { id: "c", op: "const", value, asOf, growth }
 		const context: LevyContext = { date, inflation: 250 }
 		const result = evaluateMeasures(levyOf([measure], "c"), talliesOf(), context)
 		return result.ok ? result.due : undefined
@@ -85,25 +85,25 @@ describe("evaluateMeasures const growth", () => {
 
 describe("evaluateMeasures overflow", () => {
 	it("reports VALUE_OVERFLOW at the context date instead of an unsafe number", () => {
-		const big: Measure = { id: "big", op: "const", value: Number.MAX_SAFE_INTEGER }
+		const big: LevyMeasure = { id: "big", op: "const", value: Number.MAX_SAFE_INTEGER }
 		const result = dueOf([big, { id: "r", op: "add", a: "big", b: "big" }], "r")
 		expect(result).toEqual({ ok: false, problem: { code: "VALUE_OVERFLOW", date: "2030-01-01" } })
 	})
 
 	it("accepts the largest safe value and rejects one beyond it, negative too", () => {
-		const big: Measure = { id: "big", op: "const", value: Number.MAX_SAFE_INTEGER }
-		const one: Measure = { id: "one", op: "const", value: 1 }
+		const big: LevyMeasure = { id: "big", op: "const", value: Number.MAX_SAFE_INTEGER }
+		const one: LevyMeasure = { id: "one", op: "const", value: 1 }
 		const sub = (a: string, b: string) => dueOf([big, one, { id: "r", op: "sub", a, b }], "r")
 		expect(sub("big", "one")).toMatchObject({ ok: true, due: Number.MAX_SAFE_INTEGER - 1 })
-		const low: Measure = { id: "low", op: "const", value: -Number.MAX_SAFE_INTEGER }
+		const low: LevyMeasure = { id: "low", op: "const", value: -Number.MAX_SAFE_INTEGER }
 		const result = dueOf([low, one, { id: "r", op: "sub", a: "low", b: "one" }], "r")
 		expect(result.ok).toBe(false)
 	})
 })
 
 describe("evaluateMeasures tallies", () => {
-	const wage: Measure = { id: "g", op: "tally", label: "wage", basis: "gross" }
-	const kept: Measure = { id: "f", op: "tally", label: "kept", basis: "funded" }
+	const wage: LevyMeasure = { id: "g", op: "tally", label: "wage", basis: "gross" }
+	const kept: LevyMeasure = { id: "f", op: "tally", label: "kept", basis: "funded" }
 
 	it("reports a non-integer tally at its path instead of throwing", () => {
 		for (const bad of [1.5, Number.NaN, Number.POSITIVE_INFINITY, 2 ** 60]) {
@@ -123,7 +123,7 @@ describe("evaluateMeasures tallies", () => {
 		})
 	})
 
-	it("ignores a bad tally that no Measure reads", () => {
+	it("ignores a bad tally that no LevyMeasure reads", () => {
 		const result = dueOf(
 			[wage],
 			"g",

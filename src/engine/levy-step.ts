@@ -1,11 +1,9 @@
 import type { AccountId, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { addTo } from "./add"
-import { settleAt } from "./levy-settle"
+import type { LevySet } from "./levy-set"
 import { addFlowTallies, addFundedTallies } from "./levy-tally"
-import type { LevyTracker } from "./levy-types"
 import type { DayTotals } from "./occurrence"
-import type { StateMap } from "./state"
 
 export interface Settlement {
 	readonly amount: bigint
@@ -18,16 +16,6 @@ interface DayParts {
 	readonly prepaid: bigint
 }
 
-export function settlementOn(
-	tracker: LevyTracker | undefined,
-	states: StateMap,
-	date: DateString,
-): Settlement {
-	if (tracker === undefined) return { amount: 0n, problem: undefined }
-	const outcome = settleAt(tracker, states, date)
-	return { amount: outcome.settlement, problem: outcome.problem }
-}
-
 export function mergeFunded(
 	...maps: readonly ReadonlyMap<string, bigint>[]
 ): ReadonlyMap<string, bigint> {
@@ -37,15 +25,15 @@ export function mergeFunded(
 }
 
 export function tally(
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 	date: DateString,
 	gross: ReadonlyMap<string, bigint>,
 	funded: ReadonlyMap<string, bigint>,
-	prepaid: bigint,
+	byLevy: ReadonlyMap<string, bigint>,
 ): void {
-	if (tracker === undefined) return
-	addFlowTallies(tracker, date, gross, prepaid)
-	addFundedTallies(tracker, date, funded)
+	if (levies === undefined) return
+	addFlowTallies(levies, date, gross, byLevy)
+	addFundedTallies(levies, date, funded)
 }
 
 export function totalsOf(

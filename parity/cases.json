@@ -23,7 +23,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -166,7 +166,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -281,7 +281,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 300
@@ -327,7 +327,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 100
@@ -429,7 +429,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -453,7 +453,12 @@
 						"bps": 0
 					},
 					"label": "salary",
-					"prepaymentBps": 500
+					"prepayments": [
+						{
+							"levy": "th-like",
+							"bps": 500
+						}
+					]
 				}
 			],
 			"cashflow": {
@@ -465,296 +470,298 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "th-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"due": "owed",
-				"measures": [
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
+			"levies": [
+				{
+					"id": "th-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "income",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "saved",
-						"op": "tally",
-						"label": "fund",
-						"basis": "funded"
-					},
-					{
-						"id": "half",
-						"op": "scale",
-						"of": "income",
-						"num": 1,
-						"den": 2,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfUnits",
-						"op": "scale",
-						"of": "half",
-						"num": 1,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfWhole",
-						"op": "scale",
-						"of": "halfUnits",
-						"num": 100,
-						"den": 1,
-						"rounding": "floor"
-					},
-					{
-						"id": "expenseCap",
-						"op": "const",
-						"value": 10000000
-					},
-					{
-						"id": "deduction",
-						"op": "min",
-						"a": "halfWhole",
-						"b": "expenseCap"
-					},
-					{
-						"id": "allowanceShare",
-						"op": "scale",
-						"of": "income",
-						"num": 15,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "allowanceCeiling",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "allowanceByShare",
-						"op": "min",
-						"a": "saved",
-						"b": "allowanceShare"
-					},
-					{
-						"id": "allowance",
-						"op": "min",
-						"a": "allowanceByShare",
-						"b": "allowanceCeiling"
-					},
-					{
-						"id": "personal",
-						"op": "const",
-						"value": 6000000
-					},
-					{
-						"id": "afterDeduction",
-						"op": "sub",
-						"a": "income",
-						"b": "deduction"
-					},
-					{
-						"id": "afterAllowance",
-						"op": "sub",
-						"a": "afterDeduction",
-						"b": "allowance"
-					},
-					{
-						"id": "net",
-						"op": "sub",
-						"a": "afterAllowance",
-						"b": "personal"
-					},
-					{
-						"id": "lo1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "width1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "above1",
-						"op": "sub",
-						"a": "net",
-						"b": "lo1"
-					},
-					{
-						"id": "inside1",
-						"op": "max",
-						"a": "above1",
-						"b": "zero"
-					},
-					{
-						"id": "capped1",
-						"op": "min",
-						"a": "inside1",
-						"b": "width1"
-					},
-					{
-						"id": "slice1",
-						"op": "scale",
-						"of": "capped1",
-						"num": 5,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo2",
-						"op": "const",
-						"value": 30000000
-					},
-					{
-						"id": "width2",
-						"op": "const",
-						"value": 20000000
-					},
-					{
-						"id": "above2",
-						"op": "sub",
-						"a": "net",
-						"b": "lo2"
-					},
-					{
-						"id": "inside2",
-						"op": "max",
-						"a": "above2",
-						"b": "zero"
-					},
-					{
-						"id": "capped2",
-						"op": "min",
-						"a": "inside2",
-						"b": "width2"
-					},
-					{
-						"id": "slice2",
-						"op": "scale",
-						"of": "capped2",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo3",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "width3",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above3",
-						"op": "sub",
-						"a": "net",
-						"b": "lo3"
-					},
-					{
-						"id": "inside3",
-						"op": "max",
-						"a": "above3",
-						"b": "zero"
-					},
-					{
-						"id": "capped3",
-						"op": "min",
-						"a": "inside3",
-						"b": "width3"
-					},
-					{
-						"id": "slice3",
-						"op": "scale",
-						"of": "capped3",
-						"num": 15,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo4",
-						"op": "const",
-						"value": 75000000
-					},
-					{
-						"id": "width4",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above4",
-						"op": "sub",
-						"a": "net",
-						"b": "lo4"
-					},
-					{
-						"id": "inside4",
-						"op": "max",
-						"a": "above4",
-						"b": "zero"
-					},
-					{
-						"id": "capped4",
-						"op": "min",
-						"a": "inside4",
-						"b": "width4"
-					},
-					{
-						"id": "slice4",
-						"op": "scale",
-						"of": "capped4",
-						"num": 20,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "s12",
-						"op": "add",
-						"a": "slice1",
-						"b": "slice2"
-					},
-					{
-						"id": "s123",
-						"op": "add",
-						"a": "s12",
-						"b": "slice3"
-					},
-					{
-						"id": "owed",
-						"op": "add",
-						"a": "s123",
-						"b": "slice4"
-					}
-				],
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"due": "owed",
+					"measures": [
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "income",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "saved",
+							"op": "tally",
+							"label": "fund",
+							"basis": "funded"
+						},
+						{
+							"id": "half",
+							"op": "scale",
+							"of": "income",
+							"num": 1,
+							"den": 2,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfUnits",
+							"op": "scale",
+							"of": "half",
+							"num": 1,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfWhole",
+							"op": "scale",
+							"of": "halfUnits",
+							"num": 100,
+							"den": 1,
+							"rounding": "floor"
+						},
+						{
+							"id": "expenseCap",
+							"op": "const",
+							"value": 10000000
+						},
+						{
+							"id": "deduction",
+							"op": "min",
+							"a": "halfWhole",
+							"b": "expenseCap"
+						},
+						{
+							"id": "allowanceShare",
+							"op": "scale",
+							"of": "income",
+							"num": 15,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "allowanceCeiling",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "allowanceByShare",
+							"op": "min",
+							"a": "saved",
+							"b": "allowanceShare"
+						},
+						{
+							"id": "allowance",
+							"op": "min",
+							"a": "allowanceByShare",
+							"b": "allowanceCeiling"
+						},
+						{
+							"id": "personal",
+							"op": "const",
+							"value": 6000000
+						},
+						{
+							"id": "afterDeduction",
+							"op": "sub",
+							"a": "income",
+							"b": "deduction"
+						},
+						{
+							"id": "afterAllowance",
+							"op": "sub",
+							"a": "afterDeduction",
+							"b": "allowance"
+						},
+						{
+							"id": "net",
+							"op": "sub",
+							"a": "afterAllowance",
+							"b": "personal"
+						},
+						{
+							"id": "lo1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "width1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "above1",
+							"op": "sub",
+							"a": "net",
+							"b": "lo1"
+						},
+						{
+							"id": "inside1",
+							"op": "max",
+							"a": "above1",
+							"b": "zero"
+						},
+						{
+							"id": "capped1",
+							"op": "min",
+							"a": "inside1",
+							"b": "width1"
+						},
+						{
+							"id": "slice1",
+							"op": "scale",
+							"of": "capped1",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo2",
+							"op": "const",
+							"value": 30000000
+						},
+						{
+							"id": "width2",
+							"op": "const",
+							"value": 20000000
+						},
+						{
+							"id": "above2",
+							"op": "sub",
+							"a": "net",
+							"b": "lo2"
+						},
+						{
+							"id": "inside2",
+							"op": "max",
+							"a": "above2",
+							"b": "zero"
+						},
+						{
+							"id": "capped2",
+							"op": "min",
+							"a": "inside2",
+							"b": "width2"
+						},
+						{
+							"id": "slice2",
+							"op": "scale",
+							"of": "capped2",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo3",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "width3",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above3",
+							"op": "sub",
+							"a": "net",
+							"b": "lo3"
+						},
+						{
+							"id": "inside3",
+							"op": "max",
+							"a": "above3",
+							"b": "zero"
+						},
+						{
+							"id": "capped3",
+							"op": "min",
+							"a": "inside3",
+							"b": "width3"
+						},
+						{
+							"id": "slice3",
+							"op": "scale",
+							"of": "capped3",
+							"num": 15,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo4",
+							"op": "const",
+							"value": 75000000
+						},
+						{
+							"id": "width4",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above4",
+							"op": "sub",
+							"a": "net",
+							"b": "lo4"
+						},
+						{
+							"id": "inside4",
+							"op": "max",
+							"a": "above4",
+							"b": "zero"
+						},
+						{
+							"id": "capped4",
+							"op": "min",
+							"a": "inside4",
+							"b": "width4"
+						},
+						{
+							"id": "slice4",
+							"op": "scale",
+							"of": "capped4",
+							"num": 20,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "s12",
+							"op": "add",
+							"a": "slice1",
+							"b": "slice2"
+						},
+						{
+							"id": "s123",
+							"op": "add",
+							"a": "s12",
+							"b": "slice3"
+						},
+						{
+							"id": "owed",
+							"op": "add",
+							"a": "s123",
+							"b": "slice4"
+						}
+					],
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "d94c6b19582296c4ca15ffa2c1f03a3a32109cc5695b63ab957371550f395b92"
+		"sha256": "5ee19afa8a6cd1b0cc2aad73727ac88857f29568ca88c4a8419e3fc166d82b95"
 	},
 	{
 		"name": "levy-settled-month",
@@ -768,7 +775,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -792,7 +799,12 @@
 						"bps": 0
 					},
 					"label": "salary",
-					"prepaymentBps": 500
+					"prepayments": [
+						{
+							"levy": "th-like",
+							"bps": 500
+						}
+					]
 				}
 			],
 			"cashflow": {
@@ -804,296 +816,298 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "th-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"due": "owed",
-				"measures": [
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
+			"levies": [
+				{
+					"id": "th-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "income",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "saved",
-						"op": "tally",
-						"label": "fund",
-						"basis": "funded"
-					},
-					{
-						"id": "half",
-						"op": "scale",
-						"of": "income",
-						"num": 1,
-						"den": 2,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfUnits",
-						"op": "scale",
-						"of": "half",
-						"num": 1,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfWhole",
-						"op": "scale",
-						"of": "halfUnits",
-						"num": 100,
-						"den": 1,
-						"rounding": "floor"
-					},
-					{
-						"id": "expenseCap",
-						"op": "const",
-						"value": 10000000
-					},
-					{
-						"id": "deduction",
-						"op": "min",
-						"a": "halfWhole",
-						"b": "expenseCap"
-					},
-					{
-						"id": "allowanceShare",
-						"op": "scale",
-						"of": "income",
-						"num": 15,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "allowanceCeiling",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "allowanceByShare",
-						"op": "min",
-						"a": "saved",
-						"b": "allowanceShare"
-					},
-					{
-						"id": "allowance",
-						"op": "min",
-						"a": "allowanceByShare",
-						"b": "allowanceCeiling"
-					},
-					{
-						"id": "personal",
-						"op": "const",
-						"value": 6000000
-					},
-					{
-						"id": "afterDeduction",
-						"op": "sub",
-						"a": "income",
-						"b": "deduction"
-					},
-					{
-						"id": "afterAllowance",
-						"op": "sub",
-						"a": "afterDeduction",
-						"b": "allowance"
-					},
-					{
-						"id": "net",
-						"op": "sub",
-						"a": "afterAllowance",
-						"b": "personal"
-					},
-					{
-						"id": "lo1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "width1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "above1",
-						"op": "sub",
-						"a": "net",
-						"b": "lo1"
-					},
-					{
-						"id": "inside1",
-						"op": "max",
-						"a": "above1",
-						"b": "zero"
-					},
-					{
-						"id": "capped1",
-						"op": "min",
-						"a": "inside1",
-						"b": "width1"
-					},
-					{
-						"id": "slice1",
-						"op": "scale",
-						"of": "capped1",
-						"num": 5,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo2",
-						"op": "const",
-						"value": 30000000
-					},
-					{
-						"id": "width2",
-						"op": "const",
-						"value": 20000000
-					},
-					{
-						"id": "above2",
-						"op": "sub",
-						"a": "net",
-						"b": "lo2"
-					},
-					{
-						"id": "inside2",
-						"op": "max",
-						"a": "above2",
-						"b": "zero"
-					},
-					{
-						"id": "capped2",
-						"op": "min",
-						"a": "inside2",
-						"b": "width2"
-					},
-					{
-						"id": "slice2",
-						"op": "scale",
-						"of": "capped2",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo3",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "width3",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above3",
-						"op": "sub",
-						"a": "net",
-						"b": "lo3"
-					},
-					{
-						"id": "inside3",
-						"op": "max",
-						"a": "above3",
-						"b": "zero"
-					},
-					{
-						"id": "capped3",
-						"op": "min",
-						"a": "inside3",
-						"b": "width3"
-					},
-					{
-						"id": "slice3",
-						"op": "scale",
-						"of": "capped3",
-						"num": 15,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo4",
-						"op": "const",
-						"value": 75000000
-					},
-					{
-						"id": "width4",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above4",
-						"op": "sub",
-						"a": "net",
-						"b": "lo4"
-					},
-					{
-						"id": "inside4",
-						"op": "max",
-						"a": "above4",
-						"b": "zero"
-					},
-					{
-						"id": "capped4",
-						"op": "min",
-						"a": "inside4",
-						"b": "width4"
-					},
-					{
-						"id": "slice4",
-						"op": "scale",
-						"of": "capped4",
-						"num": 20,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "s12",
-						"op": "add",
-						"a": "slice1",
-						"b": "slice2"
-					},
-					{
-						"id": "s123",
-						"op": "add",
-						"a": "s12",
-						"b": "slice3"
-					},
-					{
-						"id": "owed",
-						"op": "add",
-						"a": "s123",
-						"b": "slice4"
-					}
-				],
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"due": "owed",
+					"measures": [
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "income",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "saved",
+							"op": "tally",
+							"label": "fund",
+							"basis": "funded"
+						},
+						{
+							"id": "half",
+							"op": "scale",
+							"of": "income",
+							"num": 1,
+							"den": 2,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfUnits",
+							"op": "scale",
+							"of": "half",
+							"num": 1,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfWhole",
+							"op": "scale",
+							"of": "halfUnits",
+							"num": 100,
+							"den": 1,
+							"rounding": "floor"
+						},
+						{
+							"id": "expenseCap",
+							"op": "const",
+							"value": 10000000
+						},
+						{
+							"id": "deduction",
+							"op": "min",
+							"a": "halfWhole",
+							"b": "expenseCap"
+						},
+						{
+							"id": "allowanceShare",
+							"op": "scale",
+							"of": "income",
+							"num": 15,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "allowanceCeiling",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "allowanceByShare",
+							"op": "min",
+							"a": "saved",
+							"b": "allowanceShare"
+						},
+						{
+							"id": "allowance",
+							"op": "min",
+							"a": "allowanceByShare",
+							"b": "allowanceCeiling"
+						},
+						{
+							"id": "personal",
+							"op": "const",
+							"value": 6000000
+						},
+						{
+							"id": "afterDeduction",
+							"op": "sub",
+							"a": "income",
+							"b": "deduction"
+						},
+						{
+							"id": "afterAllowance",
+							"op": "sub",
+							"a": "afterDeduction",
+							"b": "allowance"
+						},
+						{
+							"id": "net",
+							"op": "sub",
+							"a": "afterAllowance",
+							"b": "personal"
+						},
+						{
+							"id": "lo1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "width1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "above1",
+							"op": "sub",
+							"a": "net",
+							"b": "lo1"
+						},
+						{
+							"id": "inside1",
+							"op": "max",
+							"a": "above1",
+							"b": "zero"
+						},
+						{
+							"id": "capped1",
+							"op": "min",
+							"a": "inside1",
+							"b": "width1"
+						},
+						{
+							"id": "slice1",
+							"op": "scale",
+							"of": "capped1",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo2",
+							"op": "const",
+							"value": 30000000
+						},
+						{
+							"id": "width2",
+							"op": "const",
+							"value": 20000000
+						},
+						{
+							"id": "above2",
+							"op": "sub",
+							"a": "net",
+							"b": "lo2"
+						},
+						{
+							"id": "inside2",
+							"op": "max",
+							"a": "above2",
+							"b": "zero"
+						},
+						{
+							"id": "capped2",
+							"op": "min",
+							"a": "inside2",
+							"b": "width2"
+						},
+						{
+							"id": "slice2",
+							"op": "scale",
+							"of": "capped2",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo3",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "width3",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above3",
+							"op": "sub",
+							"a": "net",
+							"b": "lo3"
+						},
+						{
+							"id": "inside3",
+							"op": "max",
+							"a": "above3",
+							"b": "zero"
+						},
+						{
+							"id": "capped3",
+							"op": "min",
+							"a": "inside3",
+							"b": "width3"
+						},
+						{
+							"id": "slice3",
+							"op": "scale",
+							"of": "capped3",
+							"num": 15,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo4",
+							"op": "const",
+							"value": 75000000
+						},
+						{
+							"id": "width4",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above4",
+							"op": "sub",
+							"a": "net",
+							"b": "lo4"
+						},
+						{
+							"id": "inside4",
+							"op": "max",
+							"a": "above4",
+							"b": "zero"
+						},
+						{
+							"id": "capped4",
+							"op": "min",
+							"a": "inside4",
+							"b": "width4"
+						},
+						{
+							"id": "slice4",
+							"op": "scale",
+							"of": "capped4",
+							"num": 20,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "s12",
+							"op": "add",
+							"a": "slice1",
+							"b": "slice2"
+						},
+						{
+							"id": "s123",
+							"op": "add",
+							"a": "s12",
+							"b": "slice3"
+						},
+						{
+							"id": "owed",
+							"op": "add",
+							"a": "s123",
+							"b": "slice4"
+						}
+					],
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2027-03-31",
 			"resolution": "month"
 		},
-		"sha256": "df44a06f7906b25d377973a8a988f0df21745689c4273bedbfcea0f8953ae450"
+		"sha256": "063f4152430344ee6cddd77d5fc58b581eb79bac10790562362b24ea06e1231c"
 	},
 	{
 		"name": "levy-refund-day",
@@ -1107,7 +1121,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1131,7 +1145,12 @@
 						"bps": 0
 					},
 					"label": "salary",
-					"prepaymentBps": 1000
+					"prepayments": [
+						{
+							"levy": "th-like",
+							"bps": 1000
+						}
+					]
 				}
 			],
 			"cashflow": {
@@ -1143,296 +1162,298 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "th-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"due": "owed",
-				"measures": [
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
+			"levies": [
+				{
+					"id": "th-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "income",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "saved",
-						"op": "tally",
-						"label": "fund",
-						"basis": "funded"
-					},
-					{
-						"id": "half",
-						"op": "scale",
-						"of": "income",
-						"num": 1,
-						"den": 2,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfUnits",
-						"op": "scale",
-						"of": "half",
-						"num": 1,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfWhole",
-						"op": "scale",
-						"of": "halfUnits",
-						"num": 100,
-						"den": 1,
-						"rounding": "floor"
-					},
-					{
-						"id": "expenseCap",
-						"op": "const",
-						"value": 10000000
-					},
-					{
-						"id": "deduction",
-						"op": "min",
-						"a": "halfWhole",
-						"b": "expenseCap"
-					},
-					{
-						"id": "allowanceShare",
-						"op": "scale",
-						"of": "income",
-						"num": 15,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "allowanceCeiling",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "allowanceByShare",
-						"op": "min",
-						"a": "saved",
-						"b": "allowanceShare"
-					},
-					{
-						"id": "allowance",
-						"op": "min",
-						"a": "allowanceByShare",
-						"b": "allowanceCeiling"
-					},
-					{
-						"id": "personal",
-						"op": "const",
-						"value": 6000000
-					},
-					{
-						"id": "afterDeduction",
-						"op": "sub",
-						"a": "income",
-						"b": "deduction"
-					},
-					{
-						"id": "afterAllowance",
-						"op": "sub",
-						"a": "afterDeduction",
-						"b": "allowance"
-					},
-					{
-						"id": "net",
-						"op": "sub",
-						"a": "afterAllowance",
-						"b": "personal"
-					},
-					{
-						"id": "lo1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "width1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "above1",
-						"op": "sub",
-						"a": "net",
-						"b": "lo1"
-					},
-					{
-						"id": "inside1",
-						"op": "max",
-						"a": "above1",
-						"b": "zero"
-					},
-					{
-						"id": "capped1",
-						"op": "min",
-						"a": "inside1",
-						"b": "width1"
-					},
-					{
-						"id": "slice1",
-						"op": "scale",
-						"of": "capped1",
-						"num": 5,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo2",
-						"op": "const",
-						"value": 30000000
-					},
-					{
-						"id": "width2",
-						"op": "const",
-						"value": 20000000
-					},
-					{
-						"id": "above2",
-						"op": "sub",
-						"a": "net",
-						"b": "lo2"
-					},
-					{
-						"id": "inside2",
-						"op": "max",
-						"a": "above2",
-						"b": "zero"
-					},
-					{
-						"id": "capped2",
-						"op": "min",
-						"a": "inside2",
-						"b": "width2"
-					},
-					{
-						"id": "slice2",
-						"op": "scale",
-						"of": "capped2",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo3",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "width3",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above3",
-						"op": "sub",
-						"a": "net",
-						"b": "lo3"
-					},
-					{
-						"id": "inside3",
-						"op": "max",
-						"a": "above3",
-						"b": "zero"
-					},
-					{
-						"id": "capped3",
-						"op": "min",
-						"a": "inside3",
-						"b": "width3"
-					},
-					{
-						"id": "slice3",
-						"op": "scale",
-						"of": "capped3",
-						"num": 15,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo4",
-						"op": "const",
-						"value": 75000000
-					},
-					{
-						"id": "width4",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above4",
-						"op": "sub",
-						"a": "net",
-						"b": "lo4"
-					},
-					{
-						"id": "inside4",
-						"op": "max",
-						"a": "above4",
-						"b": "zero"
-					},
-					{
-						"id": "capped4",
-						"op": "min",
-						"a": "inside4",
-						"b": "width4"
-					},
-					{
-						"id": "slice4",
-						"op": "scale",
-						"of": "capped4",
-						"num": 20,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "s12",
-						"op": "add",
-						"a": "slice1",
-						"b": "slice2"
-					},
-					{
-						"id": "s123",
-						"op": "add",
-						"a": "s12",
-						"b": "slice3"
-					},
-					{
-						"id": "owed",
-						"op": "add",
-						"a": "s123",
-						"b": "slice4"
-					}
-				],
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"due": "owed",
+					"measures": [
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "income",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "saved",
+							"op": "tally",
+							"label": "fund",
+							"basis": "funded"
+						},
+						{
+							"id": "half",
+							"op": "scale",
+							"of": "income",
+							"num": 1,
+							"den": 2,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfUnits",
+							"op": "scale",
+							"of": "half",
+							"num": 1,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfWhole",
+							"op": "scale",
+							"of": "halfUnits",
+							"num": 100,
+							"den": 1,
+							"rounding": "floor"
+						},
+						{
+							"id": "expenseCap",
+							"op": "const",
+							"value": 10000000
+						},
+						{
+							"id": "deduction",
+							"op": "min",
+							"a": "halfWhole",
+							"b": "expenseCap"
+						},
+						{
+							"id": "allowanceShare",
+							"op": "scale",
+							"of": "income",
+							"num": 15,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "allowanceCeiling",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "allowanceByShare",
+							"op": "min",
+							"a": "saved",
+							"b": "allowanceShare"
+						},
+						{
+							"id": "allowance",
+							"op": "min",
+							"a": "allowanceByShare",
+							"b": "allowanceCeiling"
+						},
+						{
+							"id": "personal",
+							"op": "const",
+							"value": 6000000
+						},
+						{
+							"id": "afterDeduction",
+							"op": "sub",
+							"a": "income",
+							"b": "deduction"
+						},
+						{
+							"id": "afterAllowance",
+							"op": "sub",
+							"a": "afterDeduction",
+							"b": "allowance"
+						},
+						{
+							"id": "net",
+							"op": "sub",
+							"a": "afterAllowance",
+							"b": "personal"
+						},
+						{
+							"id": "lo1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "width1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "above1",
+							"op": "sub",
+							"a": "net",
+							"b": "lo1"
+						},
+						{
+							"id": "inside1",
+							"op": "max",
+							"a": "above1",
+							"b": "zero"
+						},
+						{
+							"id": "capped1",
+							"op": "min",
+							"a": "inside1",
+							"b": "width1"
+						},
+						{
+							"id": "slice1",
+							"op": "scale",
+							"of": "capped1",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo2",
+							"op": "const",
+							"value": 30000000
+						},
+						{
+							"id": "width2",
+							"op": "const",
+							"value": 20000000
+						},
+						{
+							"id": "above2",
+							"op": "sub",
+							"a": "net",
+							"b": "lo2"
+						},
+						{
+							"id": "inside2",
+							"op": "max",
+							"a": "above2",
+							"b": "zero"
+						},
+						{
+							"id": "capped2",
+							"op": "min",
+							"a": "inside2",
+							"b": "width2"
+						},
+						{
+							"id": "slice2",
+							"op": "scale",
+							"of": "capped2",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo3",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "width3",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above3",
+							"op": "sub",
+							"a": "net",
+							"b": "lo3"
+						},
+						{
+							"id": "inside3",
+							"op": "max",
+							"a": "above3",
+							"b": "zero"
+						},
+						{
+							"id": "capped3",
+							"op": "min",
+							"a": "inside3",
+							"b": "width3"
+						},
+						{
+							"id": "slice3",
+							"op": "scale",
+							"of": "capped3",
+							"num": 15,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo4",
+							"op": "const",
+							"value": 75000000
+						},
+						{
+							"id": "width4",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above4",
+							"op": "sub",
+							"a": "net",
+							"b": "lo4"
+						},
+						{
+							"id": "inside4",
+							"op": "max",
+							"a": "above4",
+							"b": "zero"
+						},
+						{
+							"id": "capped4",
+							"op": "min",
+							"a": "inside4",
+							"b": "width4"
+						},
+						{
+							"id": "slice4",
+							"op": "scale",
+							"of": "capped4",
+							"num": 20,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "s12",
+							"op": "add",
+							"a": "slice1",
+							"b": "slice2"
+						},
+						{
+							"id": "s123",
+							"op": "add",
+							"a": "s12",
+							"b": "slice3"
+						},
+						{
+							"id": "owed",
+							"op": "add",
+							"a": "s123",
+							"b": "slice4"
+						}
+					],
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "7ee4eec0ab2558cf7ff95b656b8d7a8b2418279022708a89567ae64036980186"
+		"sha256": "726a45c8f05b5afde222869f449d2eadbc0aea3ca3b8bd19f33d2c888b8ebbc0"
 	},
 	{
 		"name": "levy-shortfall-day",
@@ -1446,7 +1467,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1471,7 +1492,12 @@
 						"bps": 0
 					},
 					"label": "salary",
-					"prepaymentBps": 500
+					"prepayments": [
+						{
+							"levy": "th-like",
+							"bps": 500
+						}
+					]
 				}
 			],
 			"cashflow": {
@@ -1483,296 +1509,298 @@
 				"contribute": [],
 				"withdraw": []
 			},
-			"levy": {
-				"id": "th-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"due": "owed",
-				"measures": [
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
+			"levies": [
+				{
+					"id": "th-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "income",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "saved",
-						"op": "tally",
-						"label": "fund",
-						"basis": "funded"
-					},
-					{
-						"id": "half",
-						"op": "scale",
-						"of": "income",
-						"num": 1,
-						"den": 2,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfUnits",
-						"op": "scale",
-						"of": "half",
-						"num": 1,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfWhole",
-						"op": "scale",
-						"of": "halfUnits",
-						"num": 100,
-						"den": 1,
-						"rounding": "floor"
-					},
-					{
-						"id": "expenseCap",
-						"op": "const",
-						"value": 10000000
-					},
-					{
-						"id": "deduction",
-						"op": "min",
-						"a": "halfWhole",
-						"b": "expenseCap"
-					},
-					{
-						"id": "allowanceShare",
-						"op": "scale",
-						"of": "income",
-						"num": 15,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "allowanceCeiling",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "allowanceByShare",
-						"op": "min",
-						"a": "saved",
-						"b": "allowanceShare"
-					},
-					{
-						"id": "allowance",
-						"op": "min",
-						"a": "allowanceByShare",
-						"b": "allowanceCeiling"
-					},
-					{
-						"id": "personal",
-						"op": "const",
-						"value": 6000000
-					},
-					{
-						"id": "afterDeduction",
-						"op": "sub",
-						"a": "income",
-						"b": "deduction"
-					},
-					{
-						"id": "afterAllowance",
-						"op": "sub",
-						"a": "afterDeduction",
-						"b": "allowance"
-					},
-					{
-						"id": "net",
-						"op": "sub",
-						"a": "afterAllowance",
-						"b": "personal"
-					},
-					{
-						"id": "lo1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "width1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "above1",
-						"op": "sub",
-						"a": "net",
-						"b": "lo1"
-					},
-					{
-						"id": "inside1",
-						"op": "max",
-						"a": "above1",
-						"b": "zero"
-					},
-					{
-						"id": "capped1",
-						"op": "min",
-						"a": "inside1",
-						"b": "width1"
-					},
-					{
-						"id": "slice1",
-						"op": "scale",
-						"of": "capped1",
-						"num": 5,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo2",
-						"op": "const",
-						"value": 30000000
-					},
-					{
-						"id": "width2",
-						"op": "const",
-						"value": 20000000
-					},
-					{
-						"id": "above2",
-						"op": "sub",
-						"a": "net",
-						"b": "lo2"
-					},
-					{
-						"id": "inside2",
-						"op": "max",
-						"a": "above2",
-						"b": "zero"
-					},
-					{
-						"id": "capped2",
-						"op": "min",
-						"a": "inside2",
-						"b": "width2"
-					},
-					{
-						"id": "slice2",
-						"op": "scale",
-						"of": "capped2",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo3",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "width3",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above3",
-						"op": "sub",
-						"a": "net",
-						"b": "lo3"
-					},
-					{
-						"id": "inside3",
-						"op": "max",
-						"a": "above3",
-						"b": "zero"
-					},
-					{
-						"id": "capped3",
-						"op": "min",
-						"a": "inside3",
-						"b": "width3"
-					},
-					{
-						"id": "slice3",
-						"op": "scale",
-						"of": "capped3",
-						"num": 15,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo4",
-						"op": "const",
-						"value": 75000000
-					},
-					{
-						"id": "width4",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above4",
-						"op": "sub",
-						"a": "net",
-						"b": "lo4"
-					},
-					{
-						"id": "inside4",
-						"op": "max",
-						"a": "above4",
-						"b": "zero"
-					},
-					{
-						"id": "capped4",
-						"op": "min",
-						"a": "inside4",
-						"b": "width4"
-					},
-					{
-						"id": "slice4",
-						"op": "scale",
-						"of": "capped4",
-						"num": 20,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "s12",
-						"op": "add",
-						"a": "slice1",
-						"b": "slice2"
-					},
-					{
-						"id": "s123",
-						"op": "add",
-						"a": "s12",
-						"b": "slice3"
-					},
-					{
-						"id": "owed",
-						"op": "add",
-						"a": "s123",
-						"b": "slice4"
-					}
-				],
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"due": "owed",
+					"measures": [
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "income",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "saved",
+							"op": "tally",
+							"label": "fund",
+							"basis": "funded"
+						},
+						{
+							"id": "half",
+							"op": "scale",
+							"of": "income",
+							"num": 1,
+							"den": 2,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfUnits",
+							"op": "scale",
+							"of": "half",
+							"num": 1,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfWhole",
+							"op": "scale",
+							"of": "halfUnits",
+							"num": 100,
+							"den": 1,
+							"rounding": "floor"
+						},
+						{
+							"id": "expenseCap",
+							"op": "const",
+							"value": 10000000
+						},
+						{
+							"id": "deduction",
+							"op": "min",
+							"a": "halfWhole",
+							"b": "expenseCap"
+						},
+						{
+							"id": "allowanceShare",
+							"op": "scale",
+							"of": "income",
+							"num": 15,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "allowanceCeiling",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "allowanceByShare",
+							"op": "min",
+							"a": "saved",
+							"b": "allowanceShare"
+						},
+						{
+							"id": "allowance",
+							"op": "min",
+							"a": "allowanceByShare",
+							"b": "allowanceCeiling"
+						},
+						{
+							"id": "personal",
+							"op": "const",
+							"value": 6000000
+						},
+						{
+							"id": "afterDeduction",
+							"op": "sub",
+							"a": "income",
+							"b": "deduction"
+						},
+						{
+							"id": "afterAllowance",
+							"op": "sub",
+							"a": "afterDeduction",
+							"b": "allowance"
+						},
+						{
+							"id": "net",
+							"op": "sub",
+							"a": "afterAllowance",
+							"b": "personal"
+						},
+						{
+							"id": "lo1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "width1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "above1",
+							"op": "sub",
+							"a": "net",
+							"b": "lo1"
+						},
+						{
+							"id": "inside1",
+							"op": "max",
+							"a": "above1",
+							"b": "zero"
+						},
+						{
+							"id": "capped1",
+							"op": "min",
+							"a": "inside1",
+							"b": "width1"
+						},
+						{
+							"id": "slice1",
+							"op": "scale",
+							"of": "capped1",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo2",
+							"op": "const",
+							"value": 30000000
+						},
+						{
+							"id": "width2",
+							"op": "const",
+							"value": 20000000
+						},
+						{
+							"id": "above2",
+							"op": "sub",
+							"a": "net",
+							"b": "lo2"
+						},
+						{
+							"id": "inside2",
+							"op": "max",
+							"a": "above2",
+							"b": "zero"
+						},
+						{
+							"id": "capped2",
+							"op": "min",
+							"a": "inside2",
+							"b": "width2"
+						},
+						{
+							"id": "slice2",
+							"op": "scale",
+							"of": "capped2",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo3",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "width3",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above3",
+							"op": "sub",
+							"a": "net",
+							"b": "lo3"
+						},
+						{
+							"id": "inside3",
+							"op": "max",
+							"a": "above3",
+							"b": "zero"
+						},
+						{
+							"id": "capped3",
+							"op": "min",
+							"a": "inside3",
+							"b": "width3"
+						},
+						{
+							"id": "slice3",
+							"op": "scale",
+							"of": "capped3",
+							"num": 15,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo4",
+							"op": "const",
+							"value": 75000000
+						},
+						{
+							"id": "width4",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above4",
+							"op": "sub",
+							"a": "net",
+							"b": "lo4"
+						},
+						{
+							"id": "inside4",
+							"op": "max",
+							"a": "above4",
+							"b": "zero"
+						},
+						{
+							"id": "capped4",
+							"op": "min",
+							"a": "inside4",
+							"b": "width4"
+						},
+						{
+							"id": "slice4",
+							"op": "scale",
+							"of": "capped4",
+							"num": 20,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "s12",
+							"op": "add",
+							"a": "slice1",
+							"b": "slice2"
+						},
+						{
+							"id": "s123",
+							"op": "add",
+							"a": "s12",
+							"b": "slice3"
+						},
+						{
+							"id": "owed",
+							"op": "add",
+							"a": "s123",
+							"b": "slice4"
+						}
+					],
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "1c8fe4e9fbdfcb496e6365a2cffa3d809e84dde5a8e83b2ba76f7c44a78c4f2b"
+		"sha256": "bd4b14281adc67b9a7f42d2a5107c80b9efdb3f923c2d304d2b0d83eb6a3e3f1"
 	},
 	{
 		"name": "levy-unsettled-month",
@@ -1786,7 +1814,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1810,7 +1838,12 @@
 						"bps": 0
 					},
 					"label": "salary",
-					"prepaymentBps": 500
+					"prepayments": [
+						{
+							"levy": "th-like",
+							"bps": 500
+						}
+					]
 				}
 			],
 			"cashflow": {
@@ -1822,296 +1855,298 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "th-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"due": "owed",
-				"measures": [
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
+			"levies": [
+				{
+					"id": "th-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "income",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "saved",
-						"op": "tally",
-						"label": "fund",
-						"basis": "funded"
-					},
-					{
-						"id": "half",
-						"op": "scale",
-						"of": "income",
-						"num": 1,
-						"den": 2,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfUnits",
-						"op": "scale",
-						"of": "half",
-						"num": 1,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfWhole",
-						"op": "scale",
-						"of": "halfUnits",
-						"num": 100,
-						"den": 1,
-						"rounding": "floor"
-					},
-					{
-						"id": "expenseCap",
-						"op": "const",
-						"value": 10000000
-					},
-					{
-						"id": "deduction",
-						"op": "min",
-						"a": "halfWhole",
-						"b": "expenseCap"
-					},
-					{
-						"id": "allowanceShare",
-						"op": "scale",
-						"of": "income",
-						"num": 15,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "allowanceCeiling",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "allowanceByShare",
-						"op": "min",
-						"a": "saved",
-						"b": "allowanceShare"
-					},
-					{
-						"id": "allowance",
-						"op": "min",
-						"a": "allowanceByShare",
-						"b": "allowanceCeiling"
-					},
-					{
-						"id": "personal",
-						"op": "const",
-						"value": 6000000
-					},
-					{
-						"id": "afterDeduction",
-						"op": "sub",
-						"a": "income",
-						"b": "deduction"
-					},
-					{
-						"id": "afterAllowance",
-						"op": "sub",
-						"a": "afterDeduction",
-						"b": "allowance"
-					},
-					{
-						"id": "net",
-						"op": "sub",
-						"a": "afterAllowance",
-						"b": "personal"
-					},
-					{
-						"id": "lo1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "width1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "above1",
-						"op": "sub",
-						"a": "net",
-						"b": "lo1"
-					},
-					{
-						"id": "inside1",
-						"op": "max",
-						"a": "above1",
-						"b": "zero"
-					},
-					{
-						"id": "capped1",
-						"op": "min",
-						"a": "inside1",
-						"b": "width1"
-					},
-					{
-						"id": "slice1",
-						"op": "scale",
-						"of": "capped1",
-						"num": 5,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo2",
-						"op": "const",
-						"value": 30000000
-					},
-					{
-						"id": "width2",
-						"op": "const",
-						"value": 20000000
-					},
-					{
-						"id": "above2",
-						"op": "sub",
-						"a": "net",
-						"b": "lo2"
-					},
-					{
-						"id": "inside2",
-						"op": "max",
-						"a": "above2",
-						"b": "zero"
-					},
-					{
-						"id": "capped2",
-						"op": "min",
-						"a": "inside2",
-						"b": "width2"
-					},
-					{
-						"id": "slice2",
-						"op": "scale",
-						"of": "capped2",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo3",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "width3",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above3",
-						"op": "sub",
-						"a": "net",
-						"b": "lo3"
-					},
-					{
-						"id": "inside3",
-						"op": "max",
-						"a": "above3",
-						"b": "zero"
-					},
-					{
-						"id": "capped3",
-						"op": "min",
-						"a": "inside3",
-						"b": "width3"
-					},
-					{
-						"id": "slice3",
-						"op": "scale",
-						"of": "capped3",
-						"num": 15,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo4",
-						"op": "const",
-						"value": 75000000
-					},
-					{
-						"id": "width4",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above4",
-						"op": "sub",
-						"a": "net",
-						"b": "lo4"
-					},
-					{
-						"id": "inside4",
-						"op": "max",
-						"a": "above4",
-						"b": "zero"
-					},
-					{
-						"id": "capped4",
-						"op": "min",
-						"a": "inside4",
-						"b": "width4"
-					},
-					{
-						"id": "slice4",
-						"op": "scale",
-						"of": "capped4",
-						"num": 20,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "s12",
-						"op": "add",
-						"a": "slice1",
-						"b": "slice2"
-					},
-					{
-						"id": "s123",
-						"op": "add",
-						"a": "s12",
-						"b": "slice3"
-					},
-					{
-						"id": "owed",
-						"op": "add",
-						"a": "s123",
-						"b": "slice4"
-					}
-				],
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"due": "owed",
+					"measures": [
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "income",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "saved",
+							"op": "tally",
+							"label": "fund",
+							"basis": "funded"
+						},
+						{
+							"id": "half",
+							"op": "scale",
+							"of": "income",
+							"num": 1,
+							"den": 2,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfUnits",
+							"op": "scale",
+							"of": "half",
+							"num": 1,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfWhole",
+							"op": "scale",
+							"of": "halfUnits",
+							"num": 100,
+							"den": 1,
+							"rounding": "floor"
+						},
+						{
+							"id": "expenseCap",
+							"op": "const",
+							"value": 10000000
+						},
+						{
+							"id": "deduction",
+							"op": "min",
+							"a": "halfWhole",
+							"b": "expenseCap"
+						},
+						{
+							"id": "allowanceShare",
+							"op": "scale",
+							"of": "income",
+							"num": 15,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "allowanceCeiling",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "allowanceByShare",
+							"op": "min",
+							"a": "saved",
+							"b": "allowanceShare"
+						},
+						{
+							"id": "allowance",
+							"op": "min",
+							"a": "allowanceByShare",
+							"b": "allowanceCeiling"
+						},
+						{
+							"id": "personal",
+							"op": "const",
+							"value": 6000000
+						},
+						{
+							"id": "afterDeduction",
+							"op": "sub",
+							"a": "income",
+							"b": "deduction"
+						},
+						{
+							"id": "afterAllowance",
+							"op": "sub",
+							"a": "afterDeduction",
+							"b": "allowance"
+						},
+						{
+							"id": "net",
+							"op": "sub",
+							"a": "afterAllowance",
+							"b": "personal"
+						},
+						{
+							"id": "lo1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "width1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "above1",
+							"op": "sub",
+							"a": "net",
+							"b": "lo1"
+						},
+						{
+							"id": "inside1",
+							"op": "max",
+							"a": "above1",
+							"b": "zero"
+						},
+						{
+							"id": "capped1",
+							"op": "min",
+							"a": "inside1",
+							"b": "width1"
+						},
+						{
+							"id": "slice1",
+							"op": "scale",
+							"of": "capped1",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo2",
+							"op": "const",
+							"value": 30000000
+						},
+						{
+							"id": "width2",
+							"op": "const",
+							"value": 20000000
+						},
+						{
+							"id": "above2",
+							"op": "sub",
+							"a": "net",
+							"b": "lo2"
+						},
+						{
+							"id": "inside2",
+							"op": "max",
+							"a": "above2",
+							"b": "zero"
+						},
+						{
+							"id": "capped2",
+							"op": "min",
+							"a": "inside2",
+							"b": "width2"
+						},
+						{
+							"id": "slice2",
+							"op": "scale",
+							"of": "capped2",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo3",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "width3",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above3",
+							"op": "sub",
+							"a": "net",
+							"b": "lo3"
+						},
+						{
+							"id": "inside3",
+							"op": "max",
+							"a": "above3",
+							"b": "zero"
+						},
+						{
+							"id": "capped3",
+							"op": "min",
+							"a": "inside3",
+							"b": "width3"
+						},
+						{
+							"id": "slice3",
+							"op": "scale",
+							"of": "capped3",
+							"num": 15,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo4",
+							"op": "const",
+							"value": 75000000
+						},
+						{
+							"id": "width4",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above4",
+							"op": "sub",
+							"a": "net",
+							"b": "lo4"
+						},
+						{
+							"id": "inside4",
+							"op": "max",
+							"a": "above4",
+							"b": "zero"
+						},
+						{
+							"id": "capped4",
+							"op": "min",
+							"a": "inside4",
+							"b": "width4"
+						},
+						{
+							"id": "slice4",
+							"op": "scale",
+							"of": "capped4",
+							"num": 20,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "s12",
+							"op": "add",
+							"a": "slice1",
+							"b": "slice2"
+						},
+						{
+							"id": "s123",
+							"op": "add",
+							"a": "s12",
+							"b": "slice3"
+						},
+						{
+							"id": "owed",
+							"op": "add",
+							"a": "s123",
+							"b": "slice4"
+						}
+					],
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "ddec6d25f1d87f62c007d42f3e65d440ed224170e2ebe58e2a119e36729d2329"
+		"sha256": "e01cfd12fd706389bc6a35938ba262bec45420843c88a82423c7c5e5a57b453f"
 	},
 	{
 		"name": "levy-carry-in-day",
@@ -2125,7 +2160,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -2149,7 +2184,12 @@
 						"bps": 0
 					},
 					"label": "salary",
-					"prepaymentBps": 500
+					"prepayments": [
+						{
+							"levy": "th-like",
+							"bps": 500
+						}
+					]
 				}
 			],
 			"cashflow": {
@@ -2161,302 +2201,304 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "th-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"due": "owed",
-				"measures": [
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
+			"levies": [
+				{
+					"id": "th-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "income",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "saved",
-						"op": "tally",
-						"label": "fund",
-						"basis": "funded"
-					},
-					{
-						"id": "half",
-						"op": "scale",
-						"of": "income",
-						"num": 1,
-						"den": 2,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfUnits",
-						"op": "scale",
-						"of": "half",
-						"num": 1,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "halfWhole",
-						"op": "scale",
-						"of": "halfUnits",
-						"num": 100,
-						"den": 1,
-						"rounding": "floor"
-					},
-					{
-						"id": "expenseCap",
-						"op": "const",
-						"value": 10000000
-					},
-					{
-						"id": "deduction",
-						"op": "min",
-						"a": "halfWhole",
-						"b": "expenseCap"
-					},
-					{
-						"id": "allowanceShare",
-						"op": "scale",
-						"of": "income",
-						"num": 15,
-						"den": 100,
-						"rounding": "floor"
-					},
-					{
-						"id": "allowanceCeiling",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "allowanceByShare",
-						"op": "min",
-						"a": "saved",
-						"b": "allowanceShare"
-					},
-					{
-						"id": "allowance",
-						"op": "min",
-						"a": "allowanceByShare",
-						"b": "allowanceCeiling"
-					},
-					{
-						"id": "personal",
-						"op": "const",
-						"value": 6000000
-					},
-					{
-						"id": "afterDeduction",
-						"op": "sub",
-						"a": "income",
-						"b": "deduction"
-					},
-					{
-						"id": "afterAllowance",
-						"op": "sub",
-						"a": "afterDeduction",
-						"b": "allowance"
-					},
-					{
-						"id": "net",
-						"op": "sub",
-						"a": "afterAllowance",
-						"b": "personal"
-					},
-					{
-						"id": "lo1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "width1",
-						"op": "const",
-						"value": 15000000
-					},
-					{
-						"id": "above1",
-						"op": "sub",
-						"a": "net",
-						"b": "lo1"
-					},
-					{
-						"id": "inside1",
-						"op": "max",
-						"a": "above1",
-						"b": "zero"
-					},
-					{
-						"id": "capped1",
-						"op": "min",
-						"a": "inside1",
-						"b": "width1"
-					},
-					{
-						"id": "slice1",
-						"op": "scale",
-						"of": "capped1",
-						"num": 5,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo2",
-						"op": "const",
-						"value": 30000000
-					},
-					{
-						"id": "width2",
-						"op": "const",
-						"value": 20000000
-					},
-					{
-						"id": "above2",
-						"op": "sub",
-						"a": "net",
-						"b": "lo2"
-					},
-					{
-						"id": "inside2",
-						"op": "max",
-						"a": "above2",
-						"b": "zero"
-					},
-					{
-						"id": "capped2",
-						"op": "min",
-						"a": "inside2",
-						"b": "width2"
-					},
-					{
-						"id": "slice2",
-						"op": "scale",
-						"of": "capped2",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo3",
-						"op": "const",
-						"value": 50000000
-					},
-					{
-						"id": "width3",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above3",
-						"op": "sub",
-						"a": "net",
-						"b": "lo3"
-					},
-					{
-						"id": "inside3",
-						"op": "max",
-						"a": "above3",
-						"b": "zero"
-					},
-					{
-						"id": "capped3",
-						"op": "min",
-						"a": "inside3",
-						"b": "width3"
-					},
-					{
-						"id": "slice3",
-						"op": "scale",
-						"of": "capped3",
-						"num": 15,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "lo4",
-						"op": "const",
-						"value": 75000000
-					},
-					{
-						"id": "width4",
-						"op": "const",
-						"value": 25000000
-					},
-					{
-						"id": "above4",
-						"op": "sub",
-						"a": "net",
-						"b": "lo4"
-					},
-					{
-						"id": "inside4",
-						"op": "max",
-						"a": "above4",
-						"b": "zero"
-					},
-					{
-						"id": "capped4",
-						"op": "min",
-						"a": "inside4",
-						"b": "width4"
-					},
-					{
-						"id": "slice4",
-						"op": "scale",
-						"of": "capped4",
-						"num": 20,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "s12",
-						"op": "add",
-						"a": "slice1",
-						"b": "slice2"
-					},
-					{
-						"id": "s123",
-						"op": "add",
-						"a": "s12",
-						"b": "slice3"
-					},
-					{
-						"id": "owed",
-						"op": "add",
-						"a": "s123",
-						"b": "slice4"
-					}
-				],
-				"carryIn": [
-					{
-						"periodStart": "2026-01-01",
-						"tallies": [
-							{
-								"label": "salary",
-								"basis": "gross",
-								"amount": 50000000
-							}
-						],
-						"prepaid": 2500000
-					}
-				]
-			}
+					"due": "owed",
+					"measures": [
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "income",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "saved",
+							"op": "tally",
+							"label": "fund",
+							"basis": "funded"
+						},
+						{
+							"id": "half",
+							"op": "scale",
+							"of": "income",
+							"num": 1,
+							"den": 2,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfUnits",
+							"op": "scale",
+							"of": "half",
+							"num": 1,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "halfWhole",
+							"op": "scale",
+							"of": "halfUnits",
+							"num": 100,
+							"den": 1,
+							"rounding": "floor"
+						},
+						{
+							"id": "expenseCap",
+							"op": "const",
+							"value": 10000000
+						},
+						{
+							"id": "deduction",
+							"op": "min",
+							"a": "halfWhole",
+							"b": "expenseCap"
+						},
+						{
+							"id": "allowanceShare",
+							"op": "scale",
+							"of": "income",
+							"num": 15,
+							"den": 100,
+							"rounding": "floor"
+						},
+						{
+							"id": "allowanceCeiling",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "allowanceByShare",
+							"op": "min",
+							"a": "saved",
+							"b": "allowanceShare"
+						},
+						{
+							"id": "allowance",
+							"op": "min",
+							"a": "allowanceByShare",
+							"b": "allowanceCeiling"
+						},
+						{
+							"id": "personal",
+							"op": "const",
+							"value": 6000000
+						},
+						{
+							"id": "afterDeduction",
+							"op": "sub",
+							"a": "income",
+							"b": "deduction"
+						},
+						{
+							"id": "afterAllowance",
+							"op": "sub",
+							"a": "afterDeduction",
+							"b": "allowance"
+						},
+						{
+							"id": "net",
+							"op": "sub",
+							"a": "afterAllowance",
+							"b": "personal"
+						},
+						{
+							"id": "lo1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "width1",
+							"op": "const",
+							"value": 15000000
+						},
+						{
+							"id": "above1",
+							"op": "sub",
+							"a": "net",
+							"b": "lo1"
+						},
+						{
+							"id": "inside1",
+							"op": "max",
+							"a": "above1",
+							"b": "zero"
+						},
+						{
+							"id": "capped1",
+							"op": "min",
+							"a": "inside1",
+							"b": "width1"
+						},
+						{
+							"id": "slice1",
+							"op": "scale",
+							"of": "capped1",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo2",
+							"op": "const",
+							"value": 30000000
+						},
+						{
+							"id": "width2",
+							"op": "const",
+							"value": 20000000
+						},
+						{
+							"id": "above2",
+							"op": "sub",
+							"a": "net",
+							"b": "lo2"
+						},
+						{
+							"id": "inside2",
+							"op": "max",
+							"a": "above2",
+							"b": "zero"
+						},
+						{
+							"id": "capped2",
+							"op": "min",
+							"a": "inside2",
+							"b": "width2"
+						},
+						{
+							"id": "slice2",
+							"op": "scale",
+							"of": "capped2",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo3",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "width3",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above3",
+							"op": "sub",
+							"a": "net",
+							"b": "lo3"
+						},
+						{
+							"id": "inside3",
+							"op": "max",
+							"a": "above3",
+							"b": "zero"
+						},
+						{
+							"id": "capped3",
+							"op": "min",
+							"a": "inside3",
+							"b": "width3"
+						},
+						{
+							"id": "slice3",
+							"op": "scale",
+							"of": "capped3",
+							"num": 15,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "lo4",
+							"op": "const",
+							"value": 75000000
+						},
+						{
+							"id": "width4",
+							"op": "const",
+							"value": 25000000
+						},
+						{
+							"id": "above4",
+							"op": "sub",
+							"a": "net",
+							"b": "lo4"
+						},
+						{
+							"id": "inside4",
+							"op": "max",
+							"a": "above4",
+							"b": "zero"
+						},
+						{
+							"id": "capped4",
+							"op": "min",
+							"a": "inside4",
+							"b": "width4"
+						},
+						{
+							"id": "slice4",
+							"op": "scale",
+							"of": "capped4",
+							"num": 20,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "s12",
+							"op": "add",
+							"a": "slice1",
+							"b": "slice2"
+						},
+						{
+							"id": "s123",
+							"op": "add",
+							"a": "s12",
+							"b": "slice3"
+						},
+						{
+							"id": "owed",
+							"op": "add",
+							"a": "s123",
+							"b": "slice4"
+						}
+					],
+					"carryIn": [
+						{
+							"periodStart": "2026-01-01",
+							"tallies": [
+								{
+									"label": "salary",
+									"basis": "gross",
+									"amount": 50000000
+								}
+							],
+							"prepaid": 2500000
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-06-01",
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "f72da7630b43d9fe9baf055e65eb49572cd73df653c01738863a7bb3ad482d1e"
+		"sha256": "f2114e3ca54a164daa960cb1f346818179a02b9225f222dd95b644dd25541ecc"
 	},
 	{
 		"name": "levy-returns-day",
@@ -2478,7 +2520,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -2533,40 +2575,42 @@
 				"contribute": [],
 				"withdraw": ["cash", "deposit"]
 			},
-			"levy": {
-				"id": "returns",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 6,
-					"day": 30
-				},
-				"measures": [
-					{
-						"id": "interest",
-						"op": "tally",
-						"label": "interest",
-						"basis": "returns"
-					}
-				],
-				"due": "interest",
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+			"levies": [
+				{
+					"id": "returns",
+					"period": {
+						"month": 1,
+						"day": 1
+					},
+					"settlement": {
+						"month": 6,
+						"day": 30
+					},
+					"measures": [
+						{
+							"id": "interest",
+							"op": "tally",
+							"label": "interest",
+							"basis": "returns"
+						}
+					],
+					"due": "interest",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2028-06-30",
 			"resolution": "day"
 		},
-		"sha256": "ac160c9e68a43b4e2437c63f7ad1408d6798439079a2d924305060e832a8250e"
+		"sha256": "0de9e44d9d9bf47da0cc5edf075bdda4c11d8739163dd6cfa3ea551dfa83ad51"
 	},
 	{
 		"name": "levy-gains-day",
@@ -2589,7 +2633,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -2644,57 +2688,59 @@
 				"contribute": [],
 				"withdraw": ["cash", "deposit", "brokerage"]
 			},
-			"levy": {
-				"id": "gains",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 6,
-					"day": 30
-				},
-				"measures": [
-					{
-						"id": "gain",
-						"op": "tally",
-						"label": "gain",
-						"basis": "gains"
+			"levies": [
+				{
+					"id": "gains",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "interest",
-						"op": "tally",
-						"label": "interest",
-						"basis": "returns"
+					"settlement": {
+						"month": 6,
+						"day": 30
 					},
-					{
-						"id": "zero",
-						"op": "const",
-						"value": 0
-					},
-					{
-						"id": "due",
-						"op": "max",
-						"a": "gain",
-						"b": "zero"
-					}
-				],
-				"due": "due",
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"measures": [
+						{
+							"id": "gain",
+							"op": "tally",
+							"label": "gain",
+							"basis": "gains"
+						},
+						{
+							"id": "interest",
+							"op": "tally",
+							"label": "interest",
+							"basis": "returns"
+						},
+						{
+							"id": "zero",
+							"op": "const",
+							"value": 0
+						},
+						{
+							"id": "due",
+							"op": "max",
+							"a": "gain",
+							"b": "zero"
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2028-06-30",
 			"resolution": "day"
 		},
-		"sha256": "354537c1d140cf7748603f316d2c4c11ce8b83fa8f3b589a0f984c3853dcf0ab"
+		"sha256": "7c6440dd75a034af75d93a9837e9a855c301f46a86e7d74dec5d3168a30ca484"
 	},
 	{
 		"name": "levy-care-credit",
@@ -2708,7 +2754,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "USD",
 			"economy": {
 				"inflation": 0
@@ -2723,9 +2769,9 @@
 			"flows": [
 				{
 					"id": "salary",
-					"amount": 10000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 10000000,
 					"growth": {
 						"bps": 0
 					},
@@ -2735,9 +2781,9 @@
 				},
 				{
 					"id": "care",
-					"amount": 1000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 1000000,
 					"growth": {
 						"bps": 0
 					},
@@ -2755,73 +2801,658 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "us-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"measures": [
-					{
-						"id": "salary",
-						"op": "tally",
-						"label": "salary",
-						"basis": "gross"
+			"levies": [
+				{
+					"id": "us-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "care",
-						"op": "tally",
-						"label": "care",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "steps",
-						"op": "scale",
-						"of": "salary",
-						"num": 1,
-						"den": 100000,
-						"rounding": "floor"
-					},
-					{
-						"id": "ceiling",
-						"op": "const",
-						"value": 1800
-					},
-					{
-						"id": "rate",
-						"op": "sub",
-						"a": "ceiling",
-						"b": "steps"
-					},
-					{
-						"id": "credit",
-						"op": "mul",
-						"a": "care",
-						"b": "rate",
-						"den": 10000,
-						"rounding": "halfUp"
-					}
-				],
-				"due": "credit",
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"measures": [
+						{
+							"id": "salary",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "care",
+							"op": "tally",
+							"label": "care",
+							"basis": "gross"
+						},
+						{
+							"id": "steps",
+							"op": "scale",
+							"of": "salary",
+							"num": 1,
+							"den": 100000,
+							"rounding": "floor"
+						},
+						{
+							"id": "ceiling",
+							"op": "const",
+							"value": 1800
+						},
+						{
+							"id": "rate",
+							"op": "sub",
+							"a": "ceiling",
+							"b": "steps"
+						},
+						{
+							"id": "credit",
+							"op": "mul",
+							"a": "care",
+							"b": "rate",
+							"den": 10000,
+							"rounding": "halfUp"
+						}
+					],
+					"due": "credit",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "ea9952d34dcc8ebcf4517e59d9dfe7cb0984c8750a49b809d71b654297229874"
+		"sha256": "965079674883fd445da074ed8c598a86493145a3b3b8aa0153c57dac0f0ae6b8"
+	},
+	{
+		"name": "levy-several",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 4,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"amount": 1000000,
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "salary",
+					"prepayments": [
+						{
+							"levy": "national",
+							"bps": 300
+						},
+						{
+							"levy": "local",
+							"bps": 200
+						}
+					]
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"levies": [
+				{
+					"id": "national",
+					"period": {
+						"month": 1,
+						"day": 1
+					},
+					"settlement": {
+						"month": 3,
+						"day": 31
+					},
+					"measures": [
+						{
+							"id": "gross",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "due",
+							"op": "scale",
+							"of": "gross",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				},
+				{
+					"id": "local",
+					"period": {
+						"month": 1,
+						"day": 1
+					},
+					"settlement": {
+						"month": 6,
+						"day": 30
+					},
+					"measures": [
+						{
+							"id": "gross",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "due",
+							"op": "scale",
+							"of": "gross",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2027-12-31",
+			"resolution": "day"
+		},
+		"sha256": "76036c63db00b8a7c9dc278399bd422ed409850a1d1f449a1373ca696057c9bb"
+	},
+	{
+		"name": "levy-stepped",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 5000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 4,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"levies": [
+				{
+					"id": "stepped",
+					"period": {
+						"month": 1,
+						"day": 1
+					},
+					"settlement": {
+						"month": 3,
+						"day": 31
+					},
+					"measures": [
+						{
+							"id": "due",
+							"op": "const",
+							"value": 100000,
+							"steps": [
+								{
+									"from": "2026-06-01",
+									"value": 200000
+								},
+								{
+									"from": "2027-03-31",
+									"value": 300000
+								},
+								{
+									"from": "2028-01-01",
+									"value": 400000
+								}
+							]
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2028-12-31",
+			"resolution": "day"
+		},
+		"sha256": "0c36e9a9919b6222f52996112fa58fbdf99367379ce63844aa72c2e05e2d0e92"
+	},
+	{
+		"name": "derive-rent",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 1000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 4,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"amount": 1000000,
+					"growth": {
+						"bps": 5000
+					},
+					"kind": "income",
+					"earned": true
+				},
+				{
+					"id": "rent",
+					"kind": "expense",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"derive": {
+						"measures": [
+							{
+								"id": "source",
+								"op": "flow",
+								"flow": "salary"
+							},
+							{
+								"id": "result",
+								"op": "scale",
+								"of": "source",
+								"num": 30,
+								"den": 100,
+								"rounding": "halfUp"
+							}
+						],
+						"result": "result"
+					}
+				},
+				{
+					"id": "save",
+					"kind": "contribution",
+					"target": "savings",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"derive": {
+						"measures": [
+							{
+								"id": "source",
+								"op": "flow",
+								"flow": "salary"
+							},
+							{
+								"id": "result",
+								"op": "scale",
+								"of": "source",
+								"num": 10,
+								"den": 100,
+								"rounding": "halfUp"
+							}
+						],
+						"result": "result"
+					}
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": ["savings"],
+				"withdraw": ["cash"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2027-12-31",
+			"resolution": "month"
+		},
+		"sha256": "59e8517eec3998df1c06e3fd9b6216fdd9643ddba414b2fcbb388104878d7bc3"
+	},
+	{
+		"name": "derive-rent-fi",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 1000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 4,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"amount": 1000000,
+					"growth": {
+						"bps": 5000
+					},
+					"kind": "income",
+					"earned": true
+				},
+				{
+					"id": "rent",
+					"kind": "expense",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"derive": {
+						"measures": [
+							{
+								"id": "source",
+								"op": "flow",
+								"flow": "salary"
+							},
+							{
+								"id": "result",
+								"op": "scale",
+								"of": "source",
+								"num": 30,
+								"den": 100,
+								"rounding": "halfUp"
+							}
+						],
+						"result": "result"
+					}
+				},
+				{
+					"id": "save",
+					"kind": "contribution",
+					"target": "savings",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"derive": {
+						"measures": [
+							{
+								"id": "source",
+								"op": "flow",
+								"flow": "salary"
+							},
+							{
+								"id": "result",
+								"op": "scale",
+								"of": "source",
+								"num": 10,
+								"den": 100,
+								"rounding": "halfUp"
+							}
+						],
+						"result": "result"
+					}
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": ["savings"],
+				"withdraw": ["cash"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2027-12-31",
+			"resolution": "month"
+		},
+		"sha256": "59e8517eec3998df1c06e3fd9b6216fdd9643ddba414b2fcbb388104878d7bc3",
+		"options": {
+			"method": "survival",
+			"minBufferMonths": 3
+		},
+		"fiSha256": "229a1119ae44c1176772ee61783bfa2dab6ad109a787335fdecdddc69119ddc3"
+	},
+	{
+		"name": "levy-several-fi",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 4,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"amount": 1000000,
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "salary",
+					"prepayments": [
+						{
+							"levy": "national",
+							"bps": 300
+						},
+						{
+							"levy": "local",
+							"bps": 200
+						}
+					]
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"levies": [
+				{
+					"id": "national",
+					"period": {
+						"month": 1,
+						"day": 1
+					},
+					"settlement": {
+						"month": 3,
+						"day": 31
+					},
+					"measures": [
+						{
+							"id": "gross",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "due",
+							"op": "scale",
+							"of": "gross",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				},
+				{
+					"id": "local",
+					"period": {
+						"month": 1,
+						"day": 1
+					},
+					"settlement": {
+						"month": 6,
+						"day": 30
+					},
+					"measures": [
+						{
+							"id": "gross",
+							"op": "tally",
+							"label": "salary",
+							"basis": "gross"
+						},
+						{
+							"id": "due",
+							"op": "scale",
+							"of": "gross",
+							"num": 5,
+							"den": 100,
+							"rounding": "halfUp"
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2027-12-31",
+			"resolution": "day"
+		},
+		"sha256": "76036c63db00b8a7c9dc278399bd422ed409850a1d1f449a1373ca696057c9bb",
+		"options": {
+			"method": "survival"
+		},
+		"fiSha256": "f450bad0dc6185e8ccdca5f0247416bccb0c5e8b832664cdaf016c680a0d84af"
 	},
 	{
 		"name": "levy-wage-base",
@@ -2835,7 +3466,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "USD",
 			"economy": {
 				"inflation": 0
@@ -2850,9 +3481,9 @@
 			"flows": [
 				{
 					"id": "salary",
-					"amount": 10000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 10000000,
 					"growth": {
 						"bps": 0
 					},
@@ -2860,6 +3491,7 @@
 					"earned": true,
 					"label": "wage",
 					"cappedPrepayment": {
+						"levy": "us-like",
 						"bps": 620,
 						"upTo": "base"
 					}
@@ -2874,50 +3506,52 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "us-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"measures": [
-					{
-						"id": "base",
-						"op": "const",
-						"value": 60000000
+			"levies": [
+				{
+					"id": "us-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "wage",
-						"op": "tally",
-						"label": "wage",
-						"basis": "gross"
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "due",
-						"op": "const",
-						"value": 0
-					}
-				],
-				"due": "due",
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"measures": [
+						{
+							"id": "base",
+							"op": "const",
+							"value": 60000000
+						},
+						{
+							"id": "wage",
+							"op": "tally",
+							"label": "wage",
+							"basis": "gross"
+						},
+						{
+							"id": "due",
+							"op": "const",
+							"value": 0
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "35fe748de89d145d9db0958c90d73029fc798890b4600da313829bdcc169fe78"
+		"sha256": "e7fe7ce1f7372070b499fe74b8ad153f6c577b47b9cd5b5d84f63b5a33991e26"
 	},
 	{
 		"name": "levy-joint-filers",
@@ -2931,7 +3565,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "USD",
 			"economy": {
 				"inflation": 0
@@ -2946,9 +3580,9 @@
 			"flows": [
 				{
 					"id": "a-salary",
-					"amount": 10000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 10000000,
 					"growth": {
 						"bps": 0
 					},
@@ -2956,15 +3590,16 @@
 					"earned": true,
 					"label": "person-a",
 					"cappedPrepayment": {
+						"levy": "us-like",
 						"bps": 620,
 						"upTo": "cap-a"
 					}
 				},
 				{
 					"id": "b-salary",
-					"amount": 4000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 4000000,
 					"growth": {
 						"bps": 0
 					},
@@ -2972,6 +3607,7 @@
 					"earned": true,
 					"label": "person-b",
 					"cappedPrepayment": {
+						"levy": "us-like",
 						"bps": 620,
 						"upTo": "cap-b"
 					}
@@ -2986,78 +3622,80 @@
 				"contribute": [],
 				"withdraw": ["cash"]
 			},
-			"levy": {
-				"id": "us-like",
-				"period": {
-					"month": 1,
-					"day": 1
-				},
-				"settlement": {
-					"month": 3,
-					"day": 31
-				},
-				"measures": [
-					{
-						"id": "cap-a",
-						"op": "const",
-						"value": 60000000
+			"levies": [
+				{
+					"id": "us-like",
+					"period": {
+						"month": 1,
+						"day": 1
 					},
-					{
-						"id": "cap-b",
-						"op": "const",
-						"value": 50000000
+					"settlement": {
+						"month": 3,
+						"day": 31
 					},
-					{
-						"id": "a-gross",
-						"op": "tally",
-						"label": "person-a",
-						"basis": "gross"
-					},
-					{
-						"id": "b-gross",
-						"op": "tally",
-						"label": "person-b",
-						"basis": "gross"
-					},
-					{
-						"id": "a-due",
-						"op": "scale",
-						"of": "a-gross",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "b-due",
-						"op": "scale",
-						"of": "b-gross",
-						"num": 10,
-						"den": 100,
-						"rounding": "halfUp"
-					},
-					{
-						"id": "due",
-						"op": "add",
-						"a": "a-due",
-						"b": "b-due"
-					}
-				],
-				"due": "due",
-				"carryIn": [
-					{
-						"periodStart": "2025-01-01",
-						"tallies": [],
-						"prepaid": 0
-					}
-				]
-			}
+					"measures": [
+						{
+							"id": "cap-a",
+							"op": "const",
+							"value": 60000000
+						},
+						{
+							"id": "cap-b",
+							"op": "const",
+							"value": 50000000
+						},
+						{
+							"id": "a-gross",
+							"op": "tally",
+							"label": "person-a",
+							"basis": "gross"
+						},
+						{
+							"id": "b-gross",
+							"op": "tally",
+							"label": "person-b",
+							"basis": "gross"
+						},
+						{
+							"id": "a-due",
+							"op": "scale",
+							"of": "a-gross",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "b-due",
+							"op": "scale",
+							"of": "b-gross",
+							"num": 10,
+							"den": 100,
+							"rounding": "halfUp"
+						},
+						{
+							"id": "due",
+							"op": "add",
+							"a": "a-due",
+							"b": "b-due"
+						}
+					],
+					"due": "due",
+					"carryIn": [
+						{
+							"periodStart": "2025-01-01",
+							"tallies": [],
+							"prepaid": 0
+						}
+					]
+				}
+			]
 		},
 		"timeline": {
 			"start": "2026-01-01",
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "1f3ea2ad6aba456eca318590b0af3484ff827e28c38521a85dea98fe29ca581f"
+		"sha256": "9cca7061e24c949f05e0cb0f8f244aad610173798c30cc15b99b745300cce482"
 	},
 	{
 		"name": "calendar-shift-day",
@@ -3071,7 +3709,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -3086,9 +3724,9 @@
 			"flows": [
 				{
 					"id": "salary",
-					"amount": 1000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 1000000,
 					"growth": {
 						"bps": 0
 					},
@@ -3097,9 +3735,9 @@
 				},
 				{
 					"id": "living",
-					"amount": 400000,
 					"frequency": "monthly",
 					"start": "2026-01-01",
+					"amount": 400000,
 					"growth": "inflation",
 					"kind": "expense"
 				}
@@ -3137,7 +3775,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -3152,9 +3790,9 @@
 			"flows": [
 				{
 					"id": "salary",
-					"amount": 1000000,
 					"frequency": "monthly",
 					"start": "2026-01-31",
+					"amount": 1000000,
 					"growth": {
 						"bps": 0
 					},
@@ -3163,9 +3801,9 @@
 				},
 				{
 					"id": "living",
-					"amount": 400000,
 					"frequency": "monthly",
 					"start": "2026-01-01",
+					"amount": 400000,
 					"growth": "inflation",
 					"kind": "expense"
 				}
@@ -3219,7 +3857,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -3366,7 +4004,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -3490,7 +4128,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -3511,18 +4149,18 @@
 			"flows": [
 				{
 					"id": "pay",
-					"amount": 300000,
 					"frequency": "monthly",
 					"start": "2026-01-15",
+					"amount": 300000,
 					"growth": "inflation",
 					"kind": "income",
 					"earned": true
 				},
 				{
 					"id": "repay",
-					"amount": 300000,
 					"frequency": "monthly",
 					"start": "2026-01-15",
+					"amount": 300000,
 					"growth": {
 						"bps": 0
 					},
@@ -3563,7 +4201,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -3584,9 +4222,9 @@
 			"flows": [
 				{
 					"id": "bonus",
-					"amount": 10000,
 					"frequency": "once",
 					"start": "2026-02-10",
+					"amount": 10000,
 					"growth": {
 						"bps": 0
 					},
@@ -3623,7 +4261,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -3666,7 +4304,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -3709,7 +4347,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -3764,7 +4402,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 3,
+			"schemaVersion": 4,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200

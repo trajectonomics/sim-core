@@ -1,7 +1,7 @@
 /** TEST-ONLY hand-computed salary Scenario for the Levy engine tests. */
 import { TH_LIKE } from "../levy/th-levy"
 import type { BasisPoints, DateString, Flow, MinorUnits, Resolution } from "../types"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { emptyCarryIn, type Setup, withCarryIn } from "./test-helpers"
 
 export const SALARY = 10_000_000
@@ -34,7 +34,7 @@ export function salaryLevySetup(options: SalarySetupOptions = {}): Setup {
 				frequency: "monthly",
 				start: "2026-01-31",
 				label: "salary",
-				prepaymentBps,
+				prepayments: prepays(TH_LIKE.id, prepaymentBps),
 			}),
 		],
 		surplus: [{ account: "cash" }],

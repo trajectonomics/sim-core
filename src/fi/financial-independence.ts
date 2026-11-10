@@ -14,6 +14,7 @@ import type {
 } from "../types/financial-independence-result"
 import { unreachable } from "./binding"
 import { survivalDefinition } from "./definition"
+import { derivedExpenseProblem } from "./derived-expense"
 import { planScan } from "./plan"
 import { runProbability } from "./probability-run"
 import { search } from "./search"
@@ -86,6 +87,10 @@ export function financialIndependence(
 		...checkFinancialIndependenceOptions(options),
 	]
 	if (problems.length > 0) return { ok: false, problems }
+	if (options.retirementSpending === undefined) {
+		const derived = derivedExpenseProblem(scenario)
+		if (derived !== undefined) return { ok: false, problems: [derived] }
+	}
 	if (options.method === "survival") return runSurvival(baseline, scenario, timeline, options)
 	if (model === undefined) {
 		return { ok: false, problems: [{ code: "MISSING_KEY", path: ["model"] }] }

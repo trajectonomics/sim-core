@@ -43,7 +43,7 @@ function evaluatePeriod(
 	const plan = tracker.periods[index]
 	const tally = tracker.tallies[index]
 	if (plan === undefined || tally === undefined) return { period: undefined, problem: undefined }
-	const context = { date: plan.dueSettlementDate, inflation: tracker.inflation }
+	const context = { date: plan.dueSettlementDate, periodEnd: plan.to, inflation: tracker.inflation }
 	const result = evaluateMeasures(tracker.levy, talliesOf(tally), context)
 	if (!result.ok)
 		return { period: undefined, problem: landedProblem(result.problem, plan.settlementDate) }

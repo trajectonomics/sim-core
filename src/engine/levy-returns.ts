@@ -15,14 +15,16 @@ function attribute(
 	ledger: ReturnLedger,
 	date: DateString,
 ): void {
-	if (date <= ledger.through) return
+	const id = tracker.levy.id
+	if (date <= (ledger.through.get(id) ?? ledger.since)) return
 	const index = settlementPeriodIndexAt(tracker.periods, date)
 	const tally = tracker.tallies[index]
 	if (index < 0 || tally === undefined) return
-	const growth = valuation(state, date) - ledger.base - ledger.attributed
+	const declared = ledger.attributed.get(id) ?? 0n
+	const growth = valuation(state, date) - ledger.base - declared
 	addTo(tally.returns, ledger.label, growth)
-	ledger.attributed += growth
-	ledger.through = date
+	ledger.attributed.set(id, declared + growth)
+	ledger.through.set(id, date)
 }
 
 /** Attributes each period end the range crosses, splitting there, then the rest at `date`. */
@@ -34,7 +36,10 @@ function attributeThrough(
 ): void {
 	const last = settlementPeriodIndexAt(tracker.periods, date)
 	for (
-		let index = settlementPeriodIndexAt(tracker.periods, ledger.through);
+		let index = settlementPeriodIndexAt(
+			tracker.periods,
+			ledger.through.get(tracker.levy.id) ?? ledger.since,
+		);
 		index <= last;
 		index++
 	) {
@@ -56,7 +61,7 @@ export function commitReturns(state: AccountState, tracker: LevyTracker, date: D
 	const ledger = state.returns
 	if (ledger === undefined) return
 	attributeThrough(state, tracker, ledger, date)
-	ledger.attributed = 0n
+	ledger.attributed.set(tracker.levy.id, 0n)
 }
 
 /**

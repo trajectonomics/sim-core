@@ -1,10 +1,10 @@
 /** TEST-ONLY builders; not imported by `src/index.ts`, so they stay out of the package. */
-import type { Levy, LevyContext, Measure, MeasuresResult, MinorUnits, Tallies } from "../types"
+import type { Levy, LevyContext, LevyMeasure, MeasuresResult, MinorUnits, Tallies } from "../types"
 import { evaluateMeasures } from "./evaluate"
 
 export const CONTEXT: LevyContext = { date: "2030-01-01", inflation: 250 }
 
-export function levyOf(measures: readonly Measure[], due: string): Levy {
+export function levyOf(measures: readonly LevyMeasure[], due: string): Levy {
 	return {
 		id: "test-levy",
 		period: { month: 1, day: 1 },
@@ -23,7 +23,7 @@ export function talliesOf(
 
 /** The `due` value, or the result itself when it overflowed. */
 export function dueOf(
-	measures: readonly Measure[],
+	measures: readonly LevyMeasure[],
 	due: string,
 	tallies: Tallies = talliesOf(),
 	context: LevyContext = CONTEXT,

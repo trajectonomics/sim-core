@@ -1,74 +1,72 @@
-import { roundHalfUp } from "../money/round"
 import type { DateString, IncomeFlow } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { addTo } from "./add"
-import { settlementPeriodIndexAt } from "./levy-plan"
-import type { LevyTally, LevyTracker } from "./levy-types"
+import {
+	eligible,
+	plainShares,
+	type SettlementPeriodView,
+	settlementPeriodGross,
+	share,
+} from "./levy-shares"
 import { isSafeInteger, overflow } from "./overflow"
-
-/** The tally and the cap table of the Settlement period one Occurrence date falls in. */
-export interface SettlementPeriodView {
-	readonly tally: LevyTally | undefined
-	readonly caps: ReadonlyMap<string, bigint> | undefined
-}
-
-export function settlementPeriodView(
-	tracker: LevyTracker | undefined,
-	date: DateString,
-): SettlementPeriodView {
-	if (tracker === undefined) return { tally: undefined, caps: undefined }
-	const index = settlementPeriodIndexAt(tracker.periods, date)
-	if (index < 0) return { tally: undefined, caps: undefined }
-	return { tally: tracker.tallies[index], caps: tracker.caps[index] }
-}
-
-/** A rate in basis points of `amount`, rounded half up in minor units. */
-function share(amount: bigint, bps: number): bigint {
-	return roundHalfUp(amount * BigInt(bps), 10_000n)
-}
-
-/** Period-to-date gross of `label` before this event: the tracker's total plus today's earlier ones. */
-function settlementPeriodGross(
-	view: SettlementPeriodView,
-	label: string,
-	today: ReadonlyMap<string, bigint>,
-): bigint {
-	return (view.tally?.gross.get(label) ?? 0n) + (today.get(label) ?? 0n)
-}
-
-/** The part of `amount` that lies below `cap` on a period-to-date gross of `already`. */
-function eligible(amount: bigint, already: bigint, cap: bigint): bigint {
-	const room = cap - already
-	if (room <= 0n) return 0n
-	return room < amount ? room : amount
-}
 
 export interface IncomeShare {
 	readonly prepaid: bigint
+	readonly byLevy: ReadonlyMap<string, bigint>
 	readonly problem?: ProjectionProblem
+}
+
+interface CappedShare {
+	readonly levy: string | undefined
+	readonly taken: bigint
+	readonly problem: ProjectionProblem | undefined
+}
+
+/** The share on the part of an Occurrence below the Flow's `upTo` cap, for its own Levy. */
+function cappedShare(
+	flow: IncomeFlow,
+	amount: bigint,
+	gross: ReadonlyMap<string, bigint>,
+	views: readonly SettlementPeriodView[],
+	date: DateString,
+): CappedShare {
+	const capped = flow.cappedPrepayment
+	const label = flow.label
+	if (capped === undefined || label === undefined)
+		return { levy: undefined, taken: 0n, problem: undefined }
+	const view = views.find((item) => item.levy === capped.levy)
+	const cap = view?.caps?.get(flow.id)
+	if (view === undefined || cap === undefined)
+		return { levy: capped.levy, taken: 0n, problem: undefined }
+	if (!isSafeInteger(cap)) return { levy: capped.levy, taken: 0n, problem: overflow(date) }
+	const already = settlementPeriodGross(view, label, gross)
+	return {
+		levy: capped.levy,
+		taken: share(eligible(amount, already, cap), capped.bps),
+		problem: undefined,
+	}
 }
 
 /**
  * Adds one labeled income amount to the gross tallies and returns its Prepayment: the plain
- * share on the whole amount plus the capped share on the part below the Flow's cap.
+ * shares plus the capped share on the part below the Flow's cap, all per Levy.
  */
 export function addIncome(
 	flow: IncomeFlow,
 	amount: bigint,
 	gross: Map<string, bigint>,
-	view: SettlementPeriodView,
+	views: readonly SettlementPeriodView[],
 	date: DateString,
 ): IncomeShare {
-	let prepaid = flow.prepaymentBps === undefined ? 0n : share(amount, flow.prepaymentBps)
-	const capped = flow.cappedPrepayment
-	const label = flow.label
-	if (capped !== undefined && label !== undefined) {
-		const cap = view.caps?.get(flow.id)
-		if (cap !== undefined && !isSafeInteger(cap)) return { prepaid, problem: overflow(date) }
-		if (cap !== undefined) {
-			prepaid += share(eligible(amount, settlementPeriodGross(view, label, gross), cap), capped.bps)
-		}
+	const byLevy = new Map(plainShares(flow.prepayments ?? [], amount, views))
+	let prepaid = 0n
+	for (const amountTaken of byLevy.values()) prepaid += amountTaken
+	const capped = cappedShare(flow, amount, gross, views, date)
+	if (capped.levy !== undefined && capped.taken !== 0n) {
+		byLevy.set(capped.levy, (byLevy.get(capped.levy) ?? 0n) + capped.taken)
+		prepaid += capped.taken
 	}
-	if (label !== undefined) addTo(gross, label, amount)
-	return { prepaid }
+	if (flow.label !== undefined) addTo(gross, flow.label, amount)
+	if (capped.problem !== undefined) return { prepaid, byLevy, problem: capped.problem }
+	return { prepaid, byLevy }
 }

@@ -1,6 +1,13 @@
 import { growthYears } from "../calendar/arith"
 import { grow } from "../money/growth"
-import type { BinaryMeasure, ConstMeasure, LevyContext, Measure, Tallies } from "../types"
+import type {
+	BinaryMeasure,
+	ConstMeasure,
+	ConstStep,
+	LevyContext,
+	LevyMeasure,
+	Tallies,
+} from "../types"
 import { mulValue } from "./mul"
 import { scaleValue } from "./scale"
 
@@ -24,9 +31,25 @@ const BINARY: Readonly<Record<BinaryMeasure["op"], (a: bigint, b: bigint) => big
 	max: greater,
 }
 
-/** A constant, grown by whole years from `asOf` to the context date (never shrunk by time). */
+/** The value of the last step on or before `through`; `value` holds before the first step. */
+function steppedValue(value: number, steps: readonly ConstStep[], through: string): number {
+	let found = value
+	for (let index = 0; index < steps.length; index++) {
+		const step = steps[index]
+		if (step === undefined || step.from > through) break
+		found = step.value
+	}
+	return found
+}
+
+/**
+ * A constant: with `steps`, the value at the context's `periodEnd` (falling back to `date`);
+ * with `growth`, grown by whole years from `asOf` (never shrunk by time).
+ */
 export function constantValue(measure: ConstMeasure, context: LevyContext): bigint {
-	const { value, asOf, growth } = measure
+	const { value, asOf, growth, steps } = measure
+	if (steps !== undefined)
+		return BigInt(steppedValue(value, steps, context.periodEnd ?? context.date))
 	if (growth === undefined || asOf === undefined) return BigInt(value)
 	const rate = growth === "inflation" ? context.inflation : growth.bps
 	const days = growthYears(asOf, context.date) * 365
@@ -36,7 +59,7 @@ export function constantValue(measure: ConstMeasure, context: LevyContext): bigi
 
 /** The exact value of one Measure given the values of the Measures it reads. */
 export function step(
-	measure: Measure,
+	measure: LevyMeasure,
 	get: Lookup,
 	tallies: Tallies,
 	context: LevyContext,

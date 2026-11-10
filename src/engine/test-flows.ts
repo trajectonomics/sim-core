@@ -5,11 +5,14 @@ import type {
 	CappedPrepayment,
 	ContributionFlow,
 	DateString,
+	Derive,
 	ExpenseFlow,
 	Frequency,
 	Growth,
 	IncomeFlow,
+	IncomeRules,
 	MinorUnits,
+	Prepayment,
 } from "../types"
 
 export interface FlowOptions {
@@ -19,7 +22,7 @@ export interface FlowOptions {
 	readonly growth?: Growth
 	readonly label?: string
 	readonly earned?: boolean
-	readonly prepaymentBps?: BasisPoints
+	readonly prepayments?: readonly Prepayment[]
 	readonly cappedPrepayment?: CappedPrepayment
 }
 
@@ -34,26 +37,60 @@ interface FlowBase {
 
 function base(id: string, amount: MinorUnits, options: FlowOptions): FlowBase {
 	return {
-		id,
+		...layout(id, options),
 		amount,
+		growth: options.growth ?? { bps: 0 },
+	}
+}
+
+/** The Flow fields a Derived flow also carries: no `amount` and no `growth`. */
+function layout(id: string, options: FlowOptions): Omit<FlowBase, "amount" | "growth"> {
+	return {
+		id,
 		frequency: options.frequency ?? "once",
 		start: options.start ?? "2026-01-01",
-		growth: options.growth ?? { bps: 0 },
 		...(options.end === undefined ? {} : { end: options.end }),
 	}
 }
 
-export function income(id: string, amount: MinorUnits, options: FlowOptions = {}): IncomeFlow {
+function labelOf(options: FlowOptions): { readonly label?: string } {
+	return options.label === undefined ? {} : { label: options.label }
+}
+
+function incomeRules(options: FlowOptions): IncomeRules {
 	return {
-		...base(id, amount, options),
 		kind: "income",
 		earned: options.earned ?? true,
-		...(options.label === undefined ? {} : { label: options.label }),
-		...(options.prepaymentBps === undefined ? {} : { prepaymentBps: options.prepaymentBps }),
+		...labelOf(options),
+		...(options.prepayments === undefined ? {} : { prepayments: options.prepayments }),
 		...(options.cappedPrepayment === undefined
 			? {}
 			: { cappedPrepayment: options.cappedPrepayment }),
 	}
+}
+
+export function income(id: string, amount: MinorUnits, options: FlowOptions = {}): IncomeFlow {
+	return { ...base(id, amount, options), ...incomeRules(options) }
+}
+
+/** An income Flow whose amount a Derived graph computes on each Occurrence. */
+export function derivedIncome(id: string, derive: Derive, options: FlowOptions = {}): IncomeFlow {
+	return { ...layout(id, options), ...incomeRules(options), derive }
+}
+
+/** An expense Flow whose amount a Derived graph computes on each Occurrence. */
+export function derivedExpense(id: string, derive: Derive, options: FlowOptions = {}): ExpenseFlow {
+	return { ...layout(id, options), kind: "expense", derive }
+}
+
+/** A contribution Flow whose amount a Derived graph computes on each Occurrence. */
+export function derivedContribution(
+	id: string,
+	target: AccountId,
+	derive: Derive,
+	options: FlowOptions = {},
+): ContributionFlow {
+	return { ...layout(id, options), kind: "contribution", target, ...labelOf(options), derive }
 }
 
 export function expense(id: string, amount: MinorUnits, options: FlowOptions = {}): ExpenseFlow {
@@ -66,10 +103,10 @@ export function contribution(
 	amount: MinorUnits,
 	options: FlowOptions = {},
 ): ContributionFlow {
-	return {
-		...base(id, amount, options),
-		kind: "contribution",
-		target,
-		...(options.label === undefined ? {} : { label: options.label }),
-	}
+	return { ...base(id, amount, options), kind: "contribution", target, ...labelOf(options) }
+}
+
+/** One Levy's share of an income Flow, for a test that names the Levy it credits. */
+export function prepays(levy: string, bps: BasisPoints): readonly Prepayment[] {
+	return [{ levy, bps }]
 }

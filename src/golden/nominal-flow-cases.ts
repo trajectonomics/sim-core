@@ -15,7 +15,7 @@ export const nominalMonthlyLoan: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 200 },
 		accounts: [cash, loan],
@@ -38,7 +38,7 @@ export const nominalOverdraw: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [cash, loan],
@@ -61,7 +61,7 @@ export const nominalShortfall: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [cash, loan],

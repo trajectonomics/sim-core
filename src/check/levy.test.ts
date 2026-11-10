@@ -3,7 +3,7 @@ import { expected, REMOVE } from "../testing"
 import { checkWith, LEVY, levyProblems } from "./levy-fixture"
 
 const m = (index: number, ...rest: (string | number)[]) =>
-	["scenario", "levy", "measures", index, ...rest] as const
+	["scenario", "levies", 0, "measures", index, ...rest] as const
 
 describe("check() Levy", () => {
 	it("accepts a valid Levy and a scenario without one", () => {
@@ -12,12 +12,12 @@ describe("check() Levy", () => {
 	})
 
 	it("rejects a Levy that is not an object, and a missing or unknown key", () => {
-		expect(checkWith({ levy: 3 })).toEqual(expected("NOT_AN_OBJECT", ["scenario", "levy"]))
+		expect(checkWith({ levy: 3 })).toEqual(expected("NOT_AN_OBJECT", ["scenario", "levies", 0]))
 		expect(levyProblems([["due"], REMOVE])).toEqual(
-			expected("MISSING_KEY", ["scenario", "levy", "due"]),
+			expected("MISSING_KEY", ["scenario", "levies", 0, "due"]),
 		)
 		expect(levyProblems([["rate"], 1])).toEqual(
-			expected("UNKNOWN_KEY", ["scenario", "levy", "rate"]),
+			expected("UNKNOWN_KEY", ["scenario", "levies", 0, "rate"]),
 		)
 	})
 
@@ -44,7 +44,7 @@ describe("check() Levy", () => {
 
 	it("rejects a due that is not a Measure", () => {
 		expect(levyProblems([["due"], "ghost"])).toEqual(
-			expected("UNKNOWN_MEASURE", ["scenario", "levy", "due"]),
+			expected("UNKNOWN_MEASURE", ["scenario", "levies", 0, "due"]),
 		)
 	})
 
@@ -120,7 +120,7 @@ describe("check() Levy", () => {
 
 describe("check() Levy period and settlement", () => {
 	it.each(["period", "settlement"])("rejects a non-calendar %s", (key) => {
-		const at = ["scenario", "levy", key] as const
+		const at = ["scenario", "levies", 0, key] as const
 		for (const bad of [
 			{ month: 13, day: 1 },
 			{ month: 0, day: 1 },
@@ -146,7 +146,7 @@ describe("check() Levy period and settlement", () => {
 	it.each(["period", "settlement"])(
 		"rejects non-integer, missing and unknown keys in %s",
 		(key) => {
-			const at = ["scenario", "levy", key] as const
+			const at = ["scenario", "levies", 0, key] as const
 			expect(levyProblems([[key, "month"], 1.5])).toEqual(
 				expected("NOT_SAFE_INTEGER", [...at, "month"]),
 			)

@@ -1,8 +1,8 @@
 /** TEST-ONLY hand-written Levy with the shape of a progressive income rule (amounts in satang). */
-import type { Levy, Measure } from "../types"
+import type { Levy, LevyMeasure } from "../types"
 
 /** `scale(min(max(net - lo, 0), width), rate, 100, halfUp)`: the part of `net` inside one band. */
-function slice(n: number, lo: number, width: number, percent: number): readonly Measure[] {
+function slice(n: number, lo: number, width: number, percent: number): readonly LevyMeasure[] {
 	return [
 		{ id: `lo${n}`, op: "const", value: lo },
 		{ id: `width${n}`, op: "const", value: width },

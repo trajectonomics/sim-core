@@ -1,33 +1,38 @@
 import { income } from "../engine/test-flows"
 import { emptyCarryIn, withCarryIn } from "../engine/test-helpers"
 import type { Fixture } from "../fixtures/fixture"
-import type { Flow, IncomeFlow, Measure } from "../types"
+import type { Flow, IncomeFlow, LevyMeasure } from "../types"
+
+/** The id of the synthetic US-style Levy every `usFixture` carries. */
+export const US_LEVY_ID = "us-like"
 
 /** A synthetic US-style fixture: one calendar-year Levy settling on the next 31 March. */
 export function usFixture(
 	flows: readonly Flow[],
-	measures: readonly Measure[],
+	measures: readonly LevyMeasure[],
 	due: string,
 ): Fixture {
 	return {
 		baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 0 }] },
 		scenario: {
-			schemaVersion: 3,
+			schemaVersion: 4,
 			currency: "USD",
 			economy: { inflation: 0 },
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
 			flows,
 			cashflow: { surplus: [{ account: "cash" }], contribute: [], withdraw: ["cash"] },
-			levy: withCarryIn(
-				{
-					id: "us-like",
-					period: { month: 1, day: 1 },
-					settlement: { month: 3, day: 31 },
-					measures,
-					due,
-				},
-				emptyCarryIn("2025-01-01"),
-			),
+			levies: [
+				withCarryIn(
+					{
+						id: US_LEVY_ID,
+						period: { month: 1, day: 1 },
+						settlement: { month: 3, day: 31 },
+						measures,
+						due,
+					},
+					emptyCarryIn("2025-01-01"),
+				),
+			],
 		},
 		timeline: { start: "2026-01-01", horizon: "2026-12-31", resolution: "month" },
 	}

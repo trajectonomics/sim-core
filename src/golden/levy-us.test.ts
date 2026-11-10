@@ -14,13 +14,13 @@ function projected(fixture: Fixture): Projection {
 }
 
 function periodOf(fixture: Fixture): SettlementPeriod {
-	const period = projected(fixture).levy?.periods.find((item) => item.from === "2026-01-01")
+	const period = projected(fixture).levies?.[0]?.periods.find((item) => item.from === "2026-01-01")
 	if (period === undefined) throw new Error("Missing the 2026 Settlement period")
 	return period
 }
 
 function levyOf(fixture: Fixture): Levy {
-	const levy = fixture.scenario.levy
+	const levy = fixture.scenario.levies?.[0]
 	if (levy === undefined) throw new Error("Fixture has no Levy")
 	return levy
 }
@@ -37,6 +37,7 @@ function expectOracle(fixture: Fixture, period: SettlementPeriod): void {
 		oracleTallies(incomes),
 		period.settlementDate,
 		fixture.scenario.economy.inflation,
+		period.to,
 	)
 	for (const measure of period.measures) {
 		const value = oracle.values.get(measure.id)
@@ -44,7 +45,7 @@ function expectOracle(fixture: Fixture, period: SettlementPeriod): void {
 		expect([measure.id, measure.value]).toEqual([measure.id, Number(value)])
 	}
 	expect(period.due).toBe(Number(oracle.due))
-	expect(period.prepaid).toBe(Number(oraclePrepaid(incomes)))
+	expect(period.prepaid).toBe(Number(oraclePrepaid(incomes, [levyOf(fixture).id])))
 }
 
 describe("golden cases for the US-style Levy operations", () => {

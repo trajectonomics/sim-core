@@ -34,20 +34,33 @@ function missingStarts(
 	)
 }
 
-function run(scenario: unknown, timeline: unknown, emit: Emit): void {
-	if (!isRecord(scenario) || !isRecord(timeline)) return
-	const levy = scenario["levy"]
+function checkLevy(
+	levy: unknown,
+	index: number,
+	scenario: unknown,
+	start: string,
+	emit: Emit,
+): void {
 	if (!isRecord(levy)) return
 	const period = periodOf(levy)
 	const settlement = levy["settlement"]
-	const start = timeline["start"]
 	if (period === undefined || !isMonthDay(settlement)) return
-	if (!isValidDate(start)) return
 	const records = recordsOf(levy)
 	if (records === undefined && Object.hasOwn(levy, "carryIn")) return
 	const missing = missingStarts(records ?? [], scenario, start, period, settlement)
-	for (let index = 0; index < missing.length; index++) {
-		emit("MISSING_CARRY_IN", ["scenario", "levy", "carryIn"])
+	for (let count = 0; count < missing.length; count++) {
+		emit("MISSING_CARRY_IN", ["scenario", "levies", index, "carryIn"])
+	}
+}
+
+function run(scenario: unknown, timeline: unknown, emit: Emit): void {
+	if (!isRecord(scenario) || !isRecord(timeline)) return
+	const levies = scenario["levies"]
+	if (!Array.isArray(levies)) return
+	const start = timeline["start"]
+	if (!isValidDate(start)) return
+	for (let index = 0; index < levies.length; index++) {
+		checkLevy(levies[index], index, scenario, start, emit)
 	}
 }
 

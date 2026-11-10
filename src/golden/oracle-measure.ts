@@ -1,6 +1,7 @@
-import type { ConstMeasure, DateString, Levy, Measure, Rounding } from "../types"
-import { oracleGrowthYears } from "./oracle-date"
-import { oracleGrow } from "./oracle-money"
+import type { DateString, Levy, LevyMeasure, Rounding } from "../types"
+import { oracleConstValue } from "./oracle-const"
+
+export { oracleConstValue }
 
 export interface OracleTallies {
 	readonly gross: ReadonlyMap<string, bigint>
@@ -26,19 +27,6 @@ export function oracleDivide(product: bigint, den: bigint, rounding: Rounding): 
 	return remainder < 0n ? quotient - 1n : quotient + 1n
 }
 
-/** A constant, grown once per whole year from `asOf` to `date`, through naive daily compounding. */
-export function oracleConstValue(
-	measure: ConstMeasure,
-	date: DateString,
-	inflation: number,
-): bigint {
-	const { value, asOf, growth } = measure
-	if (growth === undefined || asOf === undefined) return BigInt(value)
-	const rate = growth === "inflation" ? inflation : growth.bps
-	const grown = oracleGrow(BigInt(Math.abs(value)), rate, oracleGrowthYears(asOf, date) * 365)
-	return value < 0 ? -grown : grown
-}
-
 // BigInt has no Math.min or Math.max.
 function lesser(left: bigint, right: bigint): bigint {
 	if (left < right) return left
@@ -51,15 +39,16 @@ function greater(left: bigint, right: bigint): bigint {
 }
 
 function measureValue(
-	measure: Measure,
+	measure: LevyMeasure,
 	get: (id: string) => bigint,
 	tallies: OracleTallies,
 	date: DateString,
 	inflation: number,
+	periodEnd: DateString,
 ): bigint {
 	switch (measure.op) {
 		case "const":
-			return oracleConstValue(measure, date, inflation)
+			return oracleConstValue(measure, date, inflation, periodEnd)
 		case "tally":
 			return tallies[measure.basis]?.get(measure.label) ?? 0n
 		case "scale":
@@ -89,8 +78,9 @@ export function oracleMeasures(
 	tallies: OracleTallies,
 	date: DateString,
 	inflation: number,
+	periodEnd: DateString = date,
 ): OracleMeasures {
-	const byId = new Map<string, Measure>()
+	const byId = new Map<string, LevyMeasure>()
 	for (const measure of levy.measures) byId.set(measure.id, measure)
 	const memo = new Map<string, bigint>()
 	const get = (id: string): bigint => {
@@ -98,7 +88,7 @@ export function oracleMeasures(
 		if (found !== undefined) return found
 		const measure = byId.get(id)
 		if (measure === undefined) throw new Error(`No Measure ${id}`)
-		const value = measureValue(measure, get, tallies, date, inflation)
+		const value = measureValue(measure, get, tallies, date, inflation, periodEnd)
 		memo.set(id, value)
 		return value
 	}

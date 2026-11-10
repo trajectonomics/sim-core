@@ -1,3 +1,4 @@
+import { prepays } from "../engine/test-flows"
 import { emptyCarryIn, withCarryIn } from "../engine/test-helpers"
 import type { Fixture } from "../fixtures/fixture"
 import { TH_LIKE } from "../levy/th-levy"
@@ -24,7 +25,7 @@ function salaryFlow(prepaymentBps: BasisPoints, end: DateString | undefined): In
 		...(end === undefined ? {} : { end }),
 		growth: { bps: 0 },
 		label: "salary",
-		prepaymentBps,
+		prepayments: prepays(TH_LIKE.id, prepaymentBps),
 	}
 }
 
@@ -32,7 +33,7 @@ function salaryFixture(options: SalaryCase): Fixture {
 	return {
 		baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 0 }] },
 		scenario: {
-			schemaVersion: 3,
+			schemaVersion: 4,
 			currency: "THB",
 			economy: { inflation: 0 },
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
@@ -42,7 +43,7 @@ function salaryFixture(options: SalaryCase): Fixture {
 				contribute: [],
 				withdraw: options.withdraw ?? ["cash"],
 			},
-			levy: withCarryIn(TH_LIKE, ...(options.carryIn ?? [emptyCarryIn("2025-01-01")])),
+			levies: [withCarryIn(TH_LIKE, ...(options.carryIn ?? [emptyCarryIn("2025-01-01")]))],
 		},
 		timeline: {
 			start: options.start ?? "2026-01-01",

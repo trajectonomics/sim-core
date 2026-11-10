@@ -59,7 +59,8 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 		return { kind: "shortfall", failure: { month, shortfall: walked.shortfall }, beforeStop: false }
 	}
 	const annual = expenseBetween(input.requirement.expenses, month, addMonthsClamped(month, 12))
-	const reference = twentyFiveTimes(point.states, month, annual)
+	if (annual.kind === "problem") return { kind: "problem", problem: annual.problem, terminal: true }
+	const reference = twentyFiveTimes(point.states, month, annual.amount)
 	if (!reference.ok) return { kind: "problem", problem: reference.problem, terminal: true }
 	return { kind: "reachable", month, reference: reference.reference }
 }

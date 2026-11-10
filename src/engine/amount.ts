@@ -1,10 +1,11 @@
 import { grow } from "../money/growth"
-import type { BasisPoints } from "../types"
-import type { DatedEvent } from "./events"
+import type { BasisPoints, FixedAmount, Flow } from "../types"
 
-/** Flow amount at an occurrence, grown from the original by whole annual steps. */
-export function amountAt(event: DatedEvent, inflation: BasisPoints): bigint {
-	const growth = event.flow.growth
+export type FixedFlow = Flow & FixedAmount
+
+/** A fixed Flow's amount at an occurrence, grown from the original by whole annual steps. */
+export function fixedAmountAt(flow: FixedFlow, years: number, inflation: BasisPoints): bigint {
+	const growth = flow.growth
 	const rate = growth === "inflation" ? inflation : growth.bps
-	return grow(BigInt(event.flow.amount), rate, event.years * 365)
+	return grow(BigInt(flow.amount), rate, years * 365)
 }

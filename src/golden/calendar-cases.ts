@@ -7,7 +7,7 @@ import type { Fixture } from "../fixtures/fixture"
  * Monday 2026-02-02; 2026-12-25 and 2027-01-01 close a long weekend.
  */
 const scenario: Fixture["scenario"] = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	currency: "THB",
 	economy: { inflation: 200 },
 	accounts: [{ id: "cash", kind: "asset", rate: 0 }],

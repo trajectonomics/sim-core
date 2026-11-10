@@ -9,10 +9,9 @@ const prepayment: Check = boundedInt(0, 10_000, "RATE_OUT_OF_RANGE")
 export const NOT_ALLOWED: Field = opt((_value, path, emit) => emit("FIELD_NOT_ALLOWED", path))
 
 export const label: (hasLevy: boolean) => Field = tallyLabel
-export const prepaymentBps = (hasLevy: boolean): Field => needsLevy(hasLevy, prepayment)
 
 const cappedShape: Check = (value, path, emit) =>
-	void checkShape(value, path, { bps: req(prepayment), upTo: req(str) }, emit)
+	void checkShape(value, path, { levy: req(str), bps: req(prepayment), upTo: req(str) }, emit)
 
-/** The optional second Prepayment share and the Measure id it is capped at. */
+/** The optional second Prepayment share, its Levy and the Measure id it is capped at. */
 export const cappedPrepayment = (hasLevy: boolean): Field => needsLevy(hasLevy, cappedShape)

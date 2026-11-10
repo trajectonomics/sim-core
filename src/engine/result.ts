@@ -7,7 +7,7 @@ export interface EngineRun {
 	readonly snapshots: readonly EngineSnapshot[]
 	readonly totals: readonly DayTotals[]
 	readonly runsOut?: EngineRunsOut
-	readonly levy?: EngineLevy
+	readonly levies?: readonly EngineLevy[]
 }
 
 export type EngineResult =

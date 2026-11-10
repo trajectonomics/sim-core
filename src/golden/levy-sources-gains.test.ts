@@ -31,7 +31,7 @@ function gainsLevy(due: number): Levy {
 }
 
 function gained(projection: Projection, from: string): MinorUnits {
-	const period = projection.levy?.periods.find((item) => item.from === from)
+	const period = projection.levies?.[0]?.periods.find((item) => item.from === from)
 	if (period === undefined) throw new Error(`Missing period ${from}`)
 	const found = period.measures.find((item) => item.id === "gain")
 	if (found === undefined) throw new Error("Missing gain")

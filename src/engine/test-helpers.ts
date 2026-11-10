@@ -15,12 +15,7 @@ import type {
 	SurplusStep,
 	Timeline,
 } from "../types"
-import type {
-	Projection,
-	ProjectionProblem,
-	ProjectionRow,
-	SettlementPeriod,
-} from "../types/projection"
+import type { Projection, ProjectionProblem } from "../types/projection"
 import { project } from "./project"
 
 export interface Setup {
@@ -37,12 +32,19 @@ export interface Setup {
 	readonly resolution?: Resolution
 	readonly inflation?: BasisPoints
 	readonly levy?: Levy
+	readonly levies?: readonly Levy[]
 	readonly calendar?: Calendar
+}
+
+/** The Scenario's Levies: the list, or the single-Levy shorthand tests use. */
+function withLevies(setup: Setup): { readonly levies?: readonly Levy[] } {
+	const levies = setup.levies ?? (setup.levy === undefined ? undefined : [setup.levy])
+	return levies === undefined ? {} : { levies }
 }
 
 export function makeFixture(setup: Setup): Fixture {
 	const scenario: Scenario = {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: setup.inflation ?? 0 },
 		accounts: setup.accounts,
@@ -52,7 +54,7 @@ export function makeFixture(setup: Setup): Fixture {
 			contribute: setup.contribute ?? [],
 			withdraw: setup.withdraw ?? [],
 		},
-		...(setup.levy === undefined ? {} : { levy: setup.levy }),
+		...withLevies(setup),
 		...(setup.calendar === undefined ? {} : { calendar: setup.calendar }),
 	}
 	const timeline: Timeline = {
@@ -90,18 +92,4 @@ export function withCarryIn(levy: Levy, ...records: readonly CarryIn[]): Levy {
 	return { ...levy, carryIn: records }
 }
 
-export function periodFrom(projection: Projection, from: DateString): SettlementPeriod {
-	const period = projection.levy?.periods.find((item) => item.from === from)
-	if (period === undefined) throw new Error(`Missing Settlement period ${from}`)
-	return period
-}
-
-export function rowAt(projection: Projection, date: DateString): ProjectionRow {
-	const row = projection.rows.find((item) => item.date === date)
-	if (!row) throw new Error(`Missing row ${date}`)
-	return row
-}
-
-export function amounts(row: ProjectionRow): Readonly<Record<string, MinorUnits>> {
-	return Object.fromEntries(row.balances.map((balance) => [balance.account, balance.amount]))
-}
+export { amounts, periodFrom, rowAt } from "./test-rows"

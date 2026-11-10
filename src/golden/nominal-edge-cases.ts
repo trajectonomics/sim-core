@@ -16,7 +16,7 @@ export const nominalPayoffOnDate: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [cash, loan],
@@ -39,7 +39,7 @@ export const nominalLeapFlow: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [cash, savings],

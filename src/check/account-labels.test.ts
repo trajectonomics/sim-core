@@ -13,7 +13,7 @@ const baseline: Baseline = {
 }
 
 const scenario: Scenario = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	currency: "THB",
 	economy: { inflation: 0 },
 	accounts: [
@@ -23,7 +23,7 @@ const scenario: Scenario = {
 	],
 	flows: [],
 	cashflow: { surplus: [{ account: "cash" }], contribute: [], withdraw: ["cash"] },
-	levy: LEVY as never,
+	levies: [LEVY as never],
 }
 
 const timeline: Timeline = { start: "2026-01-01", horizon: "2026-12-31", resolution: "day" }
@@ -67,7 +67,7 @@ describe("check() Account tally labels", () => {
 	})
 
 	it("requires a Levy for a label and still rejects an unknown key", () => {
-		const { levy: _ignored, ...withoutLevy } = scenario
+		const { levies: _ignored, ...withoutLevy } = scenario
 		expect(
 			check(
 				baseline,

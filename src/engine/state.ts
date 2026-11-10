@@ -10,10 +10,12 @@ export interface ReturnLedger {
 	readonly label: string
 	/** The Account's value right after its last commit, or at `start`. */
 	base: bigint
-	/** Growth from `base` already given to earlier Settlement periods. */
-	attributed: bigint
-	/** The last date attribution reached: a commit date after a reset, else a period boundary. */
-	through: DateString
+	/** The Timeline start, before which nothing is attributed. */
+	readonly since: DateString
+	/** Growth from `base` already given to each Levy's earlier Settlement periods. */
+	readonly attributed: Map<string, bigint>
+	/** The last date each Levy's attribution reached: a commit date after a reset, else a boundary. */
+	readonly through: Map<string, DateString>
 }
 
 export interface AccountState {
@@ -34,7 +36,13 @@ export type StateMap = ReadonlyMap<AccountId, AccountState>
 
 function ledgerOf(rule: Account, amount: number, start: DateString): ReturnLedger | undefined {
 	if (rule.kind !== "asset" || rule.returnLabel === undefined) return undefined
-	return { label: rule.returnLabel, base: BigInt(amount), attributed: 0n, through: start }
+	return {
+		label: rule.returnLabel,
+		base: BigInt(amount),
+		since: start,
+		attributed: new Map(),
+		through: new Map(),
+	}
 }
 
 function basisOf(rule: Account, opening: ReadonlyMap<AccountId, number>): bigint | undefined {

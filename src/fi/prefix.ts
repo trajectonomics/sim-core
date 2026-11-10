@@ -1,21 +1,19 @@
 import type { ResolvedCalendar } from "../calendar/business"
 import { collectDates } from "../engine/dates"
 import { type DatedEvent, flowsAt } from "../engine/events"
-import { settlementPeriods } from "../engine/levy-plan"
-import { closeReturns } from "../engine/levy-returns"
-import { createTracker, hasSettlement } from "../engine/levy-tally"
-import type { LevyTracker } from "../engine/levy-types"
+import { planLevies } from "../engine/levy-finish"
+import { allSettlementDates, closeReturnsOn, hasSettlement, type LevySet } from "../engine/levy-set"
 import { type EngineRunsOut, processDate } from "../engine/occurrence"
 import { isSafeInteger, overflow } from "../engine/overflow"
 import type { ResolvedReturns } from "../engine/returns"
 import { createStates, type StateMap } from "../engine/state"
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import type { ProjectionProblem } from "../types/projection"
-import { cloneStates, cloneTracker } from "./clone"
+import { cloneLevySet, cloneStates } from "./clone"
 
 export interface PrefixPoint {
 	readonly states: StateMap
-	readonly tracker: LevyTracker | undefined
+	readonly levies: LevySet | undefined
 }
 
 export interface Prefix {
@@ -26,7 +24,7 @@ export interface Prefix {
 }
 
 export interface LevyPlan {
-	readonly tracker: LevyTracker | undefined
+	readonly levies: LevySet | undefined
 	readonly settlementDates: readonly DateString[]
 }
 
@@ -36,20 +34,9 @@ export function levyPlan(
 	timeline: Timeline,
 	calendar: ResolvedCalendar | undefined,
 ): LevyPlan {
-	if (scenario.levy === undefined) return { tracker: undefined, settlementDates: [] }
-	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy, calendar)
-	return {
-		tracker: createTracker(
-			scenario.levy,
-			scenario.flows,
-			periods,
-			scenario.economy.inflation,
-			timeline.start,
-		),
-		settlementDates: periods
-			.map((period) => period.settlementDate)
-			.filter((date) => date <= timeline.horizon),
-	}
+	const levies = planLevies(scenario, timeline, calendar)
+	if (levies === undefined) return { levies, settlementDates: [] }
+	return { levies, settlementDates: allSettlementDates(levies, timeline.horizon) }
 }
 
 interface PrefixAdvance {
@@ -62,13 +49,13 @@ function advance(
 	scenario: Scenario,
 	date: DateString,
 	dayEvents: readonly DatedEvent[],
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 ): PrefixAdvance {
-	if (dayEvents.length === 0 && !(tracker !== undefined && hasSettlement(tracker, date))) {
+	if (dayEvents.length === 0 && !(levies !== undefined && hasSettlement(levies, date))) {
 		return {}
 	}
-	if (tracker !== undefined) closeReturns(states, tracker, date)
-	const outcome = processDate(states, scenario, date, dayEvents, tracker)
+	if (levies !== undefined) closeReturnsOn(levies, states, date)
+	const outcome = processDate(states, scenario, date, dayEvents, levies)
 	if (outcome.problem !== undefined) return { problem: outcome.problem }
 	if (outcome.runsOut === undefined) return {}
 	if (!isSafeInteger(outcome.runsOut.unmet)) return { problem: overflow(date) }
@@ -86,18 +73,18 @@ export function baselinePrefix(
 	series?: ResolvedReturns,
 ): Prefix {
 	const states = createStates(baseline, scenario, timeline.start, series)
-	const { tracker, settlementDates } = levyPlan(scenario, timeline, calendar)
+	const { levies, settlementDates } = levyPlan(scenario, timeline, calendar)
 	const wanted = new Set(candidates)
 	const points = new Map<DateString, PrefixPoint>()
 	const dates = collectDates(events, candidates, settlementDates)
 	let index = 0
 	for (const date of dates) {
 		if (wanted.has(date)) {
-			points.set(date, { states: cloneStates(states), tracker: cloneTracker(tracker) })
+			points.set(date, { states: cloneStates(states), levies: cloneLevySet(levies) })
 		}
 		const [next, dayEvents] = flowsAt(events, index, date)
 		index = next
-		const stepped = advance(states, scenario, date, dayEvents, tracker)
+		const stepped = advance(states, scenario, date, dayEvents, levies)
 		if (stepped.problem !== undefined) {
 			return { points, runsOut: undefined, problem: stepped.problem, stoppedAt: date }
 		}

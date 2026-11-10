@@ -34,7 +34,7 @@ const setup = (end?: string): Setup => ({
 			start: "2026-01-31",
 			...(end === undefined ? {} : { end }),
 			label: "wage",
-			cappedPrepayment: { bps: 620, upTo: "base" },
+			cappedPrepayment: { levy: "growing", bps: 620, upTo: "base" },
 		}),
 	],
 	surplus: [{ account: "cash" }],
@@ -65,7 +65,7 @@ describe("a cap that is not a safe integer", () => {
 			],
 		})
 		expect(projection.runsOut?.date).toBe("2026-12-15")
-		expect(projection.levy?.periods.map((period) => period.from)).toEqual([
+		expect(projection.levies?.[0]?.periods.map((period) => period.from)).toEqual([
 			"2025-01-01",
 			"2026-01-01",
 		])

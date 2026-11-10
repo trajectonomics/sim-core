@@ -45,7 +45,7 @@ describe("Levy returns tally", () => {
 		expect(returned(projection, "2029-01-01")).toBe(whole - first)
 		expect(first).toBeGreaterThan(0)
 		expect(
-			projection.levy!.periods.every((period) => {
+			projection.levies![0]!.periods.every((period) => {
 				const found = period.measures.find((item) => item.id === "interest")
 				return (found?.value ?? 0) >= 0
 			}),
@@ -108,7 +108,7 @@ describe("Levy returns tally", () => {
 			horizon: "2029-12-31",
 			levy: withCarryIn(returnsLevy, emptyCarryIn("2027-01-01")),
 		})
-		const total = projection.levy!.periods.reduce((sum, period) => {
+		const total = projection.levies![0]!.periods.reduce((sum, period) => {
 			const found = period.measures.find((item) => item.id === "interest")
 			return sum + (found?.value ?? 0)
 		}, 0)
@@ -132,7 +132,7 @@ describe("Levy returns tally", () => {
 			horizon: "2029-12-31",
 			levy: withCarryIn(returnsLevy, emptyCarryIn("2027-01-01")),
 		})
-		const total = projection.levy!.periods.reduce((sum, period) => {
+		const total = projection.levies![0]!.periods.reduce((sum, period) => {
 			const found = period.measures.find((item) => item.id === "interest")
 			return sum + (found?.value ?? 0)
 		}, 0)
@@ -155,12 +155,12 @@ describe("Levy returns tally", () => {
 		}
 		const day = run({ ...base, resolution: "day" })
 		const month = run({ ...base, resolution: "month" })
-		expect(day.levy).toEqual(month.levy)
+		expect(day.levies).toEqual(month.levies)
 		const reversed = run({
 			...base,
 			accounts: [...base.accounts].reverse(),
 			balances: { pension: 50_000, deposit: 100_000 },
 		})
-		expect(reversed.levy).toEqual(day.levy)
+		expect(reversed.levies).toEqual(day.levies)
 	})
 })

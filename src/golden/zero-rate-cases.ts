@@ -27,7 +27,7 @@ export const zeroRateFixture: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 100 },
 		accounts: [

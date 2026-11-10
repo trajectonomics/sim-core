@@ -1,7 +1,7 @@
 import { income } from "../engine/test-flows"
 import type { Fixture } from "../fixtures/fixture"
-import type { CappedPrepayment, Measure, MinorUnits } from "../types"
-import { usFixture } from "./levy-us-cases"
+import type { CappedPrepayment, LevyMeasure, MinorUnits } from "../types"
+import { US_LEVY_ID, usFixture } from "./levy-us-cases"
 
 function cappedSalary(id: string, amount: MinorUnits, label: string, cap: CappedPrepayment) {
 	return income(id, amount, {
@@ -15,7 +15,7 @@ function cappedSalary(id: string, amount: MinorUnits, label: string, cap: Capped
 /** Social Security shape: 6.2% prepaid only up to a wage base, on a 10,000,000 salary. */
 export function wageBaseCase(cap: MinorUnits): Fixture {
 	return usFixture(
-		[cappedSalary("salary", 10_000_000, "wage", { bps: 620, upTo: "base" })],
+		[cappedSalary("salary", 10_000_000, "wage", { levy: US_LEVY_ID, bps: 620, upTo: "base" })],
 		[
 			{ id: "base", op: "const", value: cap },
 			{ id: "wage", op: "tally", label: "wage", basis: "gross" },
@@ -31,14 +31,14 @@ export const levyWageBaseStraddle: Fixture = wageBaseCase(25_000_000)
 /** Two earners, one label and one cap each, summed with `add`: joint filing needs no primitive. */
 export const levyJointFilers: Fixture = usFixture(
 	[
-		cappedSalary("a-salary", 10_000_000, "person-a", { bps: 620, upTo: "cap-a" }),
-		cappedSalary("b-salary", 4_000_000, "person-b", { bps: 620, upTo: "cap-b" }),
+		cappedSalary("a-salary", 10_000_000, "person-a", { levy: US_LEVY_ID, bps: 620, upTo: "cap-a" }),
+		cappedSalary("b-salary", 4_000_000, "person-b", { levy: US_LEVY_ID, bps: 620, upTo: "cap-b" }),
 	],
 	jointMeasures(),
 	"due",
 )
 
-function jointMeasures(): readonly Measure[] {
+function jointMeasures(): readonly LevyMeasure[] {
 	return [
 		{ id: "cap-a", op: "const", value: 60_000_000 },
 		{ id: "cap-b", op: "const", value: 50_000_000 },
