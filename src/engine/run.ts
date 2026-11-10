@@ -8,6 +8,8 @@ import { finishTracker } from "./levy-settle"
 import { createTracker } from "./levy-tally"
 import type { LevyTracker } from "./levy-types"
 import type { EngineResult } from "./result"
+import { resolveReturns } from "./return-rows"
+import type { Returns } from "./returns"
 import { type RunAccumulator, stepDate } from "./run-step"
 import { createStates } from "./state"
 
@@ -57,8 +59,9 @@ export function runEngine(
 	scenario: Scenario,
 	timeline: Timeline,
 	observations: readonly DateString[],
+	returns?: Returns,
 ): EngineResult {
-	const states = createStates(baseline, scenario, timeline.start)
+	const states = createStates(baseline, scenario, timeline.start, resolveReturns(returns, timeline))
 	const calendar = resolvedCalendar(scenario)
 	const events = buildEvents(scenario, timeline, calendar)
 	const { periods, tracker } = planFor(scenario, timeline, calendar)
