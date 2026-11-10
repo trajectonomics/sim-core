@@ -64,6 +64,7 @@ describe("the FI scan with a labelled Account", () => {
 			return result.ok && result.projection.runsOut === undefined ? "pass" : "fail"
 		})
 		expect(pattern.months.length).toBeGreaterThan(12)
+		expect(new Set(pattern.results).size).toBe(2)
 		expect(pattern.results).toEqual(naive)
 	})
 })

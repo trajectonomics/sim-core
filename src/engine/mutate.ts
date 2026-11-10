@@ -23,11 +23,12 @@ function commit(
 	capitalised: bigint,
 	capitalisedDays: bigint,
 	date: DateString,
+	tracker: LevyTracker | undefined,
 ) {
 	state.balance = capitalised
 	state.capitalisedDays = capitalisedDays
 	state.asOf = date
-	rebaseReturns(state, date)
+	if (tracker !== undefined) rebaseReturns(state, date)
 }
 
 /** Nominal commit: completed periods capitalise first, then the delta applies to capitalised. */
@@ -53,7 +54,7 @@ function nominalCommit(
 	const next = running.capitalised + delta
 	if (next >= 0n) {
 		if (!isSafeInteger(next)) return overflow(date, state.rule.id)
-		commit(state, next, running.capitalisedDays, date)
+		commit(state, next, running.capitalisedDays, date, tracker)
 		return undefined
 	}
 	// An overdrawing debit capitalises the running period first, so the Account can be paid off.
@@ -61,7 +62,7 @@ function nominalCommit(
 	const cleared = running.capitalised + accrued + delta
 	if (cleared < 0n) throw negative(state.rule.id, date)
 	if (!isSafeInteger(cleared)) return overflow(date, state.rule.id)
-	commit(state, cleared, 0n, date)
+	commit(state, cleared, 0n, date, tracker)
 	return undefined
 }
 
@@ -73,7 +74,7 @@ export function mutate(
 	state: AccountState,
 	date: DateString,
 	delta: bigint,
-	tracker?: LevyTracker,
+	tracker: LevyTracker | undefined,
 ): ProjectionProblem | undefined {
 	const rule = activeNominalRule(state)
 	if (rule !== undefined) return nominalCommit(state, rule, date, delta, tracker)
@@ -88,6 +89,6 @@ export function mutate(
 	}
 	state.balance = next
 	state.asOf = date
-	rebaseReturns(state, date)
+	if (tracker !== undefined) rebaseReturns(state, date)
 	return undefined
 }

@@ -52,22 +52,21 @@ const nominalDeposit: Account = {
 }
 
 describe("Levy tally sources on a nominal Account", () => {
-	it("attributes returns across the nominal capitalisation the read performs", () => {
+	it("attributes returns across each nominal capitalisation a read performs", () => {
+		// Monthly at 1,200 bps over a 30/31, 28/28 and 31/31 day fraction:
+		// Jan 100,000 → +968; Feb 100,968 → +1,010; Mar 101,978 → +1,020. The reads on
+		// 1 Feb and 1 Mar capitalise the first two, so a lazy base loses their growth.
 		const projection = run({
 			accounts: [nominalDeposit],
 			balances: { deposit: 100_000 },
 			surplus: [{ account: "deposit" }],
 			start: "2026-01-01",
-			horizon: "2027-06-30",
+			horizon: "2026-03-31",
 			resolution: "month",
 			levy: withCarryIn(returnsLevy, emptyCarryIn("2025-01-01")),
 		})
-		const pieces = values(projection, "interest")
-		expect(pieces.length).toBe(3)
-		expect(pieces.every((value) => value >= 0)).toBe(true)
-		expect(pieces.reduce((sum, value) => sum + value, 0)).toBe(
-			amounts(rowAt(projection, "2027-06-30"))["deposit"]! - 100_000,
-		)
+		expect(values(projection, "interest")).toEqual([0, 2_998])
+		expect(amounts(rowAt(projection, "2026-03-31"))["deposit"]).toBe(102_998)
 	})
 
 	it("adds a contribution to basis through the nominal commit", () => {

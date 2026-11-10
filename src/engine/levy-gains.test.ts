@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import type { Account, Levy, MinorUnits, Projection, SurplusStep } from "../types"
 import { contribution, expense, income } from "./test-flows"
-import { emptyCarryIn, periodFrom, run, withCarryIn } from "./test-helpers"
+import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
 const gainsLevy: Levy = {
 	id: "gains",
@@ -121,6 +121,48 @@ describe("Levy gains tally", () => {
 		})
 		expect(gained(projection, "2026-01-01")).toBe(0)
 		expect(gained(projection, "2027-01-01")).toBe(167)
+	})
+
+	it("never takes more basis than the opening basis plus inflows", () => {
+		// 100,000 basis on 80,000 of value, drained in four sales: each uses 25,000 basis, so the
+		// account gives up exactly its 100,000 basis and the four losses sum to -20,000.
+		const projection = run({
+			accounts: [brokerage],
+			balances: { brokerage: 80_000 },
+			basis: { brokerage: 100_000 },
+			flows: [
+				expense("a", 20_000, { start: "2026-02-01" }),
+				expense("b", 20_000, { start: "2026-04-01" }),
+				expense("c", 20_000, { start: "2026-06-01" }),
+				expense("d", 20_000, { start: "2026-08-01" }),
+			],
+			surplus: [{ account: "brokerage" }],
+			withdraw: ["brokerage"],
+			start: "2026-01-01",
+			horizon: "2026-12-31",
+			levy: empty,
+		})
+		expect(gained(projection, "2026-01-01")).toBe(-20_000)
+		expect(amounts(rowAt(projection, "2026-12-31"))["brokerage"]).toBe(0)
+	})
+
+	it("adds a signed gains Carry-in to the period it seeds", () => {
+		const projection = run({
+			accounts: [brokerage],
+			balances: { brokerage: 120_000 },
+			basis: { brokerage: 100_000 },
+			flows: [expense("sell", 60_000, { start: "2026-08-01" })],
+			surplus: [{ account: "brokerage" }],
+			withdraw: ["brokerage"],
+			start: "2026-07-01",
+			horizon: "2026-12-31",
+			levy: withCarryIn(gainsLevy, {
+				periodStart: "2026-01-01",
+				tallies: [{ label: "gain", basis: "gains", amount: -2_000 }],
+				prepaid: 0,
+			}),
+		})
+		expect(gained(projection, "2026-01-01")).toBe(8_000)
 	})
 
 	it("gives the same Levy for day and month resolution and for any order", () => {

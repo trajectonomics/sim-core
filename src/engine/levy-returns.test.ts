@@ -44,6 +44,12 @@ describe("Levy returns tally", () => {
 		expect(returned(projection, "2028-01-01")).toBe(first)
 		expect(returned(projection, "2029-01-01")).toBe(whole - first)
 		expect(first).toBeGreaterThan(0)
+		expect(
+			projection.levy!.periods.every((period) => {
+				const found = period.measures.find((item) => item.id === "interest")
+				return (found?.value ?? 0) >= 0
+			}),
+		).toBe(true)
 	})
 
 	it("tallies a losing period as a negative amount", () => {
@@ -106,7 +112,9 @@ describe("Levy returns tally", () => {
 			const found = period.measures.find((item) => item.id === "interest")
 			return sum + (found?.value ?? 0)
 		}, 0)
-		expect(total).toBe(amounts(rowAt(projection, "2029-12-31"))["deposit"]! - 100_000)
+		const expected = grown(100_000n, 1000, "2028-01-01", "2029-12-31")
+		expect(total).toBe(expected)
+		expect(amounts(rowAt(projection, "2029-12-31"))["deposit"]).toBe(100_000 + expected)
 	})
 
 	it("counts net inflows beside the growth in the sum of returns", () => {
@@ -128,8 +136,10 @@ describe("Levy returns tally", () => {
 			const found = period.measures.find((item) => item.id === "interest")
 			return sum + (found?.value ?? 0)
 		}, 0)
-		const inflows = projection.annual.reduce((sum, year) => sum + year.contributions, 0)
-		expect(total).toBe(amounts(rowAt(projection, "2029-12-31"))["deposit"]! - 100_000 - inflows)
+		const before = grown(100_000n, 1000, "2028-01-01", "2028-01-31")
+		const after = grown(BigInt(100_000 + before + 4_000), 1000, "2028-01-31", "2029-12-31")
+		expect(total).toBe(before + after)
+		expect(amounts(rowAt(projection, "2029-12-31"))["deposit"]).toBe(104_000 + before + after)
 	})
 
 	it("gives the same Levy for day and month resolution and for any order", () => {
