@@ -13,7 +13,7 @@ const baseline: Baseline = {
 }
 
 const scenario: Scenario = {
-	schemaVersion: 2,
+	schemaVersion: 3,
 	currency: "THB",
 	economy: { inflation: 0 },
 	accounts: [

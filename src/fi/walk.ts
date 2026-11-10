@@ -1,4 +1,5 @@
 import { type DatedEvent, flowsAt } from "../engine/events"
+import { closeReturns } from "../engine/levy-returns"
 import { hasSettlement } from "../engine/levy-tally"
 import { processDate } from "../engine/occurrence"
 import { isSafeInteger, overflow } from "../engine/overflow"
@@ -65,6 +66,8 @@ function processDay(
 	date: DateString,
 	dayEvents: readonly DatedEvent[],
 ): DayOutcome {
+	const tracker = input.point.tracker
+	if (tracker !== undefined) closeReturns(input.point.states, tracker, date)
 	const flows = processFlows(input, date, dayEvents)
 	if (flows.kind !== "ok" || input.requirement.months === 0) return flows
 	const checked = checkBuffer(input.point.states, date, input.requirement)

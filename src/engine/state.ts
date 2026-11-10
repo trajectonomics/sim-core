@@ -8,7 +8,9 @@ import type { ResolvedReturns, ResolvedSeries } from "./returns"
  */
 export interface ReturnLedger {
 	readonly label: string
-	/** Growth from the base already given to earlier Settlement periods. */
+	/** The Account's value right after its last commit, or at `start`. */
+	base: bigint
+	/** Growth from `base` already given to earlier Settlement periods. */
 	attributed: bigint
 	/** The last date attribution reached: a commit date after a reset, else a period boundary. */
 	through: DateString
@@ -30,9 +32,9 @@ export interface AccountState {
 
 export type StateMap = ReadonlyMap<AccountId, AccountState>
 
-function ledgerOf(rule: Account, start: DateString): ReturnLedger | undefined {
+function ledgerOf(rule: Account, amount: number, start: DateString): ReturnLedger | undefined {
 	if (rule.kind !== "asset" || rule.returnLabel === undefined) return undefined
-	return { label: rule.returnLabel, attributed: 0n, through: start }
+	return { label: rule.returnLabel, base: BigInt(amount), attributed: 0n, through: start }
 }
 
 function basisOf(rule: Account, opening: ReadonlyMap<AccountId, number>): bigint | undefined {
@@ -50,7 +52,7 @@ interface Opened {
 
 function stateOf(opened: Opened): AccountState {
 	const { rule, amount, start, series, basis } = opened
-	const returns = ledgerOf(rule, start)
+	const returns = ledgerOf(rule, amount, start)
 	const cost = basisOf(rule, basis)
 	return {
 		rule,

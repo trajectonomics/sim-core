@@ -13,7 +13,7 @@ export const levyGainsDay: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 2,
+		schemaVersion: 3,
 		currency: "THB",
 		economy: { inflation: 250 },
 		accounts: [brokerage, cash, deposit],

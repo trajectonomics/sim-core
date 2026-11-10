@@ -8,7 +8,7 @@ import {
 import type { DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { commitGains } from "./levy-gains"
-import { commitReturns } from "./levy-returns"
+import { commitReturns, rebaseReturns } from "./levy-returns"
 import type { LevyTracker } from "./levy-types"
 import { isSafeInteger, overflow } from "./overflow"
 import type { AccountState } from "./state"
@@ -27,6 +27,7 @@ function commit(
 	state.balance = capitalised
 	state.capitalisedDays = capitalisedDays
 	state.asOf = date
+	rebaseReturns(state, date)
 }
 
 /** Nominal commit: completed periods capitalise first, then the delta applies to capitalised. */
@@ -35,7 +36,13 @@ function nominalCommit(
 	rule: NominalRule,
 	date: DateString,
 	delta: bigint,
+	tracker: LevyTracker | undefined,
 ): ProjectionProblem | undefined {
+	const valueBefore = valuation(state, date)
+	if (tracker !== undefined) {
+		commitReturns(state, tracker, date)
+		commitGains(state, tracker, date, delta, valueBefore)
+	}
 	const settled = capitaliseThrough(
 		{ capitalised: state.balance, capitalisedDays: state.capitalisedDays, asOf: state.asOf },
 		rule,
@@ -69,7 +76,7 @@ export function mutate(
 	tracker?: LevyTracker,
 ): ProjectionProblem | undefined {
 	const rule = activeNominalRule(state)
-	if (rule !== undefined) return nominalCommit(state, rule, date, delta)
+	if (rule !== undefined) return nominalCommit(state, rule, date, delta, tracker)
 	const committed = valuation(state, date)
 	if (!isSafeInteger(committed)) return overflow(date, state.rule.id)
 	const next = committed + delta
@@ -81,5 +88,6 @@ export function mutate(
 	}
 	state.balance = next
 	state.asOf = date
+	rebaseReturns(state, date)
 	return undefined
 }

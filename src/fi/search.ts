@@ -4,6 +4,7 @@ import type { TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
 import { type Accumulator, consume } from "./accumulate"
 import type { BufferFailure, ShortfallFailure } from "./best"
+import { cloneStates } from "./clone"
 import { expenseBetween } from "./expenses"
 import type { Prefix } from "./prefix"
 import { twentyFiveTimes } from "./reference"
@@ -59,7 +60,7 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 		return { kind: "shortfall", failure: { month, shortfall: walked.shortfall }, beforeStop: false }
 	}
 	const annual = expenseBetween(input.requirement.expenses, month, addMonthsClamped(month, 12))
-	const reference = twentyFiveTimes(point.states, month, annual)
+	const reference = twentyFiveTimes(cloneStates(point.states), month, annual)
 	if (!reference.ok) return { kind: "problem", problem: reference.problem, terminal: true }
 	return { kind: "reachable", month, reference: reference.reference }
 }

@@ -23,7 +23,7 @@ describe("the FI candidate clone", () => {
 
 		const cloned = cloneStates(states)
 		const copy = cloned.get("deposit")?.returns
-		expect(copy).toEqual({ label: "interest", attributed: 5n, through: "2026-06-30" })
+		expect(copy).toEqual({ label: "interest", base: 1_000n, attributed: 5n, through: "2026-06-30" })
 		expect(copy).not.toBe(original)
 
 		if (copy !== undefined) copy.attributed = 9n

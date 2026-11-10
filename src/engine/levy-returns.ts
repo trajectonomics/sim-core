@@ -19,33 +19,54 @@ function attribute(
 	const index = settlementPeriodIndexAt(tracker.periods, date)
 	const tally = tracker.tallies[index]
 	if (index < 0 || tally === undefined) return
-	const growth = valuation(state, date) - state.balance - ledger.attributed
+	const growth = valuation(state, date) - ledger.base - ledger.attributed
 	addTo(tally.returns, ledger.label, growth)
 	ledger.attributed += growth
 	ledger.through = date
+}
+
+/** Attributes each period end the range crosses, splitting there, then the rest at `date`. */
+function attributeThrough(
+	state: AccountState,
+	tracker: LevyTracker,
+	ledger: ReturnLedger,
+	date: DateString,
+): void {
+	const last = settlementPeriodIndexAt(tracker.periods, date)
+	for (
+		let index = settlementPeriodIndexAt(tracker.periods, ledger.through);
+		index <= last;
+		index++
+	) {
+		const period = tracker.periods[index]
+		if (period !== undefined && period.to <= date) attribute(state, tracker, ledger, period.to)
+	}
+	attribute(state, tracker, ledger, date)
+}
+
+/** Moves the ledger's base to the value right after the commit that just happened. */
+export function rebaseReturns(state: AccountState, date: DateString): void {
+	const ledger = state.returns
+	if (ledger === undefined) return
+	ledger.base = valuation(state, date)
 }
 
 /** Splits a commit's growth at every period end it crosses, then attributes the rest. */
 export function commitReturns(state: AccountState, tracker: LevyTracker, date: DateString): void {
 	const ledger = state.returns
 	if (ledger === undefined) return
-	const last = settlementPeriodIndexAt(tracker.periods, date)
-	for (
-		let index = settlementPeriodIndexAt(tracker.periods, ledger.through);
-		index < last;
-		index++
-	) {
-		const period = tracker.periods[index]
-		if (period !== undefined) attribute(state, tracker, ledger, period.to)
-	}
-	attribute(state, tracker, ledger, date)
+	attributeThrough(state, tracker, ledger, date)
 	ledger.attributed = 0n
 }
 
-/** Closes the open period at `through` for every Account that tracks returns, without committing. */
+/**
+ * Closes every period end through `through` for each Account that tracks returns, without
+ * committing. Called before any read at a date, so a nominal Account's own capitalisation can
+ * never move its clock past a boundary that has not been attributed.
+ */
 export function closeReturns(states: StateMap, tracker: LevyTracker, through: DateString): void {
 	for (const state of states.values()) {
 		const ledger = state.returns
-		if (ledger !== undefined) attribute(state, tracker, ledger, through)
+		if (ledger !== undefined) attributeThrough(state, tracker, ledger, through)
 	}
 }

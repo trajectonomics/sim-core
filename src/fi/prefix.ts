@@ -2,6 +2,7 @@ import type { ResolvedCalendar } from "../calendar/business"
 import { collectDates } from "../engine/dates"
 import { type DatedEvent, flowsAt } from "../engine/events"
 import { settlementPeriods } from "../engine/levy-plan"
+import { closeReturns } from "../engine/levy-returns"
 import { createTracker, hasSettlement } from "../engine/levy-tally"
 import type { LevyTracker } from "../engine/levy-types"
 import { type EngineRunsOut, processDate } from "../engine/occurrence"
@@ -66,6 +67,7 @@ function advance(
 	if (dayEvents.length === 0 && !(tracker !== undefined && hasSettlement(tracker, date))) {
 		return {}
 	}
+	if (tracker !== undefined) closeReturns(states, tracker, date)
 	const outcome = processDate(states, scenario, date, dayEvents, tracker)
 	if (outcome.problem !== undefined) return { problem: outcome.problem }
 	if (outcome.runsOut === undefined) return {}
