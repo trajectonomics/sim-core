@@ -29,6 +29,15 @@ test's behaviour changes.
   early M, so a later candidate may fail where an earlier one passed. The scan is ascending and
   returns the first pass; it never binary-searches. A Shortfall before M is identical for every
   later candidate, so the scan may stop there.
+  Non-monotonicity is not limited to `retirementSpending` or a Levy (a `sub` or `pick` Measure can
+  fall as income rises). Two more cases survive in a Scenario with neither (#19):
+  - *Buffer date.* A candidate's walk checks the buffer at its own month M, so a later candidate
+    gets a check that an earlier one never makes. With a Minimum buffer the pass pattern across
+    candidates can be pass, fail, pass.
+  - *`upTo` rounding.* A surplus step with `upTo` skips the commit on a zero fill, and ADR 0001's
+    lazy per-account commits then round at different dates in different candidates, so a richer
+    Scenario can end one minor unit poorer. The pattern can be pass, fail, fail, pass with no
+    buffer. Both fixtures use `upTo` on a positive-rate Account.
 - **Best case when unreachable.** A candidate with no Shortfall beats one with a Shortfall. Among
   Shortfalls: latest runs-out date, then smallest unmet amount, then earliest month. Among
   buffer-only failures: latest first breach date, then smallest deficit, then earliest month.
@@ -58,7 +67,10 @@ test's behaviour changes.
 ## Considered options
 
 - **Binary search over months.** Assumes survival is monotonic in M. Retirement spending can make
-  it non-monotonic, so v1 scans linearly.
+  it non-monotonic, so v1 scans linearly. Still rejected after #19: the buffer-date and `upTo`
+  cases above break monotonicity without a Levy or `retirementSpending`, and a linear verification
+  fallback saves nothing because proving that every earlier month fails costs as much as the scan.
+  The scan is made cheaper by exact constant-factor work, never by a different search order.
 - **Call `project()` per candidate.** Correct but builds rows, roll-ups and reports for every
   candidate. The survival walk only keeps the state, tallies and buffer measurements it needs.
 - **Fixed-amount buffer.** The agreed definition is months of expenses; a fixed amount needs a
