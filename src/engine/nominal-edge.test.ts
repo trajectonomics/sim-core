@@ -100,6 +100,23 @@ describe("nominal edges", () => {
 		expect(splitAt(rowAt(projection, "2024-03-31"), "savings").amount).toBe(1_325_120)
 	})
 
+	it("projects at both ends of the supported calendar", () => {
+		for (const [start, horizon] of [
+			["0001-01-01", "0001-03-31"],
+			["9998-01-01", "9998-12-31"],
+		] as const) {
+			const projection = run({
+				accounts: [savings],
+				balances: { savings: 1_000 },
+				surplus: [{ account: "savings" }],
+				start,
+				horizon,
+				resolution: "month",
+			})
+			expect(projection.rows.at(-1)?.date).toBe(horizon)
+		}
+	})
+
 	it("reports a nominal overflow as data at the date and Account", () => {
 		const found = problems({
 			accounts: [savings],

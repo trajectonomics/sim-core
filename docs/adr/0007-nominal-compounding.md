@@ -100,6 +100,9 @@ interest charge. This ADR adds the primitive and records the two breaking change
 - Interest is rounded at capitalisation, so a small balance may not grow at all. Documented above.
 - Every parity hash changes in the ticket that changes the row type, even though effective-annual
   numbers stay identical; a one-off old-shape comparison proves the numbers did not move.
+- This Spec deliberately does not keep the issue's line "existing inputs do not change": the
+  Scenario version literal and the `ProjectionBalance` shape break. The effective-annual numbers
+  do not, which is what the old-shape comparison proves; both breaks ship in one `feat!:` release.
 - Deferred, with the next slice's shape: `daily` compounding with a Feb 29 zero-counted-day rule;
   `compoundingAnchor` for a contract anniversary, reusing the Levy `MonthDay` vocabulary;
   interest-first debit allocation; negative nominal rates with signed half-away-from-zero rounding;

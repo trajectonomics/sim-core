@@ -3,13 +3,23 @@ import { compoundingDate } from "../calendar/compounding"
 import { project } from "../engine/project"
 import type { Fixture } from "../fixtures/fixture"
 import type { Account } from "../types"
-import type { Projection } from "../types/projection"
-import { NOMINAL_CASES } from "./nominal-cases"
+import type { Projection, ProjectionRow } from "../types/projection"
+import {
+	NOMINAL_CASES,
+	nominalAnnual,
+	nominalLeapFebruary,
+	nominalQuarterly,
+	nominalZero,
+} from "./nominal-cases"
+import { EDGE_NOMINAL_CASES } from "./nominal-edge-cases"
 import { FLOW_NOMINAL_CASES } from "./nominal-flow-cases"
-
-const ALL_CASES: readonly Fixture[] = [...NOMINAL_CASES, ...FLOW_NOMINAL_CASES]
-
 import { oracleView } from "./oracle-view"
+
+const ALL_CASES: readonly Fixture[] = [
+	...NOMINAL_CASES,
+	...FLOW_NOMINAL_CASES,
+	...EDGE_NOMINAL_CASES,
+]
 
 function projectFixture(fixture: Fixture): Projection {
 	const result = project(fixture.baseline, fixture.scenario, fixture.timeline)
@@ -37,6 +47,28 @@ describe("nominal fixtures match the independent oracle", () => {
 function mustBeZero(rule: Account, date: string): boolean {
 	if (rule.compounding === undefined) return true
 	return compoundingDate(date, rule.compounding) === date
+}
+
+type Balance = ProjectionRow["balances"][number]
+
+function signedSum(balances: readonly Balance[], kinds: ReadonlyMap<string, string>): number {
+	return balances.reduce(
+		(sum, item) => sum + (kinds.get(item.account) === "liability" ? -item.amount : item.amount),
+		0,
+	)
+}
+
+function accessibleSum(
+	balances: readonly Balance[],
+	accounts: ReadonlyMap<string, Account>,
+	date: string,
+): number {
+	return balances.reduce((sum, item) => {
+		const rule = accounts.get(item.account)!
+		const locked =
+			rule.kind === "asset" && rule.lockedUntil !== undefined && date < rule.lockedUntil
+		return locked ? sum : sum + (rule.kind === "liability" ? -item.amount : item.amount)
+	}, 0)
 }
 
 function expectAccruedZeroOnBoundaries(fixture: Fixture): void {
@@ -72,13 +104,20 @@ describe("split invariants", () => {
 		for (const fixture of ALL_CASES) {
 			const projection = projectFixture(fixture)
 			const kinds = new Map(fixture.scenario.accounts.map((rule) => [rule.id, rule.kind]))
+			const accounts = new Map(fixture.scenario.accounts.map((rule) => [rule.id, rule]))
 			for (const row of projection.rows) {
-				const total = row.balances.reduce(
-					(sum, item) =>
-						sum + (kinds.get(item.account) === "liability" ? -item.amount : item.amount),
-					0,
-				)
-				expect(row.netWorth).toBe(total)
+				expect(row.netWorth).toBe(signedSum(row.balances, kinds))
+				expect(row.realNetWorth).toBe(signedSum(row.realBalances, kinds))
+				expect(row.accessibleNetWorth).toBe(accessibleSum(row.balances, accounts, row.date))
+				expect(row.realAccessibleNetWorth).toBe(accessibleSum(row.realBalances, accounts, row.date))
+			}
+		}
+	})
+
+	it("computes a quiet Account's roll-up interest as the change in its value", () => {
+		for (const fixture of [nominalQuarterly, nominalAnnual, nominalZero, nominalLeapFebruary]) {
+			for (const year of projectFixture(fixture).annual) {
+				expect(year.interest).toBe(year.closingNetWorth - year.openingNetWorth)
 			}
 		}
 	})

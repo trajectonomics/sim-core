@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { countedDays } from "../calendar/counted"
 import { project } from "../engine/project"
 import type { EngineSnapshot } from "../engine/snapshot"
 import type { Fixture } from "../fixtures/fixture"
@@ -14,7 +15,7 @@ import {
 	nominalReal,
 	nominalSemiannual,
 } from "./nominal-cases"
-import { nominalOverdraw, nominalShortfall } from "./nominal-flow-cases"
+import { nominalMonthlyLoan, nominalOverdraw, nominalShortfall } from "./nominal-flow-cases"
 
 function projectFixture(fixture: Fixture): Projection {
 	const result = project(fixture.baseline, fixture.scenario, fixture.timeline)
@@ -94,6 +95,21 @@ describe("real values deflate the components separately", () => {
 		expect(deflate(26n, 200, 365)).toBe(25n)
 		expect(deflate(26n, 200, 365)).toBe(25n)
 		expect(deflate(52n, 200, 365)).toBe(51n)
+	})
+
+	it("reports the components' sum when the rounded total would differ by one", () => {
+		const projection = projectFixture(nominalMonthlyLoan)
+		const row = projection.rows.find((item) => item.date === "2028-01-01")!
+		const nominal = row.balances.find((item) => item.account === "loan")!
+		const real = row.realBalances.find((item) => item.account === "loan")!
+		expect(real).toEqual({
+			account: "loan",
+			amount: 3_167_523,
+			capitalised: 3_166_501,
+			accruedInterest: 1_022,
+		})
+		const days = countedDays(nominalMonthlyLoan.timeline.start, "2028-01-01")
+		expect(deflate(BigInt(nominal.amount), 200, days)).toBe(3_167_522n)
 	})
 
 	it("reports 25 + 25 = 50 for a row whose nominal split is 26 + 26", () => {

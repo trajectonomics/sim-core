@@ -102,5 +102,6 @@ describe("nominal interest deepens a Shortfall", () => {
 	it("has no Shortfall when the Account carries no interest", () => {
 		const projection = run(setup({ id: "loan", kind: "liability", rate: 0 }))
 		expect(projection.runsOut).toBeUndefined()
+		expect(projection.annual[0]).toMatchObject({ contributions: 1_000_000, unmet: 0 })
 	})
 })

@@ -3,7 +3,7 @@ import { countedDays } from "../calendar/counted"
 import type { BasisPoints, CompoundingPeriod, DateString } from "../types"
 import { roundHalfUp } from "./round"
 
-/** A nominal Account's exact accrual: capitalised capitalised plus its capitalised-days numerator. */
+/** A nominal Account's exact accrual: the capitalised balance plus its capitalised-days numerator. */
 export interface Accrual {
 	readonly capitalised: bigint
 	readonly capitalisedDays: bigint
