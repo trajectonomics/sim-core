@@ -2,11 +2,13 @@ import type { AccountId, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { isSafeInteger, overflow } from "./overflow"
 import type { StateMap } from "./state"
-import { valuation } from "./value"
+import { valueParts } from "./value"
 
 export interface EngineBalance {
 	readonly account: AccountId
 	readonly amount: bigint
+	readonly capitalised: bigint
+	readonly accruedInterest: bigint
 }
 
 export interface EngineSnapshot {
@@ -27,11 +29,11 @@ export function snapshot(states: StateMap, date: DateString): SnapshotOutcome {
 	let net = 0n
 	let accessible = 0n
 	for (const state of states.values()) {
-		const amount = valuation(state, date)
-		if (!isSafeInteger(amount))
+		const parts = valueParts(state, date)
+		if (!isSafeInteger(parts.amount))
 			return { snapshot: undefined, problem: overflow(date, state.rule.id) }
-		balances.push({ account: state.rule.id, amount })
-		const signed = state.rule.kind === "liability" ? -amount : amount
+		balances.push({ account: state.rule.id, ...parts })
+		const signed = state.rule.kind === "liability" ? -parts.amount : parts.amount
 		net += signed
 		const unlocked =
 			state.rule.kind === "liability" ||

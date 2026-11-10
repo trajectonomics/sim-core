@@ -38,7 +38,9 @@ describe("check() compounding vocabulary", () => {
 
 	it("rejects a misspelled compounding key as an unknown key", () => {
 		const problems = problemsForAccount({ ...base, compouding: "monthly" })
-		expect(problems).toEqual([{ code: "UNKNOWN_KEY", path: ["scenario", "accounts", 0, "compouding"] }])
+		expect(problems).toEqual([
+			{ code: "UNKNOWN_KEY", path: ["scenario", "accounts", 0, "compouding"] },
+		])
 	})
 
 	it("accepts a zero nominal rate", () => {
@@ -69,7 +71,11 @@ describe("check() compounding vocabulary", () => {
 
 	it("requires scenario schemaVersion 3", () => {
 		const version = (value: number): readonly Problem[] =>
-			check(thaiEmployee.baseline, { ...thaiEmployee.scenario, schemaVersion: value }, thaiEmployee.timeline)
+			check(
+				thaiEmployee.baseline,
+				{ ...thaiEmployee.scenario, schemaVersion: value },
+				thaiEmployee.timeline,
+			)
 		expect(version(2)).toEqual([
 			{ code: "UNSUPPORTED_SCHEMA_VERSION", path: ["scenario", "schemaVersion"] },
 		])

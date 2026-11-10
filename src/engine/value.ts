@@ -4,14 +4,27 @@ import type { DateString } from "../types"
 import { walkRows } from "./span"
 import type { AccountState, StateMap } from "./state"
 
-/** Read-only valuation; it never commits the account. */
-export function valuation(state: AccountState, date: DateString): bigint {
+/** An Account's reported value, split into its capitalised and accrued parts. */
+export interface ValueParts {
+	readonly capitalised: bigint
+	readonly accruedInterest: bigint
+	readonly amount: bigint
+}
+
+/** Read-only valuation; it never commits the account. An effective Account is all capitalised. */
+export function valueParts(state: AccountState, date: DateString): ValueParts {
 	const series = state.series
-	if (series === undefined) {
-		if (state.asOf === date) return state.balance
-		return grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
-	}
-	return walkRows(state.balance, state.asOf, date, series)
+	const amount =
+		series === undefined
+			? state.asOf === date
+				? state.balance
+				: grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
+			: walkRows(state.balance, state.asOf, date, series)
+	return { capitalised: amount, accruedInterest: 0n, amount }
+}
+
+export function valuation(state: AccountState, date: DateString): bigint {
+	return valueParts(state, date).amount
 }
 
 function signedValue(state: AccountState, date: DateString): bigint {

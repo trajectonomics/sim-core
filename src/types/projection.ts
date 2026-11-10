@@ -6,12 +6,20 @@ export interface AccountAmount {
 	readonly amount: MinorUnits
 }
 
+/** One Account's value in a row: `capitalised + accruedInterest = amount`. */
+export interface ProjectionBalance {
+	readonly account: AccountId
+	readonly amount: MinorUnits
+	readonly capitalised: MinorUnits
+	readonly accruedInterest: MinorUnits
+}
+
 export interface ProjectionRow {
 	readonly date: DateString
-	readonly balances: readonly AccountAmount[]
+	readonly balances: readonly ProjectionBalance[]
 	readonly netWorth: MinorUnits
 	readonly accessibleNetWorth: MinorUnits
-	readonly realBalances: readonly AccountAmount[]
+	readonly realBalances: readonly ProjectionBalance[]
 	readonly realNetWorth: MinorUnits
 	readonly realAccessibleNetWorth: MinorUnits
 }

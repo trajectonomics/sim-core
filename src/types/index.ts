@@ -47,6 +47,7 @@ export type {
 	LevyMeasureValue,
 	LevyReport,
 	Projection,
+	ProjectionBalance,
 	ProjectionProblem,
 	ProjectionResult,
 	ProjectionRow,
