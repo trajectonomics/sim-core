@@ -1,3 +1,4 @@
+import { BoundedCache } from "../bounded-cache"
 import type { BasisPoints } from "../types"
 import { DAYS_PER_YEAR, dailyFactor, RATE_SCALE } from "./factor"
 import { roundHalfUp } from "./round"
@@ -30,23 +31,34 @@ function splitDays(days: number): readonly [years: number, remainder: number] {
 	return [years, days - years * DAYS_PER_YEAR]
 }
 
-/** `(10000 + rate)^years * f^remainder / (10000^years * 10^(30*remainder))`. */
+const partCache: BoundedCache<string, FactorParts> = new BoundedCache(8192)
+
+/** `(10000 + rate)^years * f^remainder / (10000^years * 10^(30*remainder))`, cached by both inputs. */
 function factorParts(rate: BasisPoints, days: number): FactorParts {
+	const key = `${rate}:${days}`
+	const cached = partCache.get(key)
+	if (cached !== undefined) return cached
 	const [years, remainder] = splitDays(days)
-	return {
+	const parts = {
 		numerator: powerAt(rate, years, true) * powerAt(rate, remainder, false),
 		denominator: powerAt(0, years, true) * powerAt(0, remainder, false),
 	}
+	partCache.set(key, parts)
+	return parts
 }
 
 /** Grows `amount` over `days` counted days with one half-up rounding at the end. */
 export function grow(amount: bigint, rate: BasisPoints, days: number): bigint {
+	if (amount === 0n) return 0n
+	if (amount > 0n && (days === 0 || rate === 0)) return amount
 	const parts = factorParts(rate, days)
 	return roundHalfUp(amount * parts.numerator, parts.denominator)
 }
 
 /** Today's-money value of `amount` at `inflation`, over `days` counted days. */
 export function deflate(amount: bigint, inflation: BasisPoints, days: number): bigint {
+	if (amount === 0n) return 0n
+	if (amount > 0n && (days === 0 || inflation === 0)) return amount
 	const parts = factorParts(inflation, days)
 	return roundHalfUp(amount * parts.denominator, parts.numerator)
 }

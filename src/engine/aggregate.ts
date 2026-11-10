@@ -39,7 +39,7 @@ export function aggregate(events: readonly DatedEvent[], inflation: BasisPoints)
 	const gross = new Map<string, bigint>()
 	const contributionEntries: ContributionEntry[] = []
 	for (const event of events) {
-		const amount = amountAt(event, inflation)
+		const amount = event.amount ?? amountAt(event, inflation)
 		const flow = event.flow
 		if (flow.kind === "income") {
 			income += amount

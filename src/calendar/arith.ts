@@ -1,3 +1,4 @@
+import { BoundedCache } from "../bounded-cache"
 import type { DateString } from "../types"
 import { daysInMonth, formatDate, parseDate } from "./civil"
 
@@ -17,10 +18,16 @@ function daysBeforeMonth(year: number, month: number): number {
 	return days
 }
 
-/** Zero-based serial day number; 0001-01-01 is 0. */
+const dayNumbers: BoundedCache<DateString, number> = new BoundedCache(65536)
+
+/** Zero-based serial day number; 0001-01-01 is 0. Cached per date, purely additively. */
 export function dayNumber(date: DateString): number {
+	const cached = dayNumbers.get(date)
+	if (cached !== undefined) return cached
 	const { year, month, day } = parseDate(date)
-	return daysBeforeYear(year) + daysBeforeMonth(year, month) + day - 1
+	const value = daysBeforeYear(year) + daysBeforeMonth(year, month) + day - 1
+	dayNumbers.set(date, value)
+	return value
 }
 
 const FIRST_DATE: DateString = "0001-01-01"
@@ -49,6 +56,7 @@ export function addDays(date: DateString, days: number): DateString {
 
 /** Adds calendar months, clamping the day to the target month's last day. */
 export function addMonthsClamped(date: DateString, months: number): DateString {
+	if (months === 0) return date
 	const { year, month, day } = parseDate(date)
 	const total = year * 12 + (month - 1) + months
 	const targetYear = Math.floor(total / 12)

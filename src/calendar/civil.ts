@@ -1,6 +1,7 @@
 import type { DateString } from "../types"
 
-const DATE_SHAPE = /^(\d{4})-(\d{2})-(\d{2})$/
+const DIGIT_ZERO = 48
+const HYPHEN = 45
 const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 export interface CivilDate {
@@ -17,11 +18,24 @@ export function daysInMonth(year: number, month: number): number {
 	return month === 2 && isLeapYear(year) ? 29 : (MONTH_DAYS[month - 1] ?? 0)
 }
 
-/** Parses an already validated `YYYY-MM-DD` date. */
+function digitAt(value: DateString, index: number): number {
+	const digit = value.charCodeAt(index) - DIGIT_ZERO
+	if (digit < 0 || digit > 9) throw new RangeError(`Invalid date: ${value}`)
+	return digit
+}
+
+function digits(value: DateString, from: number, to: number): number {
+	let total = 0
+	for (let index = from; index < to; index++) total = total * 10 + digitAt(value, index)
+	return total
+}
+
+/** Parses an already validated `YYYY-MM-DD` date; character codes, no regular expression. */
 export function parseDate(value: DateString): CivilDate {
-	const match = DATE_SHAPE.exec(value)
-	if (!match) throw new RangeError(`Invalid date: ${value}`)
-	return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) }
+	if (value.length !== 10 || value.charCodeAt(4) !== HYPHEN || value.charCodeAt(7) !== HYPHEN) {
+		throw new RangeError(`Invalid date: ${value}`)
+	}
+	return { year: digits(value, 0, 4), month: digits(value, 5, 7), day: digits(value, 8, 10) }
 }
 
 function pad(value: number, width: number): string {
