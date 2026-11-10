@@ -64,44 +64,54 @@ test's behaviour changes.
   at `9998-12-31`, the last year the core accepts. Near that edge the window can be shorter than
   twelve months rather than leave the supported calendar.
 
-## The probability-threshold case (reserved, unbuilt)
+## The probability-threshold case
 
-`FinancialIndependenceOptions` is a discriminated union on `method`. `survival` is the only value
-built today; `probabilityThreshold` is the reserved second case, specified in full in ADR-0005 and
-delivered by #67. It does not change the survival test: it asks that test of every Market path and
-turns the answers into a share.
+`FinancialIndependenceOptions` is a discriminated union on `method`. `probabilityThreshold` asks
+the survival test of every Market path and turns the answers into an FI survival share; it does
+not change the survival test. It is built on the growth seam and PRNG of ADR-0005.
 
 - **Options.** `method: "probabilityThreshold"`, `thresholdBps` (`1..10000`, so a 100% target is
   expressible), `paths` (`1..200`) and `seed` (16 lower-case hex digits, echoed verbatim), reusing
   `retirementSpending` and `minBufferMonths`. `FinancialIndependenceDefinition` stops carrying the
-  literal `1` and becomes a per-method union.
+  literal `1` and becomes a per-method union; each case carries its own `definitionVersion`.
+- **Market input.** The Return model is a run input beside the Baseline, Scenario and Timeline,
+  like the Return series of ADR-0005: `financialIndependence(..., options, model)`. It is a fifth
+  argument rather than an option, because it is market data and not a decision of the method.
+  `id` and `accounts` are validated, every bucket carries one `returnsBps` per Account in
+  `-9999..10000`, and the weights are non-negative safe integers summing to exactly 2^32.
+  `INVALID_WEIGHT`, `RETURN_WEIGHT_TOTAL` and `TOO_MANY_ENTRIES` are the ADR-0005 codes this input
+  uses; 64 Accounts, 512 buckets and 1,200 month rows are its caps. A missing model is
+  `MISSING_KEY` at `["model"]`. An Account the model does not name keeps its `Account.rate`.
+- **Paths.** One draw per month row picks one Market bucket for every Account in the model. Path
+  `i` starts from `pathSeed(seed, i)` and its rows run from `Timeline.start` to the horizon, one
+  per month start; the last row's window ends at the horizon. Each path resolves its rows once and
+  walks the unchanged Scenario once for its prefix, and every candidate reuses that path's prefix:
+  the N paths are common random numbers across the candidate grid.
 - **A path counts at candidate M** when earned income stops at M, the path has no Shortfall
   through the horizon (inclusive of a Shortfall on the horizon), and the minimum buffer holds on
   the terms above: after that date's Flows; at M even when no Occurrence lands there; at every
   Occurrence after M; and at the horizon; with `required(D) = ceil(minBufferMonths × E(D) / 12)`
   and `E(D)` not truncated at the horizon; `minBufferMonths: 0` is treated as omitted. A buffer
-  breach fails the path and the walk continues, so a later Shortfall can win the binding exactly
-  as in the survival method.
-- **The FI month** is the earliest M whose FI survival share — survived paths divided by `paths` —
-  reaches `thresholdBps`. Every candidate shares the same N paths by seed and index: common random
-  numbers, or the monthly shares would not be comparable. The scan stays ascending rather than
-  binary, because the survival method's monotonicity is not assumed.
-- **Ordering and result.** The binding order above applies. When the candidate grid is non-empty
-  and no month reaches the threshold, `FiBinding` reports `"thresholdNotReached"` and the result
-  carries `bestMonth { month, fiSurvivalBps }` — highest share, ties to the earliest month —
-  instead of `bestCase`, whose ordering ranks a single Run-out date and a single unmet amount that
-  a distribution does not have. Because `FinancialIndependence.reference` measures one date's
-  unlocked assets and expenses, the probability case's reachable variant drops it: a 25× multiple
-  of one month says nothing about a path set.
+  breach fails the path. Every candidate is evaluated for every path separately: the share is not
+  cumulative, because survival is not monotonic in M.
+- **The FI month** is the earliest M whose FI survival share — `floor(survived × 10000 / paths)` —
+  reaches `thresholdBps`. The floor is deliberate, so a 100% threshold needs every path.
+- **Ordering and result.** An empty candidate grid is `noCandidateMonth`. Otherwise, when no month
+  reaches the threshold, `FiBinding` reports `"thresholdNotReached"` and the result carries
+  `bestMonth { month, fiSurvivalBps }` — highest share, ties to the earliest month — instead of
+  `bestCase`, whose ordering ranks a single Run-out date and a single unmet amount that a
+  distribution does not have. A reachable answer carries `fiSurvivalBps` and drops `reference`: a
+  25× multiple of one month says nothing about a path set. The definition echoes the model id
+  beside the seed and the path count.
 - **Validation** sits at `["options", ...]` like the survival case. `thresholdBps` follows
   `scalars.rate`: a non-integer is `NOT_SAFE_INTEGER`, an integer outside `1..10000` is
   `RATE_OUT_OF_RANGE`. `paths` outside `1..200` is `INVALID_PATH_COUNT` and a malformed `seed` is
   `INVALID_SEED`; both arrive with the case, per ADR-0005's two-tier rule. An unknown `method`
   stays `INVALID_FI_METHOD`, which already exists.
-- **Cost gate.** At roughly 12 ms a bare run, 720 candidates × 200 paths is 144,000 runs, so the
-  case ships only after #19 or a comparable optimisation, or with a measured budget recorded
-  against the 60 s bar. The 200-path cap is the method's own: the Outcome distribution's is 10,000,
-  and the two never share an option type.
+- **Overflow.** A prefix or candidate walk that overflows fails the whole call with
+  `VALUE_OVERFLOW` at its date and Account: a share over a shrunken sample would be a lie.
+- **Cost gate.** #19 landed, so the gate is met. The 200-path cap stays the method's own: the
+  Outcome distribution's is 10,000, and the two never share an option type.
 
 ## Considered options
 

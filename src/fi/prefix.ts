@@ -6,6 +6,7 @@ import { createTracker, hasSettlement } from "../engine/levy-tally"
 import type { LevyTracker } from "../engine/levy-types"
 import { type EngineRunsOut, processDate } from "../engine/occurrence"
 import { isSafeInteger, overflow } from "../engine/overflow"
+import type { ResolvedReturns } from "../engine/returns"
 import { createStates, type StateMap } from "../engine/state"
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import type { ProjectionProblem } from "../types/projection"
@@ -74,8 +75,9 @@ export function baselinePrefix(
 	events: readonly DatedEvent[],
 	candidates: readonly DateString[],
 	calendar: ResolvedCalendar | undefined,
+	series?: ResolvedReturns,
 ): Prefix {
-	const states = createStates(baseline, scenario, timeline.start)
+	const states = createStates(baseline, scenario, timeline.start, series)
 	const plan = levyPlan(scenario, timeline, calendar)
 	const tracker = plan.tracker
 	const wanted = new Set(candidates)

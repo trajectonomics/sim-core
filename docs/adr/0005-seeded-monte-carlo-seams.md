@@ -175,9 +175,17 @@ Because `FinancialIndependence.reference` is required on a reachable answer and 
 without it: a 25× multiple of one month says nothing about a path set. `INVALID_FI_METHOD` already
 reports an unknown `method`; it landed with the survival method in #40.
 
-The case is cost-blocked and separately capped. At ~12 ms a bare run, 720 candidates × 1,000 paths
-is 720,000 runs, so its `paths` cap is 200 and it ships only with a measured budget, or after #19 or
-a comparable optimisation. #19 establishes monotonicity for the deterministic predicate only.
+The case is separately capped. Its `paths` cap is 200, and it ships only with a measured budget,
+or after #19 or a comparable optimisation; #19 has landed and #67 built the case on it. #19
+establishes monotonicity for the deterministic predicate only, which is why the probability scan
+still walks the candidates ascending and counts every candidate for every path.
+
+The Return model reaches the method as a run input beside the Baseline, Scenario and Timeline — a
+fifth argument to `financialIndependence` — because it is market data, not a decision of the
+method. One draw per month row picks one bucket for every Account in the model, so each Market
+path is one `Returns` input resolved once; every candidate month reuses that path's prefix, which
+is what makes the monthly shares comparable. An overflow in any path's prefix or candidate walk
+fails the whole call: a share over a shrunken sample would be a lie.
 
 ## Caps
 

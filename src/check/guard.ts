@@ -1,6 +1,6 @@
 import type { Emit } from "./codes"
 
-export type Root = "baseline" | "scenario" | "timeline" | "options"
+export type Root = "baseline" | "scenario" | "timeline" | "options" | "model"
 
 /**
  * Runs `run`, turning an exception (a throwing getter, a revoked Proxy) into one `NOT_AN_OBJECT`

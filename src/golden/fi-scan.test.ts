@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { readFileSync } from "node:fs"
 import { generateCases } from "../fi/scan-generator"
 import { financialIndependence } from "../index"
-import type { FinancialIndependenceResult } from "../types"
+import type { SurvivalFinancialIndependenceResult } from "../types"
 import { SCAN_CASES } from "./fi-scan-cases"
 import { oracleFiMonth } from "./oracle-fi"
 
@@ -10,7 +10,7 @@ interface Snapshot {
 	readonly cases: readonly {
 		readonly name: string
 		readonly options: unknown
-		readonly result: FinancialIndependenceResult
+		readonly result: SurvivalFinancialIndependenceResult
 	}[]
 }
 

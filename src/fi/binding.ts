@@ -1,9 +1,9 @@
 import type {
 	FiBestCase,
-	FiBinding,
-	FinancialIndependence,
-	FinancialIndependenceDefinition,
+	SurvivalBinding,
+	SurvivalDefinition,
 } from "../types/financial-independence"
+import type { SurvivalFinancialIndependence } from "../types/financial-independence-result"
 import type { BufferFailure, ShortfallFailure } from "./best"
 
 function bufferBest(failure: BufferFailure): FiBestCase {
@@ -27,7 +27,7 @@ function shortfallBest(failure: ShortfallFailure): FiBestCase {
 	}
 }
 
-function bindingOf(failure: ShortfallFailure): FiBinding {
+function bindingOf(failure: ShortfallFailure): SurvivalBinding {
 	if (failure.shortfall.date < failure.month) return "shortfallBeforeStop"
 	return failure.shortfall.undrawable >= failure.shortfall.unmet
 		? "undrawableMoney"
@@ -36,10 +36,10 @@ function bindingOf(failure: ShortfallFailure): FiBinding {
 
 /** The not-reachable answer: a buffer-only best case beats any shortfall. */
 export function unreachable(
-	definition: FinancialIndependenceDefinition,
+	definition: SurvivalDefinition,
 	buffer: BufferFailure | undefined,
 	shortfall: ShortfallFailure | undefined,
-): FinancialIndependence {
+): SurvivalFinancialIndependence {
 	if (buffer !== undefined) {
 		return { reachable: false, definition, binding: "minimumBuffer", bestCase: bufferBest(buffer) }
 	}

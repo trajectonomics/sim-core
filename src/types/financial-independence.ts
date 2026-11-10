@@ -1,5 +1,5 @@
 import type { BasisPoints, DateString, Growth, MinorUnits } from "./common"
-import type { ProjectionProblem, RunsOut } from "./projection"
+import type { RunsOut } from "./projection"
 
 export interface SurvivalOptions {
 	readonly method: "survival"
@@ -7,11 +7,33 @@ export interface SurvivalOptions {
 	readonly minBufferMonths?: number
 }
 
-export type FinancialIndependenceOptions = SurvivalOptions
+export interface ProbabilityThresholdOptions {
+	readonly method: "probabilityThreshold"
+	readonly thresholdBps: BasisPoints
+	readonly paths: number
+	readonly seed: string
+	readonly retirementSpending?: { readonly amount: MinorUnits; readonly growth: Growth }
+	readonly minBufferMonths?: number
+}
 
-export type FinancialIndependenceDefinition = FinancialIndependenceOptions & {
+export type FinancialIndependenceOptions = SurvivalOptions | ProbabilityThresholdOptions
+
+export interface SurvivalDefinition extends SurvivalOptions {
 	readonly definitionVersion: 1
 }
+
+export interface ProbabilityDefinition {
+	readonly method: "probabilityThreshold"
+	readonly thresholdBps: BasisPoints
+	readonly paths: number
+	readonly seed: string
+	readonly modelId: string
+	readonly retirementSpending?: { readonly amount: MinorUnits; readonly growth: Growth }
+	readonly minBufferMonths?: number
+	readonly definitionVersion: 1
+}
+
+export type FinancialIndependenceDefinition = SurvivalDefinition | ProbabilityDefinition
 
 export interface TwentyFiveTimesReference {
 	readonly label: "ruleOfThumb25x"
@@ -34,31 +56,18 @@ export type FiBestCase =
 			}
 	  }
 
-export type FiBinding =
+/** The bindings a deterministic `survival` answer reports. */
+export type SurvivalBinding =
 	| "shortfallBeforeStop"
 	| "undrawableMoney"
 	| "insufficientMoney"
 	| "minimumBuffer"
 
-export type FinancialIndependence =
-	| {
-			readonly reachable: true
-			readonly definition: FinancialIndependenceDefinition
-			readonly month: DateString
-			readonly reference: TwentyFiveTimesReference
-	  }
-	| {
-			readonly reachable: false
-			readonly definition: FinancialIndependenceDefinition
-			readonly binding: "noCandidateMonth"
-	  }
-	| {
-			readonly reachable: false
-			readonly definition: FinancialIndependenceDefinition
-			readonly binding: FiBinding
-			readonly bestCase: FiBestCase
-	  }
+/** Every binding an FI answer may report; `thresholdNotReached` belongs to `probabilityThreshold`. */
+export type FiBinding = SurvivalBinding | "thresholdNotReached"
 
-export type FinancialIndependenceResult =
-	| { readonly ok: true; readonly financialIndependence: FinancialIndependence }
-	| { readonly ok: false; readonly problems: readonly ProjectionProblem[] }
+/** The highest FI survival share a probability-threshold scan saw, and the first month that had it. */
+export interface ThresholdMonth {
+	readonly month: DateString
+	readonly fiSurvivalBps: BasisPoints
+}

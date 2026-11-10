@@ -16,13 +16,24 @@ export type {
 export type {
 	FiBestCase,
 	FiBinding,
-	FinancialIndependence,
 	FinancialIndependenceDefinition,
 	FinancialIndependenceOptions,
-	FinancialIndependenceResult,
+	ProbabilityDefinition,
+	ProbabilityThresholdOptions,
+	SurvivalBinding,
+	SurvivalDefinition,
 	SurvivalOptions,
+	ThresholdMonth,
 	TwentyFiveTimesReference,
 } from "./financial-independence"
+export type {
+	FinancialIndependence,
+	FinancialIndependenceResult,
+	ProbabilityFinancialIndependence,
+	ProbabilityFinancialIndependenceResult,
+	SurvivalFinancialIndependence,
+	SurvivalFinancialIndependenceResult,
+} from "./financial-independence-result"
 export type { ContributionFlow, ExpenseFlow, Flow, IncomeFlow } from "./flow"
 export type {
 	BinaryMeasure,
@@ -40,6 +51,7 @@ export type {
 	TallyBasis,
 	TallyMeasure,
 } from "./levy"
+export type { MarketBucket, ReturnModel } from "./market"
 export type {
 	AccountAmount,
 	AnnualRollup,
