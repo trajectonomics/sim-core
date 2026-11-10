@@ -53,7 +53,7 @@ const salary = (amount: MinorUnits, options: Parameters<typeof income>[2] = {}) 
 	})
 
 describe("several Levies in one Scenario", () => {
-	it("gives each Levy its own period and settlement dates", () => {
+	it("gives each Levy its own Settlement periods and Settlement dates", () => {
 		const july = {
 			...share("b", 5, { month: 9, day: 30 }),
 			period: { month: 7, day: 1 },

@@ -3,7 +3,7 @@ import type { Prepayment } from "../types"
 import type { LevyTally } from "./levy-types"
 
 /** One Levy's period state at an Occurrence date, for the shares a Flow credits it. */
-export interface LevyPeriodView {
+export interface SettlementPeriodView {
 	readonly levy: string
 	readonly tally: LevyTally | undefined
 	readonly caps: ReadonlyMap<string, bigint> | undefined
@@ -16,7 +16,7 @@ export function share(amount: bigint, bps: number): bigint {
 
 /** Period-to-date gross of `label` before this event: the tracker's total plus today's earlier ones. */
 export function settlementPeriodGross(
-	view: LevyPeriodView,
+	view: SettlementPeriodView,
 	label: string,
 	today: ReadonlyMap<string, bigint>,
 ): bigint {
@@ -45,7 +45,7 @@ function entryFor(entries: readonly Prepayment[], levy: string): Prepayment | un
 export function plainShares(
 	entries: readonly Prepayment[],
 	amount: bigint,
-	views: readonly LevyPeriodView[],
+	views: readonly SettlementPeriodView[],
 ): ReadonlyMap<string, bigint> {
 	const shares = new Map<string, bigint>()
 	let running = 0n

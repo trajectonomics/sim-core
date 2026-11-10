@@ -35,37 +35,37 @@ describe("Dated constants in the engine", () => {
 		).toBe(100)
 	})
 
-	it("applies a step inside the period to the whole period", () => {
+	it("applies a step inside a Settlement period to the whole period", () => {
 		expect(
 			dueAt(stepped(100, [{ from: "2026-06-01", value: 500 }]), "2026-01-01", "2026-12-31"),
 		).toBe(500)
 	})
 
-	it("applies a step on the period's last day", () => {
+	it("applies a step on the Settlement period's last day", () => {
 		expect(
 			dueAt(stepped(100, [{ from: "2026-12-31", value: 500 }]), "2026-01-01", "2026-12-31"),
 		).toBe(500)
 	})
 
-	it("does not apply a step after the period", () => {
+	it("does not apply a step after the Settlement period", () => {
 		expect(
 			dueAt(stepped(100, [{ from: "2027-01-01", value: 500 }]), "2026-01-01", "2026-12-31"),
 		).toBe(100)
 	})
 
-	it("does not reopen a period for a step between its end and its Settlement", () => {
+	it("does not reopen a Settlement period for a step before its Settlement", () => {
 		const levy = stepped(100, [{ from: "2027-02-01", value: 500 }])
 		expect(dueAt(levy, "2026-01-01", "2027-12-31")).toBe(100)
 		expect(dueAt(levy, "2027-01-01", "2027-12-31")).toBe(500)
 	})
 
-	it("applies a step inside a Carry-in period", () => {
+	it("applies a step inside a Carry-in Settlement period", () => {
 		expect(
 			dueAt(stepped(100, [{ from: "2026-02-01", value: 500 }]), "2026-01-01", "2026-12-31"),
 		).toBe(500)
 	})
 
-	it("reads the period's last day even when the horizon cuts the period short", () => {
+	it("reads the Settlement period's last day even when the horizon cuts it short", () => {
 		const levy = stepped(100, [{ from: "2026-09-01", value: 500 }])
 		const projection = run({
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],

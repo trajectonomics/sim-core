@@ -3,7 +3,7 @@ import type { ProjectionProblem } from "../types/projection"
 import type { Planned } from "./derive"
 import type { DatedEvent } from "./events"
 import { addIncome } from "./levy-prepaid"
-import type { LevyPeriodView } from "./levy-shares"
+import type { SettlementPeriodView } from "./levy-shares"
 
 export interface ContributionEntry {
 	readonly target: AccountId
@@ -38,7 +38,7 @@ function takeIncome(
 	totals: Totals,
 	flow: Extract<DatedEvent["flow"], { kind: "income" }>,
 	amount: bigint,
-	views: readonly LevyPeriodView[],
+	views: readonly SettlementPeriodView[],
 	date: DateString,
 ): ProjectionProblem | undefined {
 	totals.income += amount
@@ -54,7 +54,7 @@ function takeIncome(
 export function aggregate(
 	events: readonly DatedEvent[],
 	planned: Planned,
-	views: readonly LevyPeriodView[],
+	views: readonly SettlementPeriodView[],
 	date: DateString,
 ): DayFlows {
 	const totals: Totals = {

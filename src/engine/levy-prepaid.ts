@@ -3,8 +3,8 @@ import type { ProjectionProblem } from "../types/projection"
 import { addTo } from "./add"
 import {
 	eligible,
-	type LevyPeriodView,
 	plainShares,
+	type SettlementPeriodView,
 	settlementPeriodGross,
 	share,
 } from "./levy-shares"
@@ -27,7 +27,7 @@ function cappedShare(
 	flow: IncomeFlow,
 	amount: bigint,
 	gross: ReadonlyMap<string, bigint>,
-	views: readonly LevyPeriodView[],
+	views: readonly SettlementPeriodView[],
 	date: DateString,
 ): CappedShare {
 	const capped = flow.cappedPrepayment
@@ -55,7 +55,7 @@ export function addIncome(
 	flow: IncomeFlow,
 	amount: bigint,
 	gross: Map<string, bigint>,
-	views: readonly LevyPeriodView[],
+	views: readonly SettlementPeriodView[],
 	date: DateString,
 ): IncomeShare {
 	const byLevy = new Map(plainShares(flow.prepayments ?? [], amount, views))

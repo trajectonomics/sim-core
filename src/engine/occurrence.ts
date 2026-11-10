@@ -4,7 +4,7 @@ import { aggregate } from "./aggregate"
 import { applyAssets, applyDebt } from "./contributions"
 import { plannedAmounts } from "./derive"
 import type { DatedEvent } from "./events"
-import { type LevySet, periodViews, settlementOn } from "./levy-set"
+import { type LevySet, settlementOn, settlementPeriodViews } from "./levy-set"
 import { mergeFunded, tally, totalsOf } from "./levy-step"
 import { route } from "./route"
 import type { StateMap } from "./state"
@@ -52,7 +52,7 @@ export function processDate(
 ): DateOutcome {
 	const planned = plannedAmounts(events, scenario.flows, date, scenario.economy.inflation)
 	if (!planned.ok) return plannedFail(date, planned.problem)
-	const views = levies === undefined ? [] : periodViews(levies, date)
+	const views = levies === undefined ? [] : settlementPeriodViews(levies, date)
 	const day = aggregate(events, planned.planned, views, date)
 	const settlement =
 		levies === undefined ? { amount: 0n, problem: undefined } : settlementOn(levies, states, date)

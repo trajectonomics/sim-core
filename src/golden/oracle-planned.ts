@@ -1,10 +1,16 @@
 import type { Fixture } from "../fixtures/fixture"
-import { flowRefsOf } from "../levy/refs"
-import type { DateString, Flow } from "../types"
+import type { DateString, Derive, Flow } from "../types"
 import { isDerived, isFixed } from "../types"
 import { oracleCalendar } from "./oracle-calendar"
 import { oracleDeriveValues } from "./oracle-derive"
 import { type OracleEvent, oracleAmount, oracleEvents } from "./oracle-flow"
+
+/** The Flow ids a Derived amount reads, in Measure order, from the raw graph. */
+function flowReferences(derive: Derive): readonly string[] {
+	const ids: string[] = []
+	for (const measure of derive.measures) if (measure.op === "flow") ids.push(measure.flow)
+	return ids
+}
 
 /** Every Flow's planned gross amount on one Landed date, fixed sums and Derived values. */
 export type PlannedDay = ReadonlyMap<string, bigint>
@@ -18,7 +24,7 @@ function ordered(flows: readonly Flow[]): readonly Flow[] {
 	const visit = (flow: Flow): void => {
 		if (!isDerived(flow) || seen.has(flow.id)) return
 		seen.add(flow.id)
-		for (const reference of flowRefsOf(flow.derive)) {
+		for (const reference of flowReferences(flow.derive)) {
 			const found = byId.get(reference)
 			if (found !== undefined) visit(found)
 		}

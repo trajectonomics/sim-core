@@ -25,3 +25,4 @@ ADR 0002 gave a Scenario one Levy, fixed constants and Flows with fixed amounts,
 - The rules that need a new primitive stay in #28 (multiplying two Measures, Prepayment capped at a year-to-date total, previous-period references, per-person scope, several Settlement dates in one Levy) and #27 (account returns and capital gains as tally sources).
 - A Levy reading another Levy's result, and a Flow reading a Levy's due amount, are not supported.
 - Derived amounts are same-Occurrence only; a Flow due on another date contributes 0.
+- The plain `prepayments` shares are cumulative and never exceed the gross. A `cappedPrepayment` share still rounds half up on its own base ([ADR 0009](./0009-levy-us-operations.md)), so a Flow at the 10000 bps limit can take one minor unit more than its gross; `check()` bounds every plain share plus the capped one at 10000 bps.

@@ -72,7 +72,7 @@ describe("Derived Flow amounts in the engine", () => {
 		expect(amounts(rowAt(projection, "2026-01-31"))).toEqual({ cash: 200 })
 	})
 
-	it("sums a Flow's events when the Calendar lands two of them together", () => {
+	it("sums a Flow's Occurrences when the Calendar lands two of them together", () => {
 		const projection = run(
 			setup(
 				[
