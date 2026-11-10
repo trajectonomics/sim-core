@@ -13,7 +13,13 @@ export function cloneStates(states: StateMap): StateMap {
 }
 
 function cloneTally(tally: LevyTally): LevyTally {
-	return { gross: new Map(tally.gross), funded: new Map(tally.funded), prepaid: tally.prepaid }
+	return {
+		gross: new Map(tally.gross),
+		funded: new Map(tally.funded),
+		returns: new Map(tally.returns),
+		gains: new Map(tally.gains),
+		prepaid: tally.prepaid,
+	}
 }
 
 function cloneSettlementPeriod(

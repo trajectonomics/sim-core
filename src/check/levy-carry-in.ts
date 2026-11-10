@@ -5,18 +5,29 @@ import type { Check, Emit, Path } from "./codes"
 import { isValidDate } from "./date"
 import { checkLabels } from "./levy-carry-in-labels"
 import { isMonthDay } from "./month-day"
-import { amount, date, oneOf, str } from "./scalars"
+import { amount, date, oneOf, safeInt, str } from "./scalars"
 import { checkShape, isRecord, list, req } from "./shape"
 
-const tallyShape = {
-	label: req(str),
-	basis: req(oneOf(TALLY_BASES, "INVALID_BASIS")),
-	amount: req(amount),
+/** `returns` and `gains` are signed; `gross` and `funded` cannot be a loss. */
+const SIGNED_BASES: readonly string[] = ["returns", "gains"]
+
+const amountFor = (basis: unknown): Check =>
+	typeof basis === "string" && SIGNED_BASES.includes(basis) ? safeInt : amount
+
+/** A tally entry whose amount rule depends on its basis. */
+const tallyEntry: Check = (value, path, emit) => {
+	const basis = isRecord(value) ? value["basis"] : undefined
+	const shape = {
+		label: req(str),
+		basis: req(oneOf(TALLY_BASES, "INVALID_BASIS")),
+		amount: req(amountFor(basis)),
+	}
+	checkShape(value, path, shape, emit)
 }
 
 const recordShape = {
 	periodStart: req(date),
-	tallies: req(list((value, path, emit) => void checkShape(value, path, tallyShape, emit))),
+	tallies: req(list(tallyEntry)),
 	prepaid: req(amount),
 }
 

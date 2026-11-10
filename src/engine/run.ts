@@ -11,7 +11,7 @@ import type { EngineResult } from "./result"
 import { resolveReturns } from "./return-rows"
 import type { Returns } from "./returns"
 import { type RunAccumulator, stepDate } from "./run-step"
-import { createStates } from "./state"
+import { createStates, type StateMap } from "./state"
 
 interface Plan {
 	readonly periods: readonly SettlementPeriodPlan[]
@@ -46,11 +46,12 @@ function settlementDates(
 
 function attachLevy(
 	result: EngineResult,
+	states: StateMap,
 	tracker: LevyTracker | undefined,
 	runEnd: DateString,
 ): EngineResult {
 	if (!result.ok || tracker === undefined) return result
-	const finished = finishTracker(tracker, runEnd)
+	const finished = finishTracker(tracker, states, runEnd)
 	if (!finished.ok) return { ok: false, problem: finished.problem }
 	return { ok: true, run: { ...result.run, levy: finished.levy } }
 }
@@ -83,8 +84,8 @@ export function runEngine(
 		const [next, dayEvents] = flowsAt(events, index, date)
 		index = next
 		const result = stepDate(acc, states, scenario, date, dayEvents)
-		if (result !== undefined) return attachLevy(result, tracker, endDate(result, timeline))
+		if (result !== undefined) return attachLevy(result, states, tracker, endDate(result, timeline))
 	}
 	const run = { snapshots: acc.snapshots, totals: acc.totals }
-	return attachLevy({ ok: true, run }, tracker, timeline.horizon)
+	return attachLevy({ ok: true, run }, states, tracker, timeline.horizon)
 }

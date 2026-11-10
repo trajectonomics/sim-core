@@ -1,19 +1,26 @@
 import { ACCOUNT_KINDS, COMPOUNDING_PERIODS } from "../vocab"
 import type { AccountIndex, Check, Emit, Path } from "./codes"
+import { tallyLabel } from "./levy-fields"
 import { date, oneOf, safeInt, str } from "./scalars"
-import { checkShape, checkUnique, isRecord, list, opt, req } from "./shape"
+import { checkShape, checkUnique, isRecord, list, opt, req, type Shape } from "./shape"
+
+const LABEL_KEYS = ["returnLabel", "gainLabel"] as const
 
 /** A valid compounding period, so the nominal-rate rule knows whether to apply. */
 function isCompoundingPeriod(value: unknown): boolean {
 	return typeof value === "string" && COMPOUNDING_PERIODS.some((period) => period === value)
 }
 
-const shape = {
-	id: req(str),
-	kind: req(oneOf(ACCOUNT_KINDS, "INVALID_KIND")),
-	rate: req(safeInt),
-	compounding: opt(oneOf(COMPOUNDING_PERIODS, "INVALID_COMPOUNDING")),
-	lockedUntil: opt(date),
+function shapeOf(hasLevy: boolean): Shape {
+	return {
+		id: req(str),
+		kind: req(oneOf(ACCOUNT_KINDS, "INVALID_KIND")),
+		rate: req(safeInt),
+		compounding: opt(oneOf(COMPOUNDING_PERIODS, "INVALID_COMPOUNDING")),
+		lockedUntil: opt(date),
+		returnLabel: tallyLabel(hasLevy),
+		gainLabel: tallyLabel(hasLevy),
+	}
 }
 
 /**
@@ -28,16 +35,35 @@ function checkRate(value: unknown, path: Path, emit: Emit): void {
 	if (rate < floor) emit("RATE_OUT_OF_RANGE", [...path, "rate"])
 }
 
-const account: Check = (value, path, emit) => {
-	const checked = checkShape(value, path, shape, emit)
-	if (checked?.["kind"] === "liability" && Object.hasOwn(checked, "lockedUntil")) {
-		emit("LIABILITY_MISUSE", [...path, "lockedUntil"])
-	}
-	checkRate(value, path, emit)
+function presentLabels(rule: Readonly<Record<string, unknown>>): readonly string[] {
+	return LABEL_KEYS.filter((key) => Object.hasOwn(rule, key))
 }
 
-export function checkAccounts(value: unknown, path: Path, emit: Emit): void {
-	list(account)(value, path, emit)
+/** A label is meaningless on a liability, and one Account may not accrue returns and gains at once. */
+function checkLabelRules(rule: Readonly<Record<string, unknown>>, path: Path, emit: Emit): void {
+	const present = presentLabels(rule)
+	if (rule["kind"] === "liability") {
+		for (const key of present) emit("LIABILITY_MISUSE", [...path, key])
+	}
+	if (rule["kind"] === "asset" && present.length === 2) {
+		emit("CONFLICTING_LABELS", [...path, "gainLabel"])
+	}
+}
+
+const account =
+	(hasLevy: boolean): Check =>
+	(value, path, emit) => {
+		const checked = checkShape(value, path, shapeOf(hasLevy), emit)
+		if (checked === undefined) return
+		if (checked["kind"] === "liability" && Object.hasOwn(checked, "lockedUntil")) {
+			emit("LIABILITY_MISUSE", [...path, "lockedUntil"])
+		}
+		if (hasLevy) checkLabelRules(checked, path, emit)
+		checkRate(value, path, emit)
+	}
+
+export function checkAccounts(value: unknown, path: Path, emit: Emit, hasLevy: boolean): void {
+	list(account(hasLevy))(value, path, emit)
 	checkUnique(value, path, "id", emit)
 }
 

@@ -7,6 +7,8 @@ import {
 } from "../money/nominal"
 import type { DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
+import { commitReturns } from "./levy-returns"
+import type { LevyTracker } from "./levy-types"
 import { isSafeInteger, overflow } from "./overflow"
 import type { AccountState } from "./state"
 import { activeNominalRule, valuation } from "./value"
@@ -55,11 +57,15 @@ function nominalCommit(
 	return undefined
 }
 
-/** Commits accrued growth, then applies `delta`; returns a problem on overflow. */
+/**
+ * Commits accrued growth, then applies `delta`; returns a problem on overflow. The commit books
+ * the tallies the change produces (returns attribution, later realised gains) before moving.
+ */
 export function mutate(
 	state: AccountState,
 	date: DateString,
 	delta: bigint,
+	tracker?: LevyTracker,
 ): ProjectionProblem | undefined {
 	const rule = activeNominalRule(state)
 	if (rule !== undefined) return nominalCommit(state, rule, date, delta)
@@ -68,6 +74,7 @@ export function mutate(
 	const next = committed + delta
 	if (next < 0n) throw negative(state.rule.id, date)
 	if (!isSafeInteger(next)) return overflow(date, state.rule.id)
+	if (tracker !== undefined) commitReturns(state, tracker, date)
 	state.balance = next
 	state.asOf = date
 	return undefined

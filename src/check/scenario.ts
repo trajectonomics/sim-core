@@ -24,7 +24,7 @@ export function checkScenario(
 		schemaVersion: req(anyVersion),
 		currency: req(str),
 		economy: req(economy),
-		accounts: req(checkAccounts),
+		accounts: req((v, p, e) => checkAccounts(v, p, e, hasLevy)),
 		flows: req((v, p, e) => checkFlows(v, p, accounts, e, hasLevy)),
 		cashflow: req((v, p, e) => checkCashflow(v, p, accounts, e)),
 		levy: opt(checkLevy),

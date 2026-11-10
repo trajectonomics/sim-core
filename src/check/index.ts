@@ -1,6 +1,7 @@
 import { BASELINE_SCHEMA_VERSION, SCENARIO_SCHEMA_VERSION } from "../vocab"
 import { indexAccounts } from "./accounts"
 import { checkBaseline } from "./baseline"
+import { checkBaselineBasis } from "./baseline-basis"
 import type { Emit, Path, Problem } from "./codes"
 import { makeGuard } from "./guard"
 import { checkLevyCarryIn } from "./levy-carry-in-required"
@@ -35,6 +36,8 @@ export function check(baseline: unknown, scenario: unknown, timeline: unknown): 
 	)
 	if (baselineOk)
 		guard("baseline", undefined, () => checkBaseline(baseline, ["baseline"], accounts, emit))
+	if (baselineOk && scenarioOk)
+		guard("baseline", undefined, () => checkBaselineBasis(baseline, scenario, emit))
 	if (scenarioOk)
 		guard("scenario", undefined, () => checkScenario(scenario, ["scenario"], accounts, emit))
 	guard("timeline", undefined, () => checkTimeline(timeline, ["timeline"], emit))

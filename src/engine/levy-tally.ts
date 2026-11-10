@@ -28,7 +28,13 @@ export function createTracker(
 	inflation: BasisPoints,
 	start: DateString,
 ): LevyTracker {
-	const tallies = periods.map(() => ({ gross: new Map(), funded: new Map(), prepaid: 0n }))
+	const tallies = periods.map(() => ({
+		gross: new Map(),
+		funded: new Map(),
+		returns: new Map(),
+		gains: new Map(),
+		prepaid: 0n,
+	}))
 	const settlementIndex = new Map(periods.map((period) => [period.settlementDate, period.index]))
 	applyCarryIn(tallies, periods, levy, start)
 	return {
@@ -50,7 +56,12 @@ function numberMap(map: ReadonlyMap<string, bigint>): Map<string, number> {
 
 /** The evaluator's number-based view of one period's bigint tallies. */
 export function talliesOf(tally: LevyTally): Tallies {
-	return { gross: numberMap(tally.gross), funded: numberMap(tally.funded) }
+	return {
+		gross: numberMap(tally.gross),
+		funded: numberMap(tally.funded),
+		returns: numberMap(tally.returns),
+		gains: numberMap(tally.gains),
+	}
 }
 
 /** Adds one Occurrence's income labels and Prepayment to the period containing `date`. */

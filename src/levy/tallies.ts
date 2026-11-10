@@ -8,7 +8,7 @@ export function unsafeTally(
 	for (let index = 0; index < measures.length; index++) {
 		const measure = measures[index]
 		if (measure === undefined || measure.op !== "tally") continue
-		const total = tallies[measure.basis].get(measure.label)
+		const total = tallies[measure.basis]?.get(measure.label)
 		if (total !== undefined && !Number.isSafeInteger(total)) {
 			return { code: "NOT_SAFE_INTEGER", path: [measure.basis, measure.label] }
 		}
