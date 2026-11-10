@@ -13,6 +13,8 @@ import {
 	levyShortfallDay,
 	levyUnsettledMonth,
 } from "./levy-cases"
+import { levyGainsDay } from "./levy-gains-case"
+import { levyReturnsDay } from "./levy-returns-case"
 import { levyCareCredit } from "./levy-us-cases"
 import { nominalLeapFebruary, nominalPartial, nominalReal, nominalZero } from "./nominal-cases"
 import { nominalMonthlyLoan } from "./nominal-flow-cases"
@@ -52,9 +54,14 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "levy-shortfall-day", fixture: levyShortfallDay },
 	{ name: "levy-unsettled-month", fixture: levyUnsettledMonth },
 	{ name: "levy-carry-in-day", fixture: levyCarryInDay },
+<<<<<<< HEAD
 	{ name: "levy-care-credit", fixture: levyCareCredit },
 	{ name: "levy-wage-base", fixture: wageBaseCase(60_000_000) },
 	{ name: "levy-joint-filers", fixture: levyJointFilers },
+=======
+	{ name: "levy-returns-day", fixture: levyReturnsDay },
+	{ name: "levy-gains-day", fixture: levyGainsDay },
+>>>>>>> 18980c6 (feat: tally realised gains on a pooled cost basis as a Levy basis)
 	{ name: "calendar-shift-day", fixture: calendarShiftDay },
 	{ name: "calendar-fi", fixture: calendarFiMonth, options: { method: "survival" } },
 	{ name: "freelancer-fi", fixture: freelancer, options: { method: "survival" } },

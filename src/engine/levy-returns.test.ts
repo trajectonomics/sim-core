@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { oracleCountedDays } from "../golden/oracle-date"
 import { oracleGrow } from "../golden/oracle-money"
 import type { Account, Levy, MinorUnits, Projection } from "../types"
-import { expense } from "./test-flows"
+import { contribution, expense, income } from "./test-flows"
 import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
 /** A Levy that only reports its returns total; `due` stays 0 so no cash moves. */
@@ -107,6 +107,29 @@ describe("Levy returns tally", () => {
 			return sum + (found?.value ?? 0)
 		}, 0)
 		expect(total).toBe(amounts(rowAt(projection, "2029-12-31"))["deposit"]! - 100_000)
+	})
+
+	it("counts net inflows beside the growth in the sum of returns", () => {
+		const projection = run({
+			accounts: [deposit, { id: "cash", kind: "asset", rate: 0 }],
+			balances: { deposit: 100_000, cash: 0 },
+			flows: [
+				income("pay", 10_000, { start: "2028-01-31" }),
+				contribution("save", "deposit", 4_000, { start: "2028-01-31" }),
+			],
+			surplus: [{ account: "cash" }],
+			contribute: ["deposit"],
+			withdraw: ["cash"],
+			start: "2028-01-01",
+			horizon: "2029-12-31",
+			levy: withCarryIn(returnsLevy, emptyCarryIn("2027-01-01")),
+		})
+		const total = projection.levy!.periods.reduce((sum, period) => {
+			const found = period.measures.find((item) => item.id === "interest")
+			return sum + (found?.value ?? 0)
+		}, 0)
+		const inflows = projection.annual.reduce((sum, year) => sum + year.contributions, 0)
+		expect(total).toBe(amounts(rowAt(projection, "2029-12-31"))["deposit"]! - 100_000 - inflows)
 	})
 
 	it("gives the same Levy for day and month resolution and for any order", () => {

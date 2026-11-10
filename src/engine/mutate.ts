@@ -7,6 +7,7 @@ import {
 } from "../money/nominal"
 import type { DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
+import { commitGains } from "./levy-gains"
 import { commitReturns } from "./levy-returns"
 import type { LevyTracker } from "./levy-types"
 import { isSafeInteger, overflow } from "./overflow"
@@ -74,7 +75,10 @@ export function mutate(
 	const next = committed + delta
 	if (next < 0n) throw negative(state.rule.id, date)
 	if (!isSafeInteger(next)) return overflow(date, state.rule.id)
-	if (tracker !== undefined) commitReturns(state, tracker, date)
+	if (tracker !== undefined) {
+		commitReturns(state, tracker, date)
+		commitGains(state, tracker, date, delta, committed)
+	}
 	state.balance = next
 	state.asOf = date
 	return undefined

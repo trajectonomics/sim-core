@@ -14,9 +14,12 @@ const sourceLevy: Levy = withCarryIn(
 		settlement: { month: 6, day: 30 },
 		measures: [
 			{ id: "interest", op: "tally", label: "interest", basis: "returns" },
+			{ id: "gain", op: "tally", label: "gain", basis: "gains" },
+			{ id: "total", op: "add", a: "interest", b: "gain" },
 			{ id: "zero", op: "const", value: 0 },
+			{ id: "due", op: "max", a: "total", b: "zero" },
 		],
-		due: "zero",
+		due: "due",
 	},
 	emptyCarryIn("2025-01-01"),
 )
@@ -24,16 +27,18 @@ const sourceLevy: Levy = withCarryIn(
 export function sourceFixture(): Fixture {
 	return makeFixture({
 		accounts: [
+			{ id: "brokerage", kind: "asset", rate: 500, gainLabel: "gain" },
 			{ id: "cash", kind: "asset", rate: 0 },
 			{ id: "deposit", kind: "asset", rate: 1000, returnLabel: "interest" },
 		],
-		balances: { cash: 100_000, deposit: 100_000 },
+		balances: { brokerage: 100_000, cash: 100_000, deposit: 100_000 },
+		basis: { brokerage: 80_000 },
 		flows: [
 			income("salary", 10_000, { frequency: "monthly" }),
 			expense("living", 9_000, { frequency: "monthly" }),
 		],
 		surplus: [{ account: "cash" }],
-		withdraw: ["cash", "deposit"],
+		withdraw: ["cash", "deposit", "brokerage"],
 		start: "2026-01-01",
 		horizon: "2029-06-30",
 		resolution: "month",
