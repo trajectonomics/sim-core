@@ -108,3 +108,5 @@ interest charge. This ADR adds the primitive and records the two breaking change
   interest-first debit allocation; negative nominal rates with signed half-away-from-zero rounding;
   pre-start accrued-interest Carry-in; an `AnnualRollup` split of interest.
 - Business-day shifting does not move compounding dates (ADR 0006 shifts money dates only).
+- A Return series replaces the rate, so an Account that holds one is valued on the span-return path
+  even when it carries `compounding`; nominal compounding applies to Accounts without a series.
