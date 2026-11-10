@@ -7,12 +7,15 @@ import type { LevyTally, LevyTracker } from "./levy-types"
 import { isSafeInteger, overflow } from "./overflow"
 
 /** The tally and the cap table of the Settlement period one Occurrence date falls in. */
-export interface PeriodView {
+export interface SettlementPeriodView {
 	readonly tally: LevyTally | undefined
 	readonly caps: ReadonlyMap<string, bigint> | undefined
 }
 
-export function periodView(tracker: LevyTracker | undefined, date: DateString): PeriodView {
+export function settlementPeriodView(
+	tracker: LevyTracker | undefined,
+	date: DateString,
+): SettlementPeriodView {
 	if (tracker === undefined) return { tally: undefined, caps: undefined }
 	const index = settlementPeriodIndexAt(tracker.periods, date)
 	if (index < 0) return { tally: undefined, caps: undefined }
@@ -25,7 +28,11 @@ function share(amount: bigint, bps: number): bigint {
 }
 
 /** Period-to-date gross of `label` before this event: the tracker's total plus today's earlier ones. */
-function periodGross(view: PeriodView, label: string, today: ReadonlyMap<string, bigint>): bigint {
+function settlementPeriodGross(
+	view: SettlementPeriodView,
+	label: string,
+	today: ReadonlyMap<string, bigint>,
+): bigint {
 	return (view.tally?.gross.get(label) ?? 0n) + (today.get(label) ?? 0n)
 }
 
@@ -49,7 +56,7 @@ export function addIncome(
 	flow: IncomeFlow,
 	amount: bigint,
 	gross: Map<string, bigint>,
-	view: PeriodView,
+	view: SettlementPeriodView,
 	date: DateString,
 ): IncomeShare {
 	let prepaid = flow.prepaymentBps === undefined ? 0n : share(amount, flow.prepaymentBps)
@@ -59,7 +66,7 @@ export function addIncome(
 		const cap = view.caps?.get(flow.id)
 		if (cap !== undefined && !isSafeInteger(cap)) return { prepaid, problem: overflow(date) }
 		if (cap !== undefined) {
-			prepaid += share(eligible(amount, periodGross(view, label, gross), cap), capped.bps)
+			prepaid += share(eligible(amount, settlementPeriodGross(view, label, gross), cap), capped.bps)
 		}
 	}
 	if (label !== undefined) addTo(gross, label, amount)

@@ -53,7 +53,17 @@ describe("mul rounding", () => {
 		expect(multiplied(x, y, d, rounding)).toBe(want)
 	})
 
-	it("rounds a tie at +0.5 and -0.5 half up to the result further from zero", () => {
+	it.each([
+		// 1 * 1 / 2 = 0.5, and -1 * 1 / 2 = -0.5
+		["floor", 0, -1],
+		["halfUp", 1, -1],
+		["ceil", 1, 0],
+	] as const)("%s sends 0.5 to %d and -0.5 to %d", (rounding, positive, negative) => {
+		expect(multiplied(1, 1, 2, rounding)).toBe(positive)
+		expect(multiplied(-1, 1, 2, rounding)).toBe(negative)
+	})
+
+	it("rounds every tie half up to the result further from zero", () => {
 		expect([1, 3, 5].map((x) => multiplied(x, 1, 2, "halfUp"))).toEqual([1, 2, 3])
 		expect([-1, -3, -5].map((x) => multiplied(x, 1, 2, "halfUp"))).toEqual([-1, -2, -3])
 	})

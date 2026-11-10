@@ -157,7 +157,7 @@ describe("capped Prepayment in the engine", () => {
 		expect(periodFrom(projection, "2026-01-01").prepaid).toBe(620)
 	})
 
-	it("grows the cap to the Settlement's Due date", () => {
+	it("grows the cap to each Settlement's Due date over several years", () => {
 		const levy = capLevy(30_000, { bps: 1000 })
 		const projection = run({
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
@@ -165,10 +165,13 @@ describe("capped Prepayment in the engine", () => {
 			flows: [monthlySalary(620)],
 			surplus: [{ account: "cash" }],
 			withdraw: ["cash"],
-			horizon: "2026-12-31",
+			horizon: "2027-12-31",
 			levy,
 		})
-		// 2026 settles on 2027-03-31, one whole year from asOf: 30,000 * 1.1 = 33,000; 6.2% of it is 2,046.
+		// 2026 settles on 2027-03-31: 30,000 * 1.1 = 33,000, and 6.2% of it is 2,046.
 		expect(periodFrom(projection, "2026-01-01").prepaid).toBe(2_046)
+		// 2027 settles on 2028-03-31: 30,000 * 1.1^2 = 36,300; three whole months and
+		// 6,300 of the fourth, so 1,860 + 391 = 2,251.
+		expect(periodFrom(projection, "2027-01-01").prepaid).toBe(2_251)
 	})
 })

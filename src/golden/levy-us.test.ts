@@ -74,6 +74,14 @@ describe("golden cases for the US-style Levy operations", () => {
 		expectOracle(fixture, period)
 	})
 
+	it("prepays 6.2% of an $181,800 wage base across a straddling Occurrence", () => {
+		const fixture = wageBaseCase(18_180_000)
+		const period = periodOf(fixture)
+		// The first month takes 620,000; the second takes 6.2% of the 8,180,000 left: 507,160.
+		expect(period.prepaid).toBe(1_127_160)
+		expectOracle(fixture, period)
+	})
+
 	it("prepays only the part of a straddling Occurrence below the cap", () => {
 		const period = periodOf(levyWageBaseStraddle)
 		// 620,000 + 620,000, then 310,000 on the last 5,000,000 below the 25,000,000 base.

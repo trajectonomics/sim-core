@@ -2,7 +2,7 @@ import type { AccountId, BasisPoints, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { amountAt } from "./amount"
 import type { DatedEvent } from "./events"
-import { addIncome, periodView } from "./levy-prepaid"
+import { addIncome, settlementPeriodView } from "./levy-prepaid"
 import type { LevyTracker } from "./levy-types"
 
 export interface ContributionEntry {
@@ -35,7 +35,7 @@ export function aggregate(
 	let prepaid = 0n
 	const gross = new Map<string, bigint>()
 	const contributionEntries: ContributionEntry[] = []
-	const view = periodView(tracker, date)
+	const view = settlementPeriodView(tracker, date)
 	for (const event of events) {
 		const amount = event.amount ?? amountAt(event, inflation)
 		const flow = event.flow

@@ -2470,7 +2470,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "USD",
 			"economy": {
 				"inflation": 0
@@ -2583,7 +2583,7 @@
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "76e97aa0e552958f558403cb59c4d7bb0869eba1fe98043256d2cb5ae9aae2de"
+		"sha256": "ea9952d34dcc8ebcf4517e59d9dfe7cb0984c8750a49b809d71b654297229874"
 	},
 	{
 		"name": "levy-wage-base",
@@ -2597,7 +2597,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "USD",
 			"economy": {
 				"inflation": 0
@@ -2679,7 +2679,7 @@
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "5b4e9b0e0fa4669d79255d5339c5fa91f63aab2f557a587d39af7056589a0fae"
+		"sha256": "35fe748de89d145d9db0958c90d73029fc798890b4600da313829bdcc169fe78"
 	},
 	{
 		"name": "levy-joint-filers",
@@ -2693,7 +2693,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "USD",
 			"economy": {
 				"inflation": 0
@@ -2819,7 +2819,7 @@
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "3a71b57fa6f0769d4d189e1f68dc7e2d51d42f0f62c732c8a5ef8f3de86b158c"
+		"sha256": "1f3ea2ad6aba456eca318590b0af3484ff827e28c38521a85dea98fe29ca581f"
 	},
 	{
 		"name": "calendar-shift-day",

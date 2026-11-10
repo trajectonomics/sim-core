@@ -36,6 +36,7 @@ export type {
 } from "./financial-independence-result"
 export type { CappedPrepayment, ContributionFlow, ExpenseFlow, Flow, IncomeFlow } from "./flow"
 export type { Levy, LevyContext, MeasuresResult, MonthDay, Tallies } from "./levy"
+export type { MarketBucket, ReturnModel } from "./market"
 export type {
 	BinaryMeasure,
 	ConstMeasure,
@@ -48,7 +49,6 @@ export type {
 	TallyBasis,
 	TallyMeasure,
 } from "./measure"
-export type { MarketBucket, ReturnModel } from "./market"
 export type {
 	AccountAmount,
 	AnnualRollup,

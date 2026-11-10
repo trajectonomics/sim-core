@@ -18,6 +18,7 @@ export interface FlowOptions {
 	readonly frequency?: Frequency
 	readonly growth?: Growth
 	readonly label?: string
+	readonly earned?: boolean
 	readonly prepaymentBps?: BasisPoints
 	readonly cappedPrepayment?: CappedPrepayment
 }
@@ -46,7 +47,7 @@ export function income(id: string, amount: MinorUnits, options: FlowOptions = {}
 	return {
 		...base(id, amount, options),
 		kind: "income",
-		earned: true,
+		earned: options.earned ?? true,
 		...(options.label === undefined ? {} : { label: options.label }),
 		...(options.prepaymentBps === undefined ? {} : { prepaymentBps: options.prepaymentBps }),
 		...(options.cappedPrepayment === undefined
