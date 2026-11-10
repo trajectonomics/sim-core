@@ -1,6 +1,7 @@
 import { growthYears } from "../calendar/arith"
 import { grow } from "../money/growth"
 import type { BinaryMeasure, ConstMeasure, LevyContext, Measure, Tallies } from "../types"
+import { mulValue } from "./mul"
 import { scaleValue } from "./scale"
 
 export type Lookup = (id: string) => bigint
@@ -24,7 +25,7 @@ const BINARY: Readonly<Record<BinaryMeasure["op"], (a: bigint, b: bigint) => big
 }
 
 /** A constant, grown by whole years from `asOf` to the context date (never shrunk by time). */
-function constant(measure: ConstMeasure, context: LevyContext): bigint {
+export function constantValue(measure: ConstMeasure, context: LevyContext): bigint {
 	const { value, asOf, growth } = measure
 	if (growth === undefined || asOf === undefined) return BigInt(value)
 	const rate = growth === "inflation" ? context.inflation : growth.bps
@@ -42,11 +43,13 @@ export function step(
 ): bigint {
 	switch (measure.op) {
 		case "const":
-			return constant(measure, context)
+			return constantValue(measure, context)
 		case "tally":
 			return BigInt(tallies[measure.basis].get(measure.label) ?? 0)
 		case "scale":
 			return scaleValue(get(measure.of), BigInt(measure.num), BigInt(measure.den), measure.rounding)
+		case "mul":
+			return mulValue(get(measure.a), get(measure.b), BigInt(measure.den), measure.rounding)
 		case "pick":
 			return get(measure.a) > get(measure.b) ? get(measure.then) : get(measure.else)
 		default:

@@ -2459,6 +2459,369 @@
 		"sha256": "f72da7630b43d9fe9baf055e65eb49572cd73df653c01738863a7bb3ad482d1e"
 	},
 	{
+		"name": "levy-care-credit",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "USD",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"amount": 10000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "salary"
+				},
+				{
+					"id": "care",
+					"amount": 1000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "care"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"levy": {
+				"id": "us-like",
+				"period": {
+					"month": 1,
+					"day": 1
+				},
+				"settlement": {
+					"month": 3,
+					"day": 31
+				},
+				"measures": [
+					{
+						"id": "salary",
+						"op": "tally",
+						"label": "salary",
+						"basis": "gross"
+					},
+					{
+						"id": "care",
+						"op": "tally",
+						"label": "care",
+						"basis": "gross"
+					},
+					{
+						"id": "steps",
+						"op": "scale",
+						"of": "salary",
+						"num": 1,
+						"den": 100000,
+						"rounding": "floor"
+					},
+					{
+						"id": "ceiling",
+						"op": "const",
+						"value": 1800
+					},
+					{
+						"id": "rate",
+						"op": "sub",
+						"a": "ceiling",
+						"b": "steps"
+					},
+					{
+						"id": "credit",
+						"op": "mul",
+						"a": "care",
+						"b": "rate",
+						"den": 10000,
+						"rounding": "halfUp"
+					}
+				],
+				"due": "credit",
+				"carryIn": [
+					{
+						"periodStart": "2025-01-01",
+						"tallies": [],
+						"prepaid": 0
+					}
+				]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2026-12-31",
+			"resolution": "month"
+		},
+		"sha256": "ea9952d34dcc8ebcf4517e59d9dfe7cb0984c8750a49b809d71b654297229874"
+	},
+	{
+		"name": "levy-wage-base",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "USD",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"amount": 10000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "wage",
+					"cappedPrepayment": {
+						"bps": 620,
+						"upTo": "base"
+					}
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"levy": {
+				"id": "us-like",
+				"period": {
+					"month": 1,
+					"day": 1
+				},
+				"settlement": {
+					"month": 3,
+					"day": 31
+				},
+				"measures": [
+					{
+						"id": "base",
+						"op": "const",
+						"value": 60000000
+					},
+					{
+						"id": "wage",
+						"op": "tally",
+						"label": "wage",
+						"basis": "gross"
+					},
+					{
+						"id": "due",
+						"op": "const",
+						"value": 0
+					}
+				],
+				"due": "due",
+				"carryIn": [
+					{
+						"periodStart": "2025-01-01",
+						"tallies": [],
+						"prepaid": 0
+					}
+				]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2026-12-31",
+			"resolution": "month"
+		},
+		"sha256": "35fe748de89d145d9db0958c90d73029fc798890b4600da313829bdcc169fe78"
+	},
+	{
+		"name": "levy-joint-filers",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "USD",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				}
+			],
+			"flows": [
+				{
+					"id": "a-salary",
+					"amount": 10000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "person-a",
+					"cappedPrepayment": {
+						"bps": 620,
+						"upTo": "cap-a"
+					}
+				},
+				{
+					"id": "b-salary",
+					"amount": 4000000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true,
+					"label": "person-b",
+					"cappedPrepayment": {
+						"bps": 620,
+						"upTo": "cap-b"
+					}
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			},
+			"levy": {
+				"id": "us-like",
+				"period": {
+					"month": 1,
+					"day": 1
+				},
+				"settlement": {
+					"month": 3,
+					"day": 31
+				},
+				"measures": [
+					{
+						"id": "cap-a",
+						"op": "const",
+						"value": 60000000
+					},
+					{
+						"id": "cap-b",
+						"op": "const",
+						"value": 50000000
+					},
+					{
+						"id": "a-gross",
+						"op": "tally",
+						"label": "person-a",
+						"basis": "gross"
+					},
+					{
+						"id": "b-gross",
+						"op": "tally",
+						"label": "person-b",
+						"basis": "gross"
+					},
+					{
+						"id": "a-due",
+						"op": "scale",
+						"of": "a-gross",
+						"num": 10,
+						"den": 100,
+						"rounding": "halfUp"
+					},
+					{
+						"id": "b-due",
+						"op": "scale",
+						"of": "b-gross",
+						"num": 10,
+						"den": 100,
+						"rounding": "halfUp"
+					},
+					{
+						"id": "due",
+						"op": "add",
+						"a": "a-due",
+						"b": "b-due"
+					}
+				],
+				"due": "due",
+				"carryIn": [
+					{
+						"periodStart": "2025-01-01",
+						"tallies": [],
+						"prepaid": 0
+					}
+				]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2026-12-31",
+			"resolution": "month"
+		},
+		"sha256": "1f3ea2ad6aba456eca318590b0af3484ff827e28c38521a85dea98fe29ca581f"
+	},
+	{
 		"name": "calendar-shift-day",
 		"baseline": {
 			"schemaVersion": 1,

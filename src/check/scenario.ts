@@ -2,6 +2,7 @@ import { checkAccounts } from "./accounts"
 import { checkCalendar } from "./calendar"
 import { checkCashflow } from "./cashflow"
 import type { AccountIndex, Check, Emit, Path } from "./codes"
+import { checkFlowCaps } from "./flow-caps"
 import { checkFlows } from "./flows"
 import { checkLevy } from "./levy"
 import { checkContributionRouting } from "./routing"
@@ -30,5 +31,6 @@ export function checkScenario(
 		calendar: opt(checkCalendar),
 	}
 	const checked = checkShape(value, path, shape, emit)
+	checkFlowCaps(checked?.["flows"], checked?.["levy"], path, emit)
 	checkContributionRouting(checked?.["flows"], checked?.["cashflow"], accounts, path, emit)
 }

@@ -4,6 +4,7 @@ import { thaiEmployee } from "../fixtures/thai-employee"
 import type { SurvivalOptions } from "../types"
 import { calendarFiMonth, calendarShiftDay } from "./calendar-cases"
 import { capped } from "./contribution-cases"
+import { levyJointFilers, wageBaseCase } from "./levy-cap-cases"
 import {
 	levyCarryInDay,
 	levyRefundDay,
@@ -12,6 +13,7 @@ import {
 	levyShortfallDay,
 	levyUnsettledMonth,
 } from "./levy-cases"
+import { levyCareCredit } from "./levy-us-cases"
 import { nominalLeapFebruary, nominalPartial, nominalReal, nominalZero } from "./nominal-cases"
 import { nominalMonthlyLoan } from "./nominal-flow-cases"
 
@@ -50,6 +52,9 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "levy-shortfall-day", fixture: levyShortfallDay },
 	{ name: "levy-unsettled-month", fixture: levyUnsettledMonth },
 	{ name: "levy-carry-in-day", fixture: levyCarryInDay },
+	{ name: "levy-care-credit", fixture: levyCareCredit },
+	{ name: "levy-wage-base", fixture: wageBaseCase(60_000_000) },
+	{ name: "levy-joint-filers", fixture: levyJointFilers },
 	{ name: "calendar-shift-day", fixture: calendarShiftDay },
 	{ name: "calendar-fi", fixture: calendarFiMonth, options: { method: "survival" } },
 	{ name: "freelancer-fi", fixture: freelancer, options: { method: "survival" } },

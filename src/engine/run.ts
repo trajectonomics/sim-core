@@ -27,7 +27,13 @@ function planFor(
 	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy, calendar)
 	return {
 		periods,
-		tracker: createTracker(scenario.levy, periods, scenario.economy.inflation, timeline.start),
+		tracker: createTracker(
+			scenario.levy,
+			scenario.flows,
+			periods,
+			scenario.economy.inflation,
+			timeline.start,
+		),
 	}
 }
 
