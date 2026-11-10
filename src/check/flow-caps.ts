@@ -59,23 +59,23 @@ function validRate(value: unknown): value is number {
 	return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= 10_000
 }
 
-/** The plain share the Flow already credits to the cap's Levy. */
-function plainShare(flow: MeasureRecord, levy: unknown): number {
+/** Every valid plain share the Flow asks for, summed over all Levies. */
+function plainShares(flow: MeasureRecord): number {
 	const list = flow["prepayments"]
 	if (!Array.isArray(list)) return 0
 	let total = 0
 	for (let index = 0; index < list.length; index++) {
 		const entry: unknown = list[index]
-		if (isRecord(entry) && entry["levy"] === levy && validRate(entry["bps"])) total += entry["bps"]
+		if (isRecord(entry) && validRate(entry["bps"])) total += entry["bps"]
 	}
 	return total
 }
 
-/** The plain and capped shares together may never ask for more than the gross. */
+/** Every share on the gross, plain and capped, may never ask for more than 10000 basis points. */
 function checkShares(flow: MeasureRecord, capped: MeasureRecord, at: Path, emit: Emit): void {
 	const share = capped["bps"]
 	if (!validRate(share)) return
-	if (plainShare(flow, capped["levy"]) + share > 10_000) emit("RATE_OUT_OF_RANGE", at)
+	if (plainShares(flow) + share > 10_000) emit("RATE_OUT_OF_RANGE", at)
 }
 
 function checkFlow(

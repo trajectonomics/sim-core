@@ -41,10 +41,8 @@ function nominalCommit(
 ): ProjectionProblem | undefined {
 	const valueBefore = valuation(state, date)
 	if (levies !== undefined) {
-		for (const tracker of levies.trackers) {
-			commitReturns(state, tracker, date)
-			commitGains(state, tracker, date, delta, valueBefore)
-		}
+		for (const tracker of levies.trackers) commitReturns(state, tracker, date)
+		commitGains(state, levies, date, delta, valueBefore)
 	}
 	const settled = capitaliseThrough(
 		{ capitalised: state.balance, capitalisedDays: state.capitalisedDays, asOf: state.asOf },
@@ -86,10 +84,8 @@ export function mutate(
 	if (next < 0n) throw negative(state.rule.id, date)
 	if (!isSafeInteger(next)) return overflow(date, state.rule.id)
 	if (levies !== undefined) {
-		for (const tracker of levies.trackers) {
-			commitReturns(state, tracker, date)
-			commitGains(state, tracker, date, delta, committed)
-		}
+		for (const tracker of levies.trackers) commitReturns(state, tracker, date)
+		commitGains(state, levies, date, delta, committed)
 	}
 	state.balance = next
 	state.asOf = date

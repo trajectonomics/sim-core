@@ -52,6 +52,21 @@ describe("check() cappedPrepayment", () => {
 		expect(incomeCap({ bps: 5000, upTo: "cap" }, 5000)).toEqual([])
 	})
 
+	it("counts every Levy's plain share against the capped one", () => {
+		const flows = flowsWith(0, {
+			label: "salary",
+			prepayments: [
+				{ levy: "levy", bps: 5000 },
+				{ levy: "other", bps: 3000 },
+			],
+			cappedPrepayment: { levy: "levy", bps: 3000, upTo: "cap" },
+		})
+		const other = { ...(LEVY as object), id: "other" }
+		expect(checkWith({ levies: [LEVY, other], flows })).toEqual(
+			expected("RATE_OUT_OF_RANGE", capAt(0, "bps")),
+		)
+	})
+
 	it("rejects the cap on a contribution and on an expense", () => {
 		expect(checkWith({ levy: LEVY, flows: flowsWith(3, { cappedPrepayment: {} }) })).toEqual(
 			expected("FIELD_NOT_ALLOWED", at(3, "cappedPrepayment")),

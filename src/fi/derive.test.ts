@@ -125,6 +125,35 @@ describe("Derived Flows in the Financial Independence scan", () => {
 		expect(result.financialIndependence.reference.met).toBe(false)
 	})
 
+	it("returns a negative derived expense as data, not a throw", () => {
+		const negative: Derive = {
+			measures: [
+				{ id: "ten", op: "const", value: 10 },
+				{ id: "twenty", op: "const", value: 20 },
+				{ id: "result", op: "sub", a: "ten", b: "twenty" },
+			],
+			result: "result",
+		}
+		const fixture = makeFixture({
+			accounts: [{ id: "cash", kind: "asset", rate: 0 }],
+			balances: { cash: 0 },
+			surplus: [{ account: "cash" }],
+			withdraw: ["cash"],
+			horizon: "2026-12-31",
+			flows: [
+				income("yield", 1_000, { start: "2026-01-01", earned: false }),
+				derivedExpense("fee", negative, { start: "2026-01-01" }),
+			],
+		})
+		const { baseline, scenario, timeline } = fixture
+		expect(financialIndependence(baseline, scenario, timeline, { method: "survival" })).toEqual({
+			ok: false,
+			problems: [
+				{ code: "NEGATIVE_AMOUNT", path: ["scenario", "flows", 1, "derive"], date: "2026-01-01" },
+			],
+		})
+	})
+
 	it("returns an overflowing derived expense as data, not a throw", () => {
 		const big = Number.MAX_SAFE_INTEGER
 		const fixture = makeFixture({

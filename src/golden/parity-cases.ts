@@ -62,6 +62,12 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "levy-several", fixture: levySeveral },
 	{ name: "levy-stepped", fixture: levyStepped },
 	{ name: "derive-rent", fixture: deriveRent },
+	{
+		name: "derive-rent-fi",
+		fixture: deriveRent,
+		options: { method: "survival", minBufferMonths: 3 },
+	},
+	{ name: "levy-several-fi", fixture: levySeveral, options: { method: "survival" } },
 	{ name: "levy-wage-base", fixture: wageBaseCase(60_000_000) },
 	{ name: "levy-joint-filers", fixture: levyJointFilers },
 	{ name: "calendar-shift-day", fixture: calendarShiftDay },
