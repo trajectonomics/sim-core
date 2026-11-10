@@ -19,6 +19,11 @@ export function nominalRule(rule: Account): NominalRule | undefined {
 		: { rate: rule.rate, compounding: rule.compounding }
 }
 
+/** The nominal rule in force: a Return series replaces the rate, so it suspends nominal accrual. */
+export function activeNominalRule(state: AccountState): NominalRule | undefined {
+	return state.series === undefined ? nominalRule(state.rule) : undefined
+}
+
 /** A Return series replaces the rate, so an Account holding one takes this path. */
 function effectiveParts(state: AccountState, date: DateString): ValueParts {
 	const series = state.series
@@ -36,7 +41,7 @@ function effectiveParts(state: AccountState, date: DateString): ValueParts {
  * commit completed capitalisations, which are result-neutral and keep a read on a long gap linear.
  */
 export function valueParts(state: AccountState, date: DateString): ValueParts {
-	const rule = state.series === undefined ? nominalRule(state.rule) : undefined
+	const rule = activeNominalRule(state)
 	if (rule === undefined) return effectiveParts(state, date)
 	const settled = capitaliseThrough(
 		{ capitalised: state.balance, capitalisedDays: state.capitalisedDays, asOf: state.asOf },

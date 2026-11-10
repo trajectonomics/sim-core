@@ -9,7 +9,7 @@ import type { DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { isSafeInteger, overflow } from "./overflow"
 import type { AccountState } from "./state"
-import { nominalRule, valuation } from "./value"
+import { activeNominalRule, valuation } from "./value"
 
 function negative(id: string, date: DateString): RangeError {
 	return new RangeError(`Negative balance on ${id} at ${date}`)
@@ -61,7 +61,7 @@ export function mutate(
 	date: DateString,
 	delta: bigint,
 ): ProjectionProblem | undefined {
-	const rule = nominalRule(state.rule)
+	const rule = activeNominalRule(state)
 	if (rule !== undefined) return nominalCommit(state, rule, date, delta)
 	const committed = valuation(state, date)
 	if (!isSafeInteger(committed)) return overflow(date, state.rule.id)
