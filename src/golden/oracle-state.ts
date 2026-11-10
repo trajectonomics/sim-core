@@ -1,32 +1,69 @@
 import type { Account, AccountId, DateString } from "../types"
 import { oracleCountedDays } from "./oracle-date"
 import { oracleGrow } from "./oracle-money"
+import {
+	type OracleNominalRule,
+	type OracleValueParts,
+	oracleNominalParts,
+	oracleNominalRule,
+	oracleWalk,
+} from "./oracle-nominal"
+
+export type { OracleValueParts } from "./oracle-nominal"
 
 export interface OracleState {
 	readonly rule: Account
 	balance: bigint
 	asOf: DateString
+	/** A nominal Account's principal-days numerator; always 0 for an effective Account. */
+	accrued: bigint
 }
 
 export type OracleStates = ReadonlyMap<AccountId, OracleState>
 
-export interface OracleValueParts {
-	readonly capitalised: bigint
-	readonly accruedInterest: bigint
-	readonly amount: bigint
-}
-
-/** An effective-annual Account's value is all capitalised; the nominal walk arrives with #59. */
+/** An effective-annual Account's value is all capitalised. */
 export function oracleValueParts(state: OracleState, date: DateString): OracleValueParts {
-	const amount = oracleGrow(state.balance, state.rule.rate, oracleCountedDays(state.asOf, date))
-	return { capitalised: amount, accruedInterest: 0n, amount }
+	const rule = oracleNominalRule(state.rule)
+	if (rule === undefined) {
+		const amount = oracleGrow(state.balance, state.rule.rate, oracleCountedDays(state.asOf, date))
+		return { capitalised: amount, accruedInterest: 0n, amount }
+	}
+	return oracleNominalParts(
+		{ principal: state.balance, numerator: state.accrued, asOf: state.asOf },
+		rule,
+		date,
+	)
 }
 
 export function oracleValuation(state: OracleState, date: DateString): bigint {
 	return oracleValueParts(state, date).amount
 }
 
+function accrueRunning(accrual: ReturnType<typeof oracleWalk>, rule: OracleNominalRule): bigint {
+	if (accrual.numerator === 0n) return 0n
+	return oracleNominalParts(accrual, rule, accrual.asOf).accruedInterest
+}
+
+/** Commits the accrual through `date`, then applies `delta` with the principal-first debit rule. */
 export function oracleMutate(state: OracleState, date: DateString, delta: bigint): void {
-	state.balance = oracleValuation(state, date) + delta
+	const rule = oracleNominalRule(state.rule)
+	if (rule === undefined) {
+		state.balance = oracleValuation(state, date) + delta
+		state.asOf = date
+		return
+	}
+	const walked = oracleWalk(
+		{ principal: state.balance, numerator: state.accrued, asOf: state.asOf },
+		rule,
+		date,
+	)
+	const owed = -delta
+	if (delta >= 0n || owed <= walked.principal) {
+		state.balance = walked.principal + delta
+		state.accrued = walked.numerator
+	} else {
+		state.balance = walked.principal + accrueRunning(walked, rule) + delta
+		state.accrued = 0n
+	}
 	state.asOf = date
 }
