@@ -1,14 +1,14 @@
-import { collectDates } from "../engine/dates"
 import { type DatedEvent, flowsAt } from "../engine/events"
 import { hasSettlement } from "../engine/levy-tally"
 import { processDate } from "../engine/occurrence"
 import { isSafeInteger, overflow } from "../engine/overflow"
-import type { DateString, Scenario, Timeline } from "../types"
+import type { DateString, Scenario } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { type BufferBreach, checkBuffer } from "./buffer"
 import { cloneStates } from "./clone"
-import type { ExpenseWindow } from "./expenses"
 import type { PrefixPoint } from "./prefix"
+import type { RequirementTable } from "./required"
+import { type ScanSchedule, scheduleDates, scheduleFlows } from "./schedule"
 import { lockedOrAbsentAssets } from "./undrawable"
 
 export interface Shortfall {
@@ -25,13 +25,9 @@ export type WalkOutcome =
 
 export interface WalkInput {
 	readonly scenario: Scenario
-	readonly timeline: Timeline
 	readonly month: DateString
-	readonly events: readonly DatedEvent[]
 	readonly point: PrefixPoint
-	readonly settlementDates: readonly DateString[]
-	readonly expenses: ExpenseWindow
-	readonly minBufferMonths: number
+	readonly requirement: RequirementTable
 }
 
 type DayOutcome =
@@ -70,23 +66,19 @@ function processDay(
 	dayEvents: readonly DatedEvent[],
 ): DayOutcome {
 	const flows = processFlows(input, date, dayEvents)
-	if (flows.kind !== "ok" || input.minBufferMonths === 0) return flows
-	const checked = checkBuffer(input.point.states, date, input.minBufferMonths, input.expenses)
+	if (flows.kind !== "ok" || input.requirement.months === 0) return flows
+	const checked = checkBuffer(input.point.states, date, input.requirement)
 	if (checked.kind === "problem") return { kind: "problem", problem: checked.problem }
 	if (checked.kind === "breach") return { kind: "ok", breach: checked.breach }
 	return { kind: "ok" }
 }
 
 /** Continues a candidate from its unchanged prefix, checking survival and the optional buffer. */
-export function walkCandidate(input: WalkInput): WalkOutcome {
+export function walkCandidate(input: WalkInput, schedule: ScanSchedule): WalkOutcome {
 	const point = { states: cloneStates(input.point.states), tracker: input.point.tracker }
 	const working: WalkInput = { ...input, point }
-	const { timeline, month, events, settlementDates } = working
-	const dates = collectDates(
-		events,
-		[month, timeline.horizon],
-		settlementDates.filter((date) => date >= month && date <= timeline.horizon),
-	)
+	const events = scheduleFlows(schedule, input.month)
+	const dates = scheduleDates(schedule, input.month)
 	let index = 0
 	let firstBreach: BufferBreach | undefined
 	for (const date of dates) {

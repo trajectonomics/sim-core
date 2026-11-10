@@ -1,27 +1,21 @@
 import { addMonthsClamped } from "../calendar/arith"
-import type { ResolvedCalendar } from "../calendar/business"
-import type { DatedEvent } from "../engine/events"
-import type { DateString, Scenario, Timeline } from "../types"
-import type { SurvivalOptions, TwentyFiveTimesReference } from "../types/financial-independence"
+import type { DateString, Scenario } from "../types"
+import type { TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
 import { type Accumulator, consume } from "./accumulate"
 import type { BufferFailure, ShortfallFailure } from "./best"
-import { candidateFlows } from "./candidate-flows"
-import { type ExpenseWindow, expenseBetween } from "./expenses"
+import { expenseBetween } from "./expenses"
 import type { Prefix } from "./prefix"
 import { twentyFiveTimes } from "./reference"
+import type { RequirementTable } from "./required"
+import type { ScanSchedule } from "./schedule"
 import { walkCandidate } from "./walk"
 
 export interface SearchInput {
 	readonly scenario: Scenario
-	readonly timeline: Timeline
-	readonly options: SurvivalOptions
-	readonly events: readonly DatedEvent[]
 	readonly prefix: Prefix
-	readonly expenses: ExpenseWindow
-	readonly settlementDates: readonly DateString[]
-	readonly minBufferMonths: number
-	readonly calendar: ResolvedCalendar | undefined
+	readonly requirement: RequirementTable
+	readonly schedule: ScanSchedule
 }
 
 export type SearchOutcome =
@@ -55,23 +49,16 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 	}
 	const point = input.prefix.points.get(month)
 	if (point === undefined) return { kind: "skip" }
-	const events = candidateFlows(input.events, input.timeline, month, input.options, input.calendar)
-	const walked = walkCandidate({
-		scenario: input.scenario,
-		timeline: input.timeline,
-		month,
-		events,
-		point,
-		settlementDates: input.settlementDates,
-		expenses: input.expenses,
-		minBufferMonths: input.minBufferMonths,
-	})
+	const walked = walkCandidate(
+		{ scenario: input.scenario, month, point, requirement: input.requirement },
+		input.schedule,
+	)
 	if (walked.kind === "problem") return walked
 	if (walked.kind === "buffer") return { kind: "buffer", failure: { month, breach: walked.breach } }
 	if (walked.kind === "shortfall") {
 		return { kind: "shortfall", failure: { month, shortfall: walked.shortfall }, beforeStop: false }
 	}
-	const annual = expenseBetween(input.expenses, month, addMonthsClamped(month, 12))
+	const annual = expenseBetween(input.requirement.expenses, month, addMonthsClamped(month, 12))
 	const reference = twentyFiveTimes(point.states, month, annual)
 	if (!reference.ok) return { kind: "problem", problem: reference.problem, terminal: true }
 	return { kind: "reachable", month, reference: reference.reference }

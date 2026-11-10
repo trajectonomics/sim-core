@@ -5,6 +5,8 @@ import type { SurvivalOptions } from "../types/financial-independence"
 import { candidateMonths } from "./candidates"
 import { expenseWindow } from "./expenses"
 import { baselinePrefix, levyPlan } from "./prefix"
+import { requirementTable } from "./required"
+import { scanSchedule } from "./schedule"
 import type { SearchInput } from "./search"
 
 /** Everything a scan needs except the candidate months it will visit. */
@@ -33,17 +35,21 @@ export function planScan(
 			? candidates
 			: candidates.filter((month) => prefix.stoppedAt !== undefined && month <= prefix.stoppedAt)
 	const levy = levyPlan(scenario, timeline, calendar)
+	const expenses = expenseWindow(scenario, timeline, options, candidates[0]!, calendar)
 	return {
 		input: {
 			scenario,
-			timeline,
-			options,
-			events,
 			prefix,
-			expenses: expenseWindow(scenario, timeline, options, candidates[0]!, calendar),
-			settlementDates: levy.settlementDates,
-			minBufferMonths: options.minBufferMonths ?? 0,
-			calendar,
+			requirement: requirementTable(expenses, options.minBufferMonths ?? 0),
+			schedule: scanSchedule(
+				events,
+				timeline,
+				options,
+				candidates[0]!,
+				levy.settlementDates,
+				calendar,
+				scenario.economy.inflation,
+			),
 		},
 		candidates,
 		scanned,

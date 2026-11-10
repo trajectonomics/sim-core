@@ -1,12 +1,15 @@
 import type { ResolvedCalendar } from "../calendar/business"
 import { occurrences } from "../calendar/occurrence"
 import type { DateString, Flow, Scenario, Timeline } from "../types"
+import { amountAt } from "./amount"
 import { compareIds } from "./order"
 
 export interface DatedEvent {
 	readonly date: DateString
 	readonly flow: Flow
 	readonly years: number
+	/** The grown amount, when the scan computed it once per event instead of per candidate. */
+	readonly amount?: bigint
 }
 
 /** All flow Occurrences in the timeline, on their Landed dates, sorted by date then flow id. */
@@ -26,7 +29,8 @@ export function buildEvents(
 			calendar,
 		)
 		for (const occurrence of found) {
-			events.push({ date: occurrence.date, flow, years: occurrence.years })
+			const event = { date: occurrence.date, flow, years: occurrence.years }
+			events.push({ ...event, amount: amountAt(event, scenario.economy.inflation) })
 		}
 	}
 	return events.sort((left, right) =>
