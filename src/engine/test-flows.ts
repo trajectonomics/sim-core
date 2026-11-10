@@ -2,6 +2,7 @@
 import type {
 	AccountId,
 	BasisPoints,
+	CappedPrepayment,
 	ContributionFlow,
 	DateString,
 	ExpenseFlow,
@@ -18,6 +19,7 @@ export interface FlowOptions {
 	readonly growth?: Growth
 	readonly label?: string
 	readonly prepaymentBps?: BasisPoints
+	readonly cappedPrepayment?: CappedPrepayment
 }
 
 interface FlowBase {
@@ -47,6 +49,9 @@ export function income(id: string, amount: MinorUnits, options: FlowOptions = {}
 		earned: true,
 		...(options.label === undefined ? {} : { label: options.label }),
 		...(options.prepaymentBps === undefined ? {} : { prepaymentBps: options.prepaymentBps }),
+		...(options.cappedPrepayment === undefined
+			? {}
+			: { cappedPrepayment: options.cappedPrepayment }),
 	}
 }
 

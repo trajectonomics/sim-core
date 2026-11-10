@@ -34,23 +34,20 @@ export type {
 	SurvivalFinancialIndependence,
 	SurvivalFinancialIndependenceResult,
 } from "./financial-independence-result"
-export type { ContributionFlow, ExpenseFlow, Flow, IncomeFlow } from "./flow"
+export type { CappedPrepayment, ContributionFlow, ExpenseFlow, Flow, IncomeFlow } from "./flow"
+export type { Levy, LevyContext, MeasuresResult, MonthDay, Tallies } from "./levy"
 export type {
 	BinaryMeasure,
 	ConstMeasure,
-	Levy,
-	LevyContext,
 	Measure,
 	MeasureOp,
-	MeasuresResult,
-	MonthDay,
+	MulMeasure,
 	PickMeasure,
 	Rounding,
 	ScaleMeasure,
-	Tallies,
 	TallyBasis,
 	TallyMeasure,
-} from "./levy"
+} from "./measure"
 export type { MarketBucket, ReturnModel } from "./market"
 export type {
 	AccountAmount,

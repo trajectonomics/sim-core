@@ -82,13 +82,15 @@ describe("check() Levy", () => {
 	})
 
 	it("reports only INVALID_OP for an unknown op, not problems in its other keys", () => {
-		expect(levyProblems([["measures", 2, "op"], "mul"], [["measures", 2, "den"], 0])).toEqual(
+		expect(levyProblems([["measures", 2, "op"], "power"], [["measures", 2, "den"], 0])).toEqual(
 			expected("INVALID_OP", m(2, "op")),
 		)
 	})
 
 	it("rejects an unknown op, basis and rounding", () => {
-		expect(levyProblems([["measures", 0, "op"], "mul"])).toEqual(expected("INVALID_OP", m(0, "op")))
+		expect(levyProblems([["measures", 0, "op"], "power"])).toEqual(
+			expected("INVALID_OP", m(0, "op")),
+		)
 		expect(levyProblems([["measures", 0, "basis"], "net"])).toEqual(
 			expected("INVALID_BASIS", m(0, "basis")),
 		)

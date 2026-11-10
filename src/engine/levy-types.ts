@@ -1,5 +1,6 @@
 import type { BasisPoints, DateString, Levy } from "../types"
 import type { ProjectionProblem } from "../types/projection"
+import type { CapTable } from "./levy-cap"
 import type { SettlementPeriodPlan } from "./levy-plan"
 
 export interface LevyTally {
@@ -34,6 +35,7 @@ export interface LevyTracker {
 	readonly levy: Levy
 	readonly inflation: BasisPoints
 	readonly periods: readonly SettlementPeriodPlan[]
+	readonly caps: readonly CapTable[]
 	readonly tallies: readonly LevyTally[]
 	readonly results: (EngineSettlementPeriod | undefined)[]
 	readonly settlementIndex: ReadonlyMap<DateString, number>

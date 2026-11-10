@@ -22,6 +22,11 @@ const OP_SHAPES: Readonly<Record<MeasureOp, Shape>> = {
 		den: req(denominator),
 		rounding: req(oneOf(ROUNDINGS, "INVALID_ROUNDING")),
 	},
+	mul: {
+		...operands,
+		den: req(denominator),
+		rounding: req(oneOf(ROUNDINGS, "INVALID_ROUNDING")),
+	},
 	pick: {
 		...operands,
 		// biome-ignore lint/suspicious/noThenProperty: `then` is a Measure operand key, not a thenable

@@ -13,6 +13,7 @@ export const REF_KEYS: { readonly [Op in keyof ByOp]: readonly OperandKey<ByOp[O
 		min: ["a", "b"],
 		max: ["a", "b"],
 		scale: ["of"],
+		mul: ["a", "b"],
 		pick: ["a", "b", "then", "else"],
 	})
 

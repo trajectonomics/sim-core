@@ -71,7 +71,7 @@ A Flow amount computed on each Occurrence from other Flows instead of fixed: a M
 _Avoid_: Percentage flow, formula flow, linked flow
 
 **Tally label**:
-A label on an income Flow, on a contribution Flow, or on an asset Account (`returnLabel`, `gainLabel`), that a Levy sums over a Settlement period. A Flow or Account with no label is never tallied, which is how a tax-sheltered Account is left out. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap.
+A label on an income Flow, on a contribution Flow, or on an asset Account (`returnLabel`, `gainLabel`), that a Levy sums over a Settlement period. A Flow or Account with no label is never tallied, which is how a tax-sheltered Account is left out. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap. A label is the unit of per-person scope: separate caps per earner are separate labels, and `add` sums their Measures.
 _Avoid_: Category, tag, tax category
 
 **Returns tally**:
@@ -87,7 +87,7 @@ The pooled amount put into an Account (average cost): applied Contributions and 
 _Avoid_: Purchase price, lot
 
 **Prepayment**:
-An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount, rounded half up in minor units. A Flow names the Levy each share is credited to; the shares sum to at most 10000 basis points and are rounded cumulatively in Scenario Levy order, so together they never exceed the gross. Only the net lands in cash. A Levy's period total is credited against it at Settlement.
+An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount, rounded half up in minor units. A Flow names the Levy each share is credited to; the shares sum to at most 10000 basis points and are rounded cumulatively in Scenario Levy order, so together they never exceed the gross. Only the net lands in cash. A Levy's period total is credited against it at Settlement. An income Flow may also carry a `cappedPrepayment` share, taken only from the part of each Occurrence below a cap on the label's period-to-date gross (Carry-in included); the cap is a Levy `const`, so a wage base stops being prepaid once it is reached.
 _Avoid_: Withholding, prepaid tax
 
 **Settlement**:

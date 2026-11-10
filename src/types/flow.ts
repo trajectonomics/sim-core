@@ -18,6 +18,14 @@ export interface IncomeFlow extends FlowBase {
 	readonly label?: string
 	/** Share of each Occurrence taken at source, 0 to 10000. Needs a Levy. */
 	readonly prepaymentBps?: BasisPoints
+	/** A second share, on the part of each Occurrence below a cap on the label's period-to-date gross. Needs a Levy. */
+	readonly cappedPrepayment?: CappedPrepayment
+}
+
+/** `bps` of the part of gross below `upTo`, a Levy `const` Measure named by id. */
+export interface CappedPrepayment {
+	readonly bps: BasisPoints
+	readonly upTo: string
 }
 
 export interface ExpenseFlow extends FlowBase {

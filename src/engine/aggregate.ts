@@ -1,8 +1,9 @@
-import { roundHalfUp } from "../money/round"
-import type { AccountId, BasisPoints, IncomeFlow } from "../types"
-import { addTo } from "./add"
+import type { AccountId, BasisPoints, DateString } from "../types"
+import type { ProjectionProblem } from "../types/projection"
 import { amountAt } from "./amount"
 import type { DatedEvent } from "./events"
+import { addIncome, periodView } from "./levy-prepaid"
+import type { LevyTracker } from "./levy-types"
 
 export interface ContributionEntry {
 	readonly target: AccountId
@@ -18,32 +19,33 @@ export interface DayFlows {
 	/** Planned gross income by Tally label. */
 	readonly gross: ReadonlyMap<string, bigint>
 	readonly prepaid: bigint
-}
-
-function prepaidAmount(amount: bigint, bps: number): bigint {
-	return roundHalfUp(amount * BigInt(bps), 10_000n)
-}
-
-/** Adds a labeled income amount to the gross tallies and returns its Prepayment. */
-function addIncome(flow: IncomeFlow, amount: bigint, gross: Map<string, bigint>): bigint {
-	if (flow.label !== undefined) addTo(gross, flow.label, amount)
-	if (flow.prepaymentBps === undefined) return 0n
-	return prepaidAmount(amount, flow.prepaymentBps)
+	/** A capped Prepayment read a cap that is not a safe integer. */
+	readonly capProblem?: ProjectionProblem
 }
 
 /** Sums one Occurrence's flows, separating Prepayment and Tally labels from the cash amounts. */
-export function aggregate(events: readonly DatedEvent[], inflation: BasisPoints): DayFlows {
+export function aggregate(
+	events: readonly DatedEvent[],
+	inflation: BasisPoints,
+	date: DateString,
+	tracker: LevyTracker | undefined,
+): DayFlows {
 	let income = 0n
 	let expense = 0n
 	let prepaid = 0n
 	const gross = new Map<string, bigint>()
 	const contributionEntries: ContributionEntry[] = []
+	const view = periodView(tracker, date)
 	for (const event of events) {
 		const amount = event.amount ?? amountAt(event, inflation)
 		const flow = event.flow
 		if (flow.kind === "income") {
 			income += amount
-			prepaid += addIncome(flow, amount, gross)
+			const taken = addIncome(flow, amount, gross, view, date)
+			if (taken.problem !== undefined) {
+				return { income, expense, contributionEntries, gross, prepaid, capProblem: taken.problem }
+			}
+			prepaid += taken.prepaid
 		} else if (flow.kind === "expense") {
 			expense += amount
 		} else {

@@ -1,5 +1,6 @@
-import type { BasisPoints, DateString, Levy, Tallies } from "../types"
+import type { BasisPoints, DateString, Flow, Levy, Tallies } from "../types"
 import { addTo } from "./add"
+import { capTables } from "./levy-cap"
 import { type SettlementPeriodPlan, settlementPeriodIndexAt } from "./levy-plan"
 import type { LevyTally, LevyTracker } from "./levy-types"
 
@@ -22,6 +23,7 @@ function applyCarryIn(
 
 export function createTracker(
 	levy: Levy,
+	flows: readonly Flow[],
 	periods: readonly SettlementPeriodPlan[],
 	inflation: BasisPoints,
 	start: DateString,
@@ -33,6 +35,7 @@ export function createTracker(
 		levy,
 		inflation,
 		periods,
+		caps: capTables(levy, flows, periods, inflation),
 		tallies,
 		results: periods.map(() => undefined),
 		settlementIndex,
