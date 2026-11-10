@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test"
+import { compoundingDate } from "../calendar/compounding"
 import { project } from "../engine/project"
 import type { Fixture } from "../fixtures/fixture"
+import type { Account } from "../types"
 import type { Projection } from "../types/projection"
 import { NOMINAL_CASES } from "./nominal-cases"
 import { FLOW_NOMINAL_CASES } from "./nominal-flow-cases"
@@ -31,6 +33,24 @@ describe("nominal fixtures match the independent oracle", () => {
 	}
 })
 
+/** Effective Accounts, and nominal Accounts on a compounding date, report no accrued interest. */
+function mustBeZero(rule: Account, date: string): boolean {
+	if (rule.compounding === undefined) return true
+	return compoundingDate(date, rule.compounding) === date
+}
+
+function expectAccruedZeroOnBoundaries(fixture: Fixture): void {
+	const projection = projectFixture(fixture)
+	const accounts = new Map(fixture.scenario.accounts.map((rule) => [rule.id, rule]))
+	expect(projection.rows[0]!.balances.every((item) => item.accruedInterest === 0)).toBe(true)
+	for (const row of projection.rows) {
+		for (const balance of row.balances) {
+			const rule = accounts.get(balance.account)!
+			if (mustBeZero(rule, row.date)) expect(balance.accruedInterest).toBe(0)
+		}
+	}
+}
+
 describe("split invariants", () => {
 	it("holds capitalised + accruedInterest = amount on every nominal and real row", () => {
 		for (const fixture of ALL_CASES) {
@@ -40,6 +60,25 @@ describe("split invariants", () => {
 					expect(balance.capitalised + balance.accruedInterest).toBe(balance.amount)
 					expect(balance.amount).toBeGreaterThanOrEqual(0)
 				}
+			}
+		}
+	})
+
+	it("reports zero accrued on the opening row and on every compounding date", () => {
+		for (const fixture of ALL_CASES) expectAccruedZeroOnBoundaries(fixture)
+	})
+
+	it("keeps net worth equal to the signed sum of amounts", () => {
+		for (const fixture of ALL_CASES) {
+			const projection = projectFixture(fixture)
+			const kinds = new Map(fixture.scenario.accounts.map((rule) => [rule.id, rule.kind]))
+			for (const row of projection.rows) {
+				const total = row.balances.reduce(
+					(sum, item) =>
+						sum + (kinds.get(item.account) === "liability" ? -item.amount : item.amount),
+					0,
+				)
+				expect(row.netWorth).toBe(total)
 			}
 		}
 	})

@@ -15,7 +15,7 @@ export interface OracleState {
 	readonly rule: Account
 	balance: bigint
 	asOf: DateString
-	/** A nominal Account's principal-days numerator; always 0 for an effective Account. */
+	/** A nominal Account's capitalised-days numerator; always 0 for an effective Account. */
 	accrued: bigint
 }
 
@@ -29,7 +29,7 @@ export function oracleValueParts(state: OracleState, date: DateString): OracleVa
 		return { capitalised: amount, accruedInterest: 0n, amount }
 	}
 	return oracleNominalParts(
-		{ principal: state.balance, numerator: state.accrued, asOf: state.asOf },
+		{ capitalised: state.balance, numerator: state.accrued, asOf: state.asOf },
 		rule,
 		date,
 	)
@@ -44,7 +44,7 @@ function accrueRunning(accrual: ReturnType<typeof oracleWalk>, rule: OracleNomin
 	return oracleNominalParts(accrual, rule, accrual.asOf).accruedInterest
 }
 
-/** Commits the accrual through `date`, then applies `delta` with the principal-first debit rule. */
+/** Commits the accrual through `date`, then applies `delta` with the capitalised-first debit rule. */
 export function oracleMutate(state: OracleState, date: DateString, delta: bigint): void {
 	const rule = oracleNominalRule(state.rule)
 	if (rule === undefined) {
@@ -53,16 +53,16 @@ export function oracleMutate(state: OracleState, date: DateString, delta: bigint
 		return
 	}
 	const walked = oracleWalk(
-		{ principal: state.balance, numerator: state.accrued, asOf: state.asOf },
+		{ capitalised: state.balance, numerator: state.accrued, asOf: state.asOf },
 		rule,
 		date,
 	)
 	const owed = -delta
-	if (delta >= 0n || owed <= walked.principal) {
-		state.balance = walked.principal + delta
+	if (delta >= 0n || owed <= walked.capitalised) {
+		state.balance = walked.capitalised + delta
 		state.accrued = walked.numerator
 	} else {
-		state.balance = walked.principal + accrueRunning(walked, rule) + delta
+		state.balance = walked.capitalised + accrueRunning(walked, rule) + delta
 		state.accrued = 0n
 	}
 	state.asOf = date

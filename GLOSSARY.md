@@ -7,7 +7,7 @@ Domain vocabulary for `sim-core` (personal-finance projection engine).
 ## Core Concepts
 
 **Baseline**:
-The opening snapshot: balances per account at the Timeline start, and the Cost basis of any Account that tracks gains. Nothing else. A balance is capitalised principal with zero Accrued interest, so feeding a row's `amount` back in folds Accrued interest into principal early, feeding `capitalised` drops it, and only a row on a Compounding date resumes exactly.
+The opening snapshot: balances per account at the Timeline start, and the Cost basis of any Account that tracks gains. Nothing else. A balance is a Capitalised balance with zero Accrued interest, so feeding a row's `amount` back in folds Accrued interest into the capitalised balance early, feeding `capitalised` drops it, and only a row on a Compounding date resumes exactly.
 _Avoid_: Initial state, starting ledger, opening balance
 
 **Scenario**:
@@ -115,11 +115,11 @@ The last day of a **Compounding period**: the date on which its Accrued interest
 _Avoid_: Payment date, period end
 
 **Capitalisation**:
-The moment a nominal Account's **Accrued interest** is added to its **Capitalised balance** and starts earning interest itself. It happens once per Account per **Compounding date**, and early only when a debit would take principal below zero (a settlement, so the Account can be paid off).
+The moment a nominal Account's **Accrued interest** is added to its **Capitalised balance** and starts earning interest itself. It happens once per Account per **Compounding date**, and early only when a debit would take the Capitalised balance below zero (a settlement, so the Account can be paid off).
 _Avoid_: Compounding, reinvestment, posting
 
 **Capitalised balance**:
-The part of a nominal Account's value that has been capitalised, or of an effective Account's value, which is all of it. It is the principal that earns interest; a Flow changes it from the Flow's date.
+The part of a nominal Account's value that has been capitalised, or of an effective Account's value, which is all of it. It is the balance that earns interest; a Flow changes it from the Flow's date.
 _Avoid_: Principal, base balance, locked balance
 
 **Accrued interest**:

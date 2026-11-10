@@ -3,10 +3,10 @@ import { countedDays } from "../calendar/counted"
 import type { BasisPoints, CompoundingPeriod, DateString } from "../types"
 import { roundHalfUp } from "./round"
 
-/** A nominal Account's exact accrual: capitalised principal plus its principal-days numerator. */
+/** A nominal Account's exact accrual: capitalised capitalised plus its capitalised-days numerator. */
 export interface Accrual {
-	readonly principal: bigint
-	readonly principalDays: bigint
+	readonly capitalised: bigint
+	readonly capitalisedDays: bigint
 	readonly asOf: DateString
 }
 
@@ -30,9 +30,13 @@ export function accrualDenominator(rule: NominalRule, date: DateString): bigint 
 	)
 }
 
-/** Rounds an exact principal-days numerator into minor units, half up. */
-export function interestOf(principalDays: bigint, rate: BasisPoints, denominator: bigint): bigint {
-	return roundHalfUp(principalDays * BigInt(rate), denominator)
+/** Rounds an exact capitalised-days numerator into minor units, half up. */
+export function interestOf(
+	capitalisedDays: bigint,
+	rate: BasisPoints,
+	denominator: bigint,
+): bigint {
+	return roundHalfUp(capitalisedDays * BigInt(rate), denominator)
 }
 
 /**
@@ -40,26 +44,26 @@ export function interestOf(principalDays: bigint, rate: BasisPoints, denominator
  * read on a compounding date reports the period already capitalised; a partial period stays exact.
  */
 export function capitaliseThrough(accrual: Accrual, rule: NominalRule, date: DateString): Accrual {
-	let principal = accrual.principal
-	let principalDays = accrual.principalDays
+	let capitalised = accrual.capitalised
+	let capitalisedDays = accrual.capitalisedDays
 	let asOf = accrual.asOf
 	while (asOf < date) {
 		const boundary = nextCompoundingDate(asOf, rule.compounding)
 		if (boundary === undefined || boundary > date) break
-		principalDays += principal * BigInt(countedDays(asOf, boundary))
-		principal += interestOf(principalDays, rule.rate, accrualDenominator(rule, boundary))
-		principalDays = 0n
+		capitalisedDays += capitalised * BigInt(countedDays(asOf, boundary))
+		capitalised += interestOf(capitalisedDays, rule.rate, accrualDenominator(rule, boundary))
+		capitalisedDays = 0n
 		asOf = boundary
 	}
-	return { principal, principalDays, asOf }
+	return { capitalised, capitalisedDays, asOf }
 }
 
-/** Adds principal over the counted days from `asOf` to `date`, without capitalising. */
+/** Adds capitalised over the counted days from `asOf` to `date`, without capitalising. */
 export function commitThrough(accrual: Accrual, date: DateString): Accrual {
 	if (date <= accrual.asOf) return accrual
-	const principalDays =
-		accrual.principalDays + accrual.principal * BigInt(countedDays(accrual.asOf, date))
-	return { principal: accrual.principal, principalDays, asOf: date }
+	const capitalisedDays =
+		accrual.capitalisedDays + accrual.capitalised * BigInt(countedDays(accrual.asOf, date))
+	return { capitalised: accrual.capitalised, capitalisedDays, asOf: date }
 }
 
 /** The value at `date`: completed periods capitalised, the running period's interest rounded. */
@@ -67,12 +71,12 @@ export function accrualParts(accrual: Accrual, rule: NominalRule, date: DateStri
 	const settled = capitaliseThrough(accrual, rule, date)
 	const running = commitThrough(settled, date)
 	const accruedInterest =
-		running.principalDays === 0n
+		running.capitalisedDays === 0n
 			? 0n
-			: interestOf(running.principalDays, rule.rate, accrualDenominator(rule, date))
+			: interestOf(running.capitalisedDays, rule.rate, accrualDenominator(rule, date))
 	return {
-		capitalised: running.principal,
+		capitalised: running.capitalised,
 		accruedInterest,
-		amount: running.principal + accruedInterest,
+		amount: running.capitalised + accruedInterest,
 	}
 }

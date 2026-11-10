@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test"
 import { project } from "../engine/project"
+import type { EngineSnapshot } from "../engine/snapshot"
 import type { Fixture } from "../fixtures/fixture"
 import { deflate } from "../money/growth"
+import { realValues } from "../output/real"
+import type { RuleMap } from "../output/rules"
 import type { Projection, ProjectionBalance } from "../types/projection"
 import {
 	nominalAnnual,
@@ -91,6 +94,22 @@ describe("real values deflate the components separately", () => {
 		expect(deflate(26n, 200, 365)).toBe(25n)
 		expect(deflate(26n, 200, 365)).toBe(25n)
 		expect(deflate(52n, 200, 365)).toBe(51n)
+	})
+
+	it("reports 25 + 25 = 50 for a row whose nominal split is 26 + 26", () => {
+		const snapshot: EngineSnapshot = {
+			date: "2026-12-31",
+			balances: [{ account: "savings", amount: 52n, capitalised: 26n, accruedInterest: 26n }],
+			netWorth: 52n,
+			accessibleNetWorth: 52n,
+		}
+		const rules: RuleMap = new Map([
+			["savings", { id: "savings", kind: "asset", rate: 1200, compounding: "monthly" }],
+		])
+		const real = realValues(snapshot, rules, "2025-12-31", 200)
+		expect(real.values?.balances).toEqual([
+			{ account: "savings", amount: 50, capitalised: 25, accruedInterest: 25 },
+		])
 	})
 
 	it("sets every real amount to the rounded components, not the rounded total", () => {

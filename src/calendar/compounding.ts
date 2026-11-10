@@ -33,7 +33,7 @@ export function periodStart(date: DateString, period: CompoundingPeriod): DateSt
 }
 
 /** Last day of the compounding period containing `date`: the date its interest capitalises. */
-export function periodEnd(date: DateString, period: CompoundingPeriod): DateString {
+export function compoundingDate(date: DateString, period: CompoundingPeriod): DateString {
 	const { year, month } = parseDate(date)
 	const index = startMonthIndex(year, month, period) + MONTHS[period] - 1
 	const lastYear = Math.floor(index / 12)
@@ -43,7 +43,7 @@ export function periodEnd(date: DateString, period: CompoundingPeriod): DateStri
 
 /** Counted days in the whole period containing `date`: the capitalisation denominator's length. */
 export function periodCountedDays(date: DateString, period: CompoundingPeriod): number {
-	return countedSpan(periodStart(date, period), periodEnd(date, period))
+	return countedSpan(periodStart(date, period), compoundingDate(date, period))
 }
 
 /**
@@ -57,5 +57,5 @@ export function nextCompoundingDate(
 ): DateString | undefined {
 	const next = addDays(asOf, 1)
 	if (next === asOf) return undefined
-	return periodEnd(next, period)
+	return compoundingDate(next, period)
 }

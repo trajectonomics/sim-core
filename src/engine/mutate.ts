@@ -15,13 +15,18 @@ function negative(id: string, date: DateString): RangeError {
 	return new RangeError(`Negative balance on ${id} at ${date}`)
 }
 
-function commit(state: AccountState, principal: bigint, principalDays: bigint, date: DateString) {
-	state.balance = principal
-	state.principalDays = principalDays
+function commit(
+	state: AccountState,
+	capitalised: bigint,
+	capitalisedDays: bigint,
+	date: DateString,
+) {
+	state.balance = capitalised
+	state.capitalisedDays = capitalisedDays
 	state.asOf = date
 }
 
-/** Nominal commit: completed periods capitalise first, then the delta applies to principal. */
+/** Nominal commit: completed periods capitalise first, then the delta applies to capitalised. */
 function nominalCommit(
 	state: AccountState,
 	rule: NominalRule,
@@ -29,21 +34,21 @@ function nominalCommit(
 	delta: bigint,
 ): ProjectionProblem | undefined {
 	const settled = capitaliseThrough(
-		{ principal: state.balance, principalDays: state.principalDays, asOf: state.asOf },
+		{ capitalised: state.balance, capitalisedDays: state.capitalisedDays, asOf: state.asOf },
 		rule,
 		date,
 	)
-	if (!isSafeInteger(settled.principal)) return overflow(date, state.rule.id)
+	if (!isSafeInteger(settled.capitalised)) return overflow(date, state.rule.id)
 	const running = commitThrough(settled, date)
-	const next = running.principal + delta
+	const next = running.capitalised + delta
 	if (next >= 0n) {
 		if (!isSafeInteger(next)) return overflow(date, state.rule.id)
-		commit(state, next, running.principalDays, date)
+		commit(state, next, running.capitalisedDays, date)
 		return undefined
 	}
 	// An overdrawing debit capitalises the running period first, so the Account can be paid off.
-	const accrued = interestOf(running.principalDays, rule.rate, accrualDenominator(rule, date))
-	const cleared = running.principal + accrued + delta
+	const accrued = interestOf(running.capitalisedDays, rule.rate, accrualDenominator(rule, date))
+	const cleared = running.capitalised + accrued + delta
 	if (cleared < 0n) throw negative(state.rule.id, date)
 	if (!isSafeInteger(cleared)) return overflow(date, state.rule.id)
 	commit(state, cleared, 0n, date)

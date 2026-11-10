@@ -1,20 +1,11 @@
 import { describe, expect, it } from "bun:test"
 import type { Account } from "../types"
-import type { ProjectionRow } from "../types/projection"
+import { splitAt } from "./test-balance"
 import { contribution, expense, income } from "./test-flows"
 import { rowAt, run } from "./test-helpers"
 
 const cash: Account = { id: "cash", kind: "asset", rate: 0 }
 const savings: Account = { id: "savings", kind: "asset", rate: 1200, compounding: "monthly" }
-
-function splitAt(row: ProjectionRow, account: string) {
-	const balance = row.balances.find((item) => item.account === account)!
-	return {
-		capitalised: balance.capitalised,
-		accruedInterest: balance.accruedInterest,
-		amount: balance.amount,
-	}
-}
 
 const loan: Account = { id: "loan", kind: "liability", rate: 1200, compounding: "monthly" }
 
@@ -105,6 +96,7 @@ describe("nominal interest deepens a Shortfall", () => {
 		const projection = run(setup(loan))
 		expect(projection.runsOut).toEqual({ date: "2026-01-31", unmet: 10_000 })
 		expect(splitAt(rowAt(projection, "2026-01-31"), "loan").amount).toBe(0)
+		expect(projection.annual[0]).toMatchObject({ contributions: 1_010_000, unmet: 10_000 })
 	})
 
 	it("has no Shortfall when the Account carries no interest", () => {

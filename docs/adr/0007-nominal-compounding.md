@@ -21,23 +21,24 @@ interest charge. This ADR adds the primitive and records the two breaking change
   a period whose compounding date is `asOf` has already closed.
 - **Periodic rate and counted days.** A full period earns `rate / m`, with `m` of 12, 4, 2 or 1. A
   partial period earns that fraction pro-rated by Actual/365 No Leap counted days within the
-  period: `principal × rate × elapsedCountedDays / (10000 × m × periodCountedDays)`, where
+  period: `capitalised × rate × elapsedCountedDays / (10000 × m × periodCountedDays)`, where
   `periodCountedDays` is the whole period's counted length (28 for February 2024, because Feb 29
   is not counted). A full period is therefore exactly `rate / m` whatever the month length.
-- **Exact numerator, one rounding.** Interest is carried as `principalDays`, the sum of principal
-  over the counted days of the current period. Its denominator is
+- **Exact numerator, one rounding.** Interest is carried as `capitalisedDays`, the sum of the
+  capitalised balance over the counted days of the current period. Its denominator is
   `D = 10000 × m × periodCountedDays`, and Accrued interest is
-  `roundHalfUp(principalDays × rate, D)`. The numerator is exact, so a Flow does not round the
+  `roundHalfUp(capitalisedDays × rate, D)`. The numerator is exact, so a Flow does not round the
   accrued amount; rounding happens when an integer is needed — a capitalisation, a row, a cap or
   a debit. This avoids ADR 0001's repeated-commit freeze inside a period.
 - **A row reports the Account's value.** `capitalised + accruedInterest`, where `capitalised` is
-  the principal and Accrued interest is part of Net worth and of every routing valuation. At a
-  compounding date the engine accrues that day, capitalises, and only then applies the day's
-  Flows, so the row reports `accruedInterest = 0` and the same total. Capitalisation changes only
+  the capitalised balance and Accrued interest is part of Net worth and of every routing
+  valuation. At a compounding date the engine accrues that day, capitalises, and only then
+  applies the day's Flows, so the row reports `accruedInterest = 0` and the same total. Capitalisation changes only
   how future interest is computed.
-- **Principal-first debits, with a settlement exception.** A debit reduces principal and leaves
-  Accrued interest to capitalise at the period end. A debit that would take principal below zero
-  first capitalises the Accrued interest at the debit date, then applies the remainder: that is a
+- **Capitalised-first debits, with a settlement exception.** A debit reduces the capitalised
+  balance and leaves Accrued interest to capitalise on the Compounding date. A debit that would
+  take the capitalised balance below zero first capitalises the Accrued interest at the debit
+  date, then applies the remainder: that is a
   settlement, not periodic compounding. It is the only early capitalisation. The existing caps
   (a Liability payment is `min(planned, valuation)`, a withdrawal is `min(remaining, valuation)`)
   use the same valuation including Accrued interest, so a payment can clear the Account and the
@@ -76,8 +77,8 @@ interest charge. This ADR adds the primitive and records the two breaking change
 - **Compounding on the contract's anniversary, anchored to `Timeline.start`.** Moving the
   Projection window would move the compounding dates, so two Projections of one Account would not
   be comparable. The Baseline has no Account opening date to anchor to.
-- **Interest capitalised only at period end, excluded from the reported value.** A mid-period row
-  would understate what the Account is worth and what a payment would clear, and the split would
+- **Interest capitalised only on a Compounding date, excluded from the reported value.** A mid-period
+  row would understate what the Account is worth and what a payment would clear, and the split would
   have to be recomputed by the caller.
 - **Interest-first debit allocation.** Closer to a loan statement, but it needs an accrued-payment
   accumulator so unpaid interest is not capitalised early. Deferred.
@@ -88,10 +89,10 @@ interest charge. This ADR adds the primitive and records the two breaking change
 
 ## Consequences
 
-- **Baseline round-trip hazard.** A Baseline balance is capitalised principal with zero Accrued
-  interest at `Timeline.start`. Feeding a row's `amount` back in folds Accrued interest into
-  principal early; feeding `capitalised` drops the Accrued interest. Only a row on a compounding
-  date resumes exactly, so mid-period resumption needs a future accrued-interest Carry-in.
+- **Baseline round-trip hazard.** A Baseline balance is a Capitalised balance with zero Accrued
+  interest at `Timeline.start`. Feeding a row's `amount` back in folds Accrued interest into the
+  capitalised balance early; feeding `capitalised` drops the Accrued interest. Only a row on a
+  Compounding date resumes exactly, so mid-period resumption needs a future accrued-interest Carry-in.
 - A caller that opens the Projection mid-period does not invent interest before `start`: the first
   period accrues from `Timeline.start`, whose day does not earn, like the effective-annual path.
 - The effective annual rate of a nominal Account is `(1 + rate/m)^m - 1` before rounding. It is not

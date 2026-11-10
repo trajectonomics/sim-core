@@ -9,7 +9,7 @@ export interface AccountState {
 	balance: bigint
 	asOf: DateString
 	/** A nominal Account's exact capitalised-days numerator; always 0 for an effective Account. */
-	principalDays: bigint
+	capitalisedDays: bigint
 }
 
 export type StateMap = ReadonlyMap<AccountId, AccountState>
@@ -30,7 +30,7 @@ export function createStates(
 			rule,
 			balance: BigInt(opening.get(rule.id) ?? 0),
 			asOf: start,
-			principalDays: 0n,
+			capitalisedDays: 0n,
 		}
 		const resolved = series?.get(rule.id)
 		states.set(rule.id, resolved === undefined ? base : { ...base, series: resolved })

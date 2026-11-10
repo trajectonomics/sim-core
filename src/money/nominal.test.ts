@@ -2,9 +2,9 @@ import { describe, expect, it } from "bun:test"
 import type { CompoundingPeriod } from "../types"
 import { type Accrual, accrualParts, capitaliseThrough, commitThrough } from "./nominal"
 
-const at = (principal: number, date: string): Accrual => ({
-	principal: BigInt(principal),
-	principalDays: 0n,
+const at = (capitalised: number, date: string): Accrual => ({
+	capitalised: BigInt(capitalised),
+	capitalisedDays: 0n,
 	asOf: date,
 })
 
@@ -23,7 +23,7 @@ describe("nominal capitalisation", () => {
 
 	it("rounds a half-unit capitalisation up", () => {
 		const settled = capitaliseThrough(at(50, "2025-12-31"), monthly, "2026-01-31")
-		expect(settled.principal).toBe(51n)
+		expect(settled.capitalised).toBe(51n)
 	})
 
 	it("does not grow a ten-satang balance at four percent monthly", () => {
@@ -32,17 +32,14 @@ describe("nominal capitalisation", () => {
 			{ rate: 400, compounding: "monthly" },
 			"2026-12-31",
 		)
-		expect(settled.principal).toBe(10n)
+		expect(settled.capitalised).toBe(10n)
 	})
 
 	it("capitalises each calendar period in a long gap", () => {
+		// Twelve hand-computed 1% capitalisations: 1,010,000 ... 1,126,825.
 		const settled = capitaliseThrough(at(1_000_000, "2025-12-31"), monthly, "2026-12-31")
-		let oracle = 1_000_000n
-		for (let month = 0; month < 12; month++) {
-			oracle += (oracle * 1200n + 60_000n) / 120_000n
-		}
-		expect(settled.principal).toBe(oracle)
-		expect(settled.principalDays).toBe(0n)
+		expect(settled.capitalised).toBe(1_126_825n)
+		expect(settled.capitalisedDays).toBe(0n)
 		expect(settled.asOf).toBe("2026-12-31")
 	})
 
@@ -54,7 +51,7 @@ describe("nominal capitalisation", () => {
 		] as const
 		for (const [rate, compounding, date, expected] of cases) {
 			const settled = capitaliseThrough(at(1_000_000, "2025-12-31"), { rate, compounding }, date)
-			expect(settled.principal).toBe(BigInt(expected))
+			expect(settled.capitalised).toBe(BigInt(expected))
 		}
 	})
 
@@ -66,7 +63,7 @@ describe("nominal capitalisation", () => {
 	it("stops at the last supported date without leaving the calendar", () => {
 		const settled = capitaliseThrough(at(1_000, "9998-12-31"), monthly, "9999-12-31")
 		expect(settled.asOf).toBe("9999-12-31")
-		expect(settled.principal).toBeGreaterThan(1_000n)
+		expect(settled.capitalised).toBeGreaterThan(1_000n)
 	})
 })
 
@@ -91,7 +88,7 @@ describe("nominal value at a date", () => {
 
 	it("keeps the exact numerator across a mid-period commit", () => {
 		const committed = commitThrough(at(1_200_000, "2026-01-01"), "2026-01-16")
-		expect(committed.principalDays).toBe(18_000_000n)
+		expect(committed.capitalisedDays).toBe(18_000_000n)
 		const parts = accrualParts(committed, monthly, "2026-01-16")
 		expect(parts.accruedInterest).toBe(5_806n)
 	})

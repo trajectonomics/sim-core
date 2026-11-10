@@ -17,7 +17,7 @@ export interface OracleNominalRule {
 }
 
 export interface OracleAccrual {
-	readonly principal: bigint
+	readonly capitalised: bigint
 	readonly numerator: bigint
 	readonly asOf: DateString
 }
@@ -48,7 +48,7 @@ function periodStart(date: DateString, period: CompoundingPeriod): DateString {
 	return `${String(year).padStart(4, "0")}-${String(first).padStart(2, "0")}-01`
 }
 
-function periodEnd(date: DateString, period: CompoundingPeriod): DateString {
+function compoundingDate(date: DateString, period: CompoundingPeriod): DateString {
 	const [year, month] = parse(date)
 	const last = month - ((month - 1) % MONTHS[period]) + MONTHS[period] - 1
 	return `${String(year).padStart(4, "0")}-${String(last).padStart(2, "0")}-${monthDays(year, last)}`
@@ -82,19 +82,19 @@ export function oracleWalk(
 	rule: OracleNominalRule,
 	date: DateString,
 ): OracleAccrual {
-	let principal = accrual.principal
+	let capitalised = accrual.capitalised
 	let numerator = accrual.numerator
 	let asOf = accrual.asOf
 	while (asOf < date) {
 		asOf = oracleAddDays(asOf, 1)
 		const [, month, day] = parse(asOf)
-		if (month !== 2 || day !== 29) numerator += principal
-		if (asOf === periodEnd(asOf, rule.compounding)) {
-			principal += roundHalfUp(numerator * BigInt(rule.rate), denominator(asOf, rule))
+		if (month !== 2 || day !== 29) numerator += capitalised
+		if (asOf === compoundingDate(asOf, rule.compounding)) {
+			capitalised += roundHalfUp(numerator * BigInt(rule.rate), denominator(asOf, rule))
 			numerator = 0n
 		}
 	}
-	return { principal, numerator, asOf }
+	return { capitalised, numerator, asOf }
 }
 
 /** The value at `date`: completed periods capitalised, the running period's interest rounded. */
@@ -104,14 +104,14 @@ export function oracleNominalParts(
 	date: DateString,
 ): OracleValueParts {
 	const walked = oracleWalk(accrual, rule, date)
-	const end = periodEnd(oracleAddDays(walked.asOf, 1), rule.compounding)
+	const end = compoundingDate(oracleAddDays(walked.asOf, 1), rule.compounding)
 	const accruedInterest =
 		walked.numerator === 0n
 			? 0n
 			: roundHalfUp(walked.numerator * BigInt(rule.rate), denominator(end, rule))
 	return {
-		capitalised: walked.principal,
+		capitalised: walked.capitalised,
 		accruedInterest,
-		amount: walked.principal + accruedInterest,
+		amount: walked.capitalised + accruedInterest,
 	}
 }

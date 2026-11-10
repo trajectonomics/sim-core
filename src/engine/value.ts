@@ -39,12 +39,12 @@ export function valueParts(state: AccountState, date: DateString): ValueParts {
 	const rule = state.series === undefined ? nominalRule(state.rule) : undefined
 	if (rule === undefined) return effectiveParts(state, date)
 	const settled = capitaliseThrough(
-		{ principal: state.balance, principalDays: state.principalDays, asOf: state.asOf },
+		{ capitalised: state.balance, capitalisedDays: state.capitalisedDays, asOf: state.asOf },
 		rule,
 		date,
 	)
-	state.balance = settled.principal
-	state.principalDays = settled.principalDays
+	state.balance = settled.capitalised
+	state.capitalisedDays = settled.capitalisedDays
 	state.asOf = settled.asOf
 	return accrualParts(settled, rule, date)
 }

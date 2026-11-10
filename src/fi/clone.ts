@@ -8,7 +8,7 @@ export function cloneStates(states: StateMap): StateMap {
 			rule: state.rule,
 			balance: state.balance,
 			asOf: state.asOf,
-			principalDays: state.principalDays,
+			capitalisedDays: state.capitalisedDays,
 		})
 	}
 	return cloned

@@ -1,20 +1,11 @@
 import { describe, expect, it } from "bun:test"
 import type { Account } from "../types"
-import type { ProjectionRow } from "../types/projection"
+import { splitAt } from "./test-balance"
 import { contribution, expense, income } from "./test-flows"
 import { problems, rowAt, run } from "./test-helpers"
 
 const cash: Account = { id: "cash", kind: "asset", rate: 0 }
 const savings: Account = { id: "savings", kind: "asset", rate: 1200, compounding: "monthly" }
-
-function splitAt(row: ProjectionRow, account: string) {
-	const balance = row.balances.find((item) => item.account === account)!
-	return {
-		capitalised: balance.capitalised,
-		accruedInterest: balance.accruedInterest,
-		amount: balance.amount,
-	}
-}
 
 describe("nominal edges", () => {
 	it("fills a `upTo` ceiling to the value including accrued interest", () => {

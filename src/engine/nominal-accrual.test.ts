@@ -1,21 +1,12 @@
 import { describe, expect, it } from "bun:test"
 import type { Account } from "../types"
-import type { ProjectionRow } from "../types/projection"
 import { project } from "./project"
+import { splitAt } from "./test-balance"
 import { contribution, expense, income } from "./test-flows"
 import { makeFixture, rowAt, run } from "./test-helpers"
 
 const savings: Account = { id: "savings", kind: "asset", rate: 1200, compounding: "monthly" }
 const cash: Account = { id: "cash", kind: "asset", rate: 0 }
-
-function splitAt(row: ProjectionRow, account: string) {
-	const balance = row.balances.find((item) => item.account === account)!
-	return {
-		capitalised: balance.capitalised,
-		accruedInterest: balance.accruedInterest,
-		amount: balance.amount,
-	}
-}
 
 function projecting(fixture: ReturnType<typeof makeFixture>) {
 	const result = project(fixture.baseline, fixture.scenario, fixture.timeline)
