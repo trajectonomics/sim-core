@@ -8,6 +8,7 @@ import type { AccountState, StateMap } from "./state"
 export function valuation(state: AccountState, date: DateString): bigint {
 	const series = state.series
 	if (series === undefined) {
+		if (state.asOf === date) return state.balance
 		return grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
 	}
 	return walkRows(state.balance, state.asOf, date, series)
