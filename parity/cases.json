@@ -2459,6 +2459,244 @@
 		"sha256": "f72da7630b43d9fe9baf055e65eb49572cd73df653c01738863a7bb3ad482d1e"
 	},
 	{
+		"name": "levy-returns-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 1000000
+				},
+				{
+					"account": "deposit",
+					"amount": 100000
+				},
+				{
+					"account": "pension",
+					"amount": 50000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 250
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "deposit",
+					"kind": "asset",
+					"rate": 1000,
+					"returnLabel": "interest"
+				},
+				{
+					"id": "pension",
+					"kind": "asset",
+					"rate": 500,
+					"lockedUntil": "2035-01-01"
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"kind": "income",
+					"earned": true,
+					"amount": 10000000,
+					"frequency": "monthly",
+					"start": "2026-01-25",
+					"growth": {
+						"bps": 0
+					},
+					"label": "salary"
+				},
+				{
+					"id": "living",
+					"kind": "expense",
+					"amount": 2000000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash", "deposit"]
+			},
+			"levy": {
+				"id": "returns",
+				"period": {
+					"month": 1,
+					"day": 1
+				},
+				"settlement": {
+					"month": 6,
+					"day": 30
+				},
+				"measures": [
+					{
+						"id": "interest",
+						"op": "tally",
+						"label": "interest",
+						"basis": "returns"
+					}
+				],
+				"due": "interest",
+				"carryIn": [
+					{
+						"periodStart": "2025-01-01",
+						"tallies": [],
+						"prepaid": 0
+					}
+				]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2028-06-30",
+			"resolution": "day"
+		},
+		"sha256": "ac160c9e68a43b4e2437c63f7ad1408d6798439079a2d924305060e832a8250e"
+	},
+	{
+		"name": "levy-gains-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "brokerage",
+					"amount": 100000,
+					"basis": 80000
+				},
+				{
+					"account": "cash",
+					"amount": 1000000
+				},
+				{
+					"account": "deposit",
+					"amount": 100000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 250
+			},
+			"accounts": [
+				{
+					"id": "brokerage",
+					"kind": "asset",
+					"rate": 500,
+					"gainLabel": "gain"
+				},
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "deposit",
+					"kind": "asset",
+					"rate": 1000,
+					"returnLabel": "interest"
+				}
+			],
+			"flows": [
+				{
+					"id": "salary",
+					"kind": "income",
+					"earned": true,
+					"amount": 10000000,
+					"frequency": "monthly",
+					"start": "2026-01-25",
+					"growth": {
+						"bps": 0
+					},
+					"label": "salary"
+				},
+				{
+					"id": "living",
+					"kind": "expense",
+					"amount": 2000000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash", "deposit", "brokerage"]
+			},
+			"levy": {
+				"id": "gains",
+				"period": {
+					"month": 1,
+					"day": 1
+				},
+				"settlement": {
+					"month": 6,
+					"day": 30
+				},
+				"measures": [
+					{
+						"id": "gain",
+						"op": "tally",
+						"label": "gain",
+						"basis": "gains"
+					},
+					{
+						"id": "interest",
+						"op": "tally",
+						"label": "interest",
+						"basis": "returns"
+					},
+					{
+						"id": "zero",
+						"op": "const",
+						"value": 0
+					},
+					{
+						"id": "due",
+						"op": "max",
+						"a": "gain",
+						"b": "zero"
+					}
+				],
+				"due": "due",
+				"carryIn": [
+					{
+						"periodStart": "2025-01-01",
+						"tallies": [],
+						"prepaid": 0
+					}
+				]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2028-06-30",
+			"resolution": "day"
+		},
+		"sha256": "354537c1d140cf7748603f316d2c4c11ce8b83fa8f3b589a0f984c3853dcf0ab"
+	},
+	{
 		"name": "levy-care-credit",
 		"baseline": {
 			"schemaVersion": 1,

@@ -86,11 +86,10 @@ export function baselinePrefix(
 	series?: ResolvedReturns,
 ): Prefix {
 	const states = createStates(baseline, scenario, timeline.start, series)
-	const plan = levyPlan(scenario, timeline, calendar)
-	const tracker = plan.tracker
+	const { tracker, settlementDates } = levyPlan(scenario, timeline, calendar)
 	const wanted = new Set(candidates)
 	const points = new Map<DateString, PrefixPoint>()
-	const dates = collectDates(events, candidates, plan.settlementDates)
+	const dates = collectDates(events, candidates, settlementDates)
 	let index = 0
 	for (const date of dates) {
 		if (wanted.has(date)) {

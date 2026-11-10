@@ -5,6 +5,8 @@ import { oracleGrow } from "./oracle-money"
 export interface OracleTallies {
 	readonly gross: ReadonlyMap<string, bigint>
 	readonly funded: ReadonlyMap<string, bigint>
+	readonly returns?: ReadonlyMap<string, bigint>
+	readonly gains?: ReadonlyMap<string, bigint>
 }
 
 export interface OracleMeasures {
@@ -59,7 +61,7 @@ function measureValue(
 		case "const":
 			return oracleConstValue(measure, date, inflation)
 		case "tally":
-			return tallies[measure.basis].get(measure.label) ?? 0n
+			return tallies[measure.basis]?.get(measure.label) ?? 0n
 		case "scale":
 			return oracleDivide(
 				get(measure.of) * BigInt(measure.num),
