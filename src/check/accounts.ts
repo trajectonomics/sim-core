@@ -1,13 +1,31 @@
-import { ACCOUNT_KINDS } from "../vocab"
+import { ACCOUNT_KINDS, COMPOUNDING_PERIODS } from "../vocab"
 import type { AccountIndex, Check, Emit, Path } from "./codes"
-import { date, oneOf, rate, str } from "./scalars"
+import { date, oneOf, safeInt, str } from "./scalars"
 import { checkShape, checkUnique, isRecord, list, opt, req } from "./shape"
+
+/** A valid compounding period, so the nominal-rate rule knows whether to apply. */
+function isCompoundingPeriod(value: unknown): boolean {
+	return typeof value === "string" && COMPOUNDING_PERIODS.some((period) => period === value)
+}
 
 const shape = {
 	id: req(str),
 	kind: req(oneOf(ACCOUNT_KINDS, "INVALID_KIND")),
-	rate: req(rate),
+	rate: req(safeInt),
+	compounding: opt(oneOf(COMPOUNDING_PERIODS, "INVALID_COMPOUNDING")),
 	lockedUntil: opt(date),
+}
+
+/**
+ * One rate problem at most: a nominal Account's rate is non-negative, an effective annual one
+ * keeps the `-9999` floor. An absent or invalid `compounding` never applies the nominal floor.
+ */
+function checkRate(value: unknown, path: Path, emit: Emit): void {
+	const record = isRecord(value) ? value : {}
+	const rate = record["rate"]
+	if (typeof rate !== "number" || !Number.isSafeInteger(rate)) return
+	const floor = isCompoundingPeriod(record["compounding"]) ? 0 : -9999
+	if (rate < floor) emit("RATE_OUT_OF_RANGE", [...path, "rate"])
 }
 
 const account: Check = (value, path, emit) => {
@@ -15,6 +33,7 @@ const account: Check = (value, path, emit) => {
 	if (checked?.["kind"] === "liability" && Object.hasOwn(checked, "lockedUntil")) {
 		emit("LIABILITY_MISUSE", [...path, "lockedUntil"])
 	}
+	checkRate(value, path, emit)
 }
 
 export function checkAccounts(value: unknown, path: Path, emit: Emit): void {

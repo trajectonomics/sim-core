@@ -1,17 +1,61 @@
 import { countedDays } from "../calendar/counted"
 import { grow } from "../money/growth"
-import type { DateString } from "../types"
+import { accrualParts, capitaliseThrough, type NominalRule } from "../money/nominal"
+import type { Account, DateString } from "../types"
 import { walkRows } from "./span"
 import type { AccountState, StateMap } from "./state"
 
-/** Read-only valuation; it never commits the account. */
-export function valuation(state: AccountState, date: DateString): bigint {
+/** An Account's reported value, split into its capitalised and accrued parts. */
+export interface ValueParts {
+	readonly capitalised: bigint
+	readonly accruedInterest: bigint
+	readonly amount: bigint
+}
+
+/** The nominal rule of an Account, or `undefined` when its rate is effective annual. */
+export function nominalRule(rule: Account): NominalRule | undefined {
+	return rule.compounding === undefined
+		? undefined
+		: { rate: rule.rate, compounding: rule.compounding }
+}
+
+/** The nominal rule in force: a Return series replaces the rate, so it suspends nominal accrual. */
+export function activeNominalRule(state: AccountState): NominalRule | undefined {
+	return state.series === undefined ? nominalRule(state.rule) : undefined
+}
+
+/** A Return series replaces the rate, so an Account holding one takes this path. */
+function effectiveParts(state: AccountState, date: DateString): ValueParts {
 	const series = state.series
-	if (series === undefined) {
-		if (state.asOf === date) return state.balance
-		return grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
-	}
-	return walkRows(state.balance, state.asOf, date, series)
+	const amount =
+		series === undefined
+			? state.asOf === date
+				? state.balance
+				: grow(state.balance, state.rule.rate, countedDays(state.asOf, date))
+			: walkRows(state.balance, state.asOf, date, series)
+	return { capitalised: amount, accruedInterest: 0n, amount }
+}
+
+/**
+ * Read-only for the running period: it never commits the partial interest it reports. It does
+ * commit completed capitalisations, which are result-neutral and keep a read on a long gap linear.
+ */
+export function valueParts(state: AccountState, date: DateString): ValueParts {
+	const rule = activeNominalRule(state)
+	if (rule === undefined) return effectiveParts(state, date)
+	const settled = capitaliseThrough(
+		{ capitalised: state.balance, capitalisedDays: state.capitalisedDays, asOf: state.asOf },
+		rule,
+		date,
+	)
+	state.balance = settled.capitalised
+	state.capitalisedDays = settled.capitalisedDays
+	state.asOf = settled.asOf
+	return accrualParts(settled, rule, date)
+}
+
+export function valuation(state: AccountState, date: DateString): bigint {
+	return valueParts(state, date).amount
 }
 
 function signedValue(state: AccountState, date: DateString): bigint {

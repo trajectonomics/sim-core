@@ -5,7 +5,7 @@ import type { Fixture } from "../fixtures/fixture"
 export const handRows: Fixture = {
 	baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 100000 }] },
 	scenario: {
-		schemaVersion: 2,
+		schemaVersion: 3,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [{ id: "cash", kind: "asset", rate: 5000 }],

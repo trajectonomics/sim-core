@@ -23,7 +23,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -140,7 +140,7 @@
 			"horizon": "2051-01-01",
 			"resolution": "day"
 		},
-		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833"
+		"sha256": "a2f7b7f7e6c709045fd0c4cb27be0e50fda465e844ca9c5f84859d97a45302dc"
 	},
 	{
 		"name": "thai-employee-month",
@@ -166,7 +166,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -267,7 +267,7 @@
 			"horizon": "2056-01-01",
 			"resolution": "month"
 		},
-		"sha256": "1f54262a5d84382979929adb2675cbef47a848d36ccccce67aa6f87eb6c711d1"
+		"sha256": "6e2e784da3ccedf3bcf9c160167c6b1714e88dd0cd68fac18254c5f64e734849"
 	},
 	{
 		"name": "leap-tie-day",
@@ -281,7 +281,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 300
@@ -309,7 +309,7 @@
 			"horizon": "2029-03-01",
 			"resolution": "day"
 		},
-		"sha256": "4229ec37910413dfdcf8e68b00ffcfadce75fd73b9c3f199d0ee903e651adc70"
+		"sha256": "788fbe85cde4c75e0d985ad0d946430dc32f825ce3d5700881d301b465afb584"
 	},
 	{
 		"name": "capped-month",
@@ -327,7 +327,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 100
@@ -415,7 +415,7 @@
 			"horizon": "2026-06-30",
 			"resolution": "month"
 		},
-		"sha256": "205ae5c1e87b815ee4436a2fa8ae17740aa406df496c18276acdf76b9d67da8e"
+		"sha256": "858fae3622697deaa5756561884a93acb7d641fa00d877b0c0621d67f40ab1b2"
 	},
 	{
 		"name": "levy-salary-day",
@@ -429,7 +429,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -754,7 +754,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "463e7cc451d18d0bc5868170958f58f6ea802f5a27d9eb4fe1e34206a4ed7a27"
+		"sha256": "d94c6b19582296c4ca15ffa2c1f03a3a32109cc5695b63ab957371550f395b92"
 	},
 	{
 		"name": "levy-settled-month",
@@ -768,7 +768,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1093,7 +1093,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "month"
 		},
-		"sha256": "c8fe5a797ff562ad3c5551fede44f3fe70ee66a799d7d4468d5060d82a398205"
+		"sha256": "df44a06f7906b25d377973a8a988f0df21745689c4273bedbfcea0f8953ae450"
 	},
 	{
 		"name": "levy-refund-day",
@@ -1107,7 +1107,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1432,7 +1432,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "3ee8b680d5409ad4683f5a543779fbc6af43cafd9a26dbf9f0cccbcdd2f3f356"
+		"sha256": "7ee4eec0ab2558cf7ff95b656b8d7a8b2418279022708a89567ae64036980186"
 	},
 	{
 		"name": "levy-shortfall-day",
@@ -1446,7 +1446,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1772,7 +1772,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "c8e3da6996898642406b90eb834ce4f5dd078eafe5f3b551fc98c4f420454e82"
+		"sha256": "1c8fe4e9fbdfcb496e6365a2cffa3d809e84dde5a8e83b2ba76f7c44a78c4f2b"
 	},
 	{
 		"name": "levy-unsettled-month",
@@ -1786,7 +1786,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -2111,7 +2111,7 @@
 			"horizon": "2026-12-31",
 			"resolution": "month"
 		},
-		"sha256": "85edbd8dc333ce5161003de214a54cf5f2806dc7fd4d6d342ed38cd5bd64e42c"
+		"sha256": "ddec6d25f1d87f62c007d42f3e65d440ed224170e2ebe58e2a119e36729d2329"
 	},
 	{
 		"name": "levy-carry-in-day",
@@ -2125,7 +2125,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -2456,7 +2456,7 @@
 			"horizon": "2027-03-31",
 			"resolution": "day"
 		},
-		"sha256": "30409b12a3d63f637dd95dcfca14523684b0b6a50e5bed1807c42d4e5514aeaf"
+		"sha256": "f72da7630b43d9fe9baf055e65eb49572cd73df653c01738863a7bb3ad482d1e"
 	},
 	{
 		"name": "calendar-shift-day",
@@ -2470,7 +2470,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -2522,7 +2522,7 @@
 			"horizon": "2028-03-31",
 			"resolution": "day"
 		},
-		"sha256": "5e2ad27eaae3301d344a9417f60b00c493ce7447a23a1b52367b044b01ba506c"
+		"sha256": "5ad0a282a87273bf336e142552196d1bbdbf0b78e527c043aa8a7dfc105df438"
 	},
 	{
 		"name": "calendar-fi",
@@ -2536,7 +2536,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -2588,7 +2588,7 @@
 			"horizon": "2040-01-01",
 			"resolution": "month"
 		},
-		"sha256": "4c88b1fe7e41f362ed84a86c94a388432a0fb30f4fbfd5051d4dfdc37545a5fa",
+		"sha256": "6075f5bea05b4489d1057b61670361c09a33201b2f42c53be25de0e3cf2b6cb8",
 		"options": {
 			"method": "survival"
 		},
@@ -2618,7 +2618,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -2735,7 +2735,7 @@
 			"horizon": "2051-01-01",
 			"resolution": "day"
 		},
-		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833",
+		"sha256": "a2f7b7f7e6c709045fd0c4cb27be0e50fda465e844ca9c5f84859d97a45302dc",
 		"options": {
 			"method": "survival"
 		},
@@ -2765,7 +2765,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -2866,12 +2866,278 @@
 			"horizon": "2056-01-01",
 			"resolution": "month"
 		},
-		"sha256": "1f54262a5d84382979929adb2675cbef47a848d36ccccce67aa6f87eb6c711d1",
+		"sha256": "6e2e784da3ccedf3bcf9c160167c6b1714e88dd0cd68fac18254c5f64e734849",
 		"options": {
 			"method": "survival",
 			"minBufferMonths": 6
 		},
 		"fiSha256": "e4773251ec99dbc356bf5f0727fbe6b1028f286169f23dcac3cc31cdf6067aea"
+	},
+	{
+		"name": "nominal-monthly-loan",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				},
+				{
+					"account": "loan",
+					"amount": 9000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "loan",
+					"kind": "liability",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [
+				{
+					"id": "pay",
+					"amount": 300000,
+					"frequency": "monthly",
+					"start": "2026-01-15",
+					"growth": "inflation",
+					"kind": "income",
+					"earned": true
+				},
+				{
+					"id": "repay",
+					"amount": 300000,
+					"frequency": "monthly",
+					"start": "2026-01-15",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "contribution",
+					"target": "loan"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			}
+		},
+		"timeline": {
+			"start": "2025-12-31",
+			"horizon": "2028-01-01",
+			"resolution": "month"
+		},
+		"sha256": "9c1a6406ccf22c556f79384283c6a204e6d055809e1895b5ae56209158703e1c"
+	},
+	{
+		"name": "nominal-partial-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				},
+				{
+					"account": "savings",
+					"amount": 1200000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [
+				{
+					"id": "bonus",
+					"amount": 10000,
+					"frequency": "once",
+					"start": "2026-02-10",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2026-01-16",
+			"horizon": "2026-03-31",
+			"resolution": "day"
+		},
+		"sha256": "96675f9accaba6b2bf316f12af442cb4df6acc57c561b834f30f3d7f943044e9"
+	},
+	{
+		"name": "nominal-zero-month",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 1000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 0,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "savings"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2025-12-31",
+			"horizon": "2027-01-01",
+			"resolution": "month"
+		},
+		"sha256": "f65769f6150ccec7ec74eb50f137b364348f646a93ff7d95fd46c1e1f89a6cbe"
+	},
+	{
+		"name": "nominal-leap-february-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 1200000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "savings"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2024-01-31",
+			"horizon": "2024-04-30",
+			"resolution": "day"
+		},
+		"sha256": "e52f52196d71a486a01204c83d780d58edb17b1db8e2090ff24885b1feda6dd2"
+	},
+	{
+		"name": "nominal-real-month",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 1000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "savings"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2025-12-31",
+			"horizon": "2027-01-01",
+			"resolution": "month"
+		},
+		"sha256": "42eead49b6b1eb94ec0686004146d3c0f94801f8a2b0420ddf20188fc019002d"
 	},
 	{
 		"name": "freelancer-fi-retirement",
@@ -2897,7 +3163,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -3014,7 +3280,7 @@
 			"horizon": "2051-01-01",
 			"resolution": "day"
 		},
-		"sha256": "71b2bf1f738a8bf0ab68d17a2609f277eb295f10084d1a1f6da5a71bc85f1833",
+		"sha256": "a2f7b7f7e6c709045fd0c4cb27be0e50fda465e844ca9c5f84859d97a45302dc",
 		"options": {
 			"method": "survival",
 			"retirementSpending": {

@@ -1,6 +1,6 @@
 import type { EngineSnapshot } from "../engine/snapshot"
 import type { BasisPoints, Timeline } from "../types"
-import type { AccountAmount, ProjectionProblem, ProjectionRow } from "../types/projection"
+import type { ProjectionBalance, ProjectionProblem, ProjectionRow } from "../types/projection"
 import { realValues } from "./real"
 import type { RuleMap } from "./rules"
 
@@ -9,10 +9,12 @@ export interface RowsOutcome {
 	readonly problem: ProjectionProblem | undefined
 }
 
-function nominalAmounts(snapshot: EngineSnapshot): readonly AccountAmount[] {
+function nominalAmounts(snapshot: EngineSnapshot): readonly ProjectionBalance[] {
 	return snapshot.balances.map((balance) => ({
 		account: balance.account,
 		amount: Number(balance.amount),
+		capitalised: Number(balance.capitalised),
+		accruedInterest: Number(balance.accruedInterest),
 	}))
 }
 

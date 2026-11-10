@@ -6,6 +6,7 @@ export type { Cashflow, SurplusStep } from "./cashflow"
 export type {
 	AccountId,
 	BasisPoints,
+	CompoundingPeriod,
 	DateString,
 	Frequency,
 	Growth,
@@ -46,6 +47,7 @@ export type {
 	LevyMeasureValue,
 	LevyReport,
 	Projection,
+	ProjectionBalance,
 	ProjectionProblem,
 	ProjectionResult,
 	ProjectionRow,

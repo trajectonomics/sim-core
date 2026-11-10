@@ -4,7 +4,7 @@ import type { AccountAmount, AnnualRollup, ProjectionRow, RunsOut } from "../typ
 import { oracleAnnual, oraclePeriodEnds } from "./oracle-annual"
 import type { OracleFlowDay } from "./oracle-sim"
 import { oracleRun } from "./oracle-sim"
-import type { OracleBalance, OracleSnapshot } from "./oracle-snapshot"
+import type { OracleRowBalance, OracleSnapshot } from "./oracle-snapshot"
 
 export interface OracleView {
 	readonly rows: readonly ProjectionRow[]
@@ -26,8 +26,13 @@ function unfundedTotals(flows: readonly OracleFlowDay[]): readonly AccountAmount
 		.map(([account, amount]) => ({ account, amount: Number(amount) }))
 }
 
-function amounts(items: readonly OracleBalance[]): ProjectionRow["balances"] {
-	return items.map((item) => ({ account: item.account, amount: Number(item.amount) }))
+function amounts(items: readonly OracleRowBalance[]): ProjectionRow["balances"] {
+	return items.map((item) => ({
+		account: item.account,
+		amount: Number(item.amount),
+		capitalised: Number(item.capitalised),
+		accruedInterest: Number(item.accruedInterest),
+	}))
 }
 
 function toRow(snapshot: OracleSnapshot): ProjectionRow {

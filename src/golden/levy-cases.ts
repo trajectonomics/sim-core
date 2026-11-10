@@ -32,7 +32,7 @@ function salaryFixture(options: SalaryCase): Fixture {
 	return {
 		baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 0 }] },
 		scenario: {
-			schemaVersion: 2,
+			schemaVersion: 3,
 			currency: "THB",
 			economy: { inflation: 0 },
 			accounts: [{ id: "cash", kind: "asset", rate: 0 }],

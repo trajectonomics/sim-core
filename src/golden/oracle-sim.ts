@@ -45,6 +45,7 @@ function createStates(fixture: Fixture): OracleStates {
 			rule,
 			balance: BigInt(opening.get(rule.id) ?? 0),
 			asOf: fixture.timeline.start,
+			accrued: 0n,
 		})
 	}
 	return states

@@ -1,4 +1,4 @@
-import type { FREQUENCIES, RESOLUTIONS } from "../vocab"
+import type { COMPOUNDING_PERIODS, FREQUENCIES, RESOLUTIONS } from "../vocab"
 
 /** Calendar date, `YYYY-MM-DD`. */
 export type DateString = string
@@ -14,6 +14,9 @@ export type AccountId = string
 
 export type Frequency = (typeof FREQUENCIES)[number]
 export type Resolution = (typeof RESOLUTIONS)[number]
+
+/** The calendar period at whose end accrued interest is capitalised. */
+export type CompoundingPeriod = (typeof COMPOUNDING_PERIODS)[number]
 
 /** `"inflation"` follows `economy.inflation`; `{ bps }` is a fixed yearly step (may be negative). */
 export type Growth = "inflation" | { readonly bps: BasisPoints }

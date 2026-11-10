@@ -22,3 +22,7 @@ Projections must be byte-identical across runtimes, and a V8/JavaScriptCore comp
 - A Return-series run rounds once per held Return row rather than once per span, because a span
   return is not an effective annual rate; see ADR-0005. Every run without a series rounds exactly as
   above.
+- **Exceptions.** ADR-0007 names the two places this rule does not hold for a nominal Account:
+  `rate` is a nominal annual rate when `compounding` is present (a full period earns `rate / m`,
+  not an effective annual share), and a read may commit completed capitalisations at compounding
+  dates. The effective-annual path itself is unchanged.
