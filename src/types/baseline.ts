@@ -4,6 +4,8 @@ import type { AccountId, MinorUnits } from "./common"
 export interface Balance {
 	readonly account: AccountId
 	readonly amount: MinorUnits
+	/** Cost basis at `start`; required when the Account tracks gains and the amount is positive. */
+	readonly basis?: MinorUnits
 }
 
 export interface Baseline {

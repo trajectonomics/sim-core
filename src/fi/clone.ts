@@ -5,11 +5,8 @@ export function cloneStates(states: StateMap): StateMap {
 	const cloned = new Map<string, AccountState>()
 	for (const [id, state] of states) {
 		cloned.set(id, {
-			rule: state.rule,
-			balance: state.balance,
-			asOf: state.asOf,
-			capitalisedDays: state.capitalisedDays,
-			...(state.series === undefined ? {} : { series: state.series }),
+			...state,
+			...(state.returns === undefined ? {} : { returns: { ...state.returns } }),
 		})
 	}
 	return cloned
