@@ -7,7 +7,7 @@ Domain vocabulary for `sim-core` (personal-finance projection engine).
 ## Core Concepts
 
 **Baseline**:
-The opening snapshot: balances per account at the Timeline start. Nothing else.
+The opening snapshot: balances per account at the Timeline start, and the Cost basis of any Account that tracks gains. Nothing else.
 _Avoid_: Initial state, starting ledger, opening balance
 
 **Scenario**:
@@ -63,8 +63,20 @@ A named value inside a Levy, computed in integer minor units from tallies, const
 _Avoid_: Variable, formula, derived flow
 
 **Tally label**:
-A label on an income Flow, or on a contribution Flow, that a Levy sums over a Settlement period. A Flow with no label is never tallied. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap.
+A label on an income Flow, on a contribution Flow, or on an asset Account (`returnLabel`, `gainLabel`), that a Levy sums over a Settlement period. A Flow or Account with no label is never tallied, which is how a tax-sheltered Account is left out. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap.
 _Avoid_: Category, tag, tax category
+
+**Returns tally**:
+The growth an Account with a `returnLabel` accrued inside a Settlement period, counted whether or not it was withdrawn. It is signed, and attributed from read-only valuations so it never changes a balance.
+_Avoid_: Interest income, investment income
+
+**Realised gain**:
+The gain of a withdrawal from an Account with a `gainLabel`: the amount withdrawn minus the Cost basis it used up. It is signed and tallied in the Settlement period of the withdrawal's Landed date.
+_Avoid_: Capital gain, profit
+
+**Cost basis**:
+The pooled amount put into an Account (average cost): applied Contributions and surplus fills add to it, growth does not, and a withdrawal uses up a proportional share. The opening value is given in the Baseline.
+_Avoid_: Purchase price, lot
 
 **Prepayment**:
 An amount taken at source from an income Flow, as a share in basis points of each Occurrence's gross amount, rounded half up in minor units. Only the net lands in cash. The period's total is credited against the Levy at Settlement.
