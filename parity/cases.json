@@ -2874,6 +2874,272 @@
 		"fiSha256": "e4773251ec99dbc356bf5f0727fbe6b1028f286169f23dcac3cc31cdf6067aea"
 	},
 	{
+		"name": "nominal-monthly-loan",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				},
+				{
+					"account": "loan",
+					"amount": 9000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "loan",
+					"kind": "liability",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [
+				{
+					"id": "pay",
+					"amount": 300000,
+					"frequency": "monthly",
+					"start": "2026-01-15",
+					"growth": "inflation",
+					"kind": "income",
+					"earned": true
+				},
+				{
+					"id": "repay",
+					"amount": 300000,
+					"frequency": "monthly",
+					"start": "2026-01-15",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "contribution",
+					"target": "loan"
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": ["cash"]
+			}
+		},
+		"timeline": {
+			"start": "2025-12-31",
+			"horizon": "2028-01-01",
+			"resolution": "month"
+		},
+		"sha256": "9c1a6406ccf22c556f79384283c6a204e6d055809e1895b5ae56209158703e1c"
+	},
+	{
+		"name": "nominal-partial-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 0
+				},
+				{
+					"account": "savings",
+					"amount": 1200000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [
+				{
+					"id": "bonus",
+					"amount": 10000,
+					"frequency": "once",
+					"start": "2026-02-10",
+					"growth": {
+						"bps": 0
+					},
+					"kind": "income",
+					"earned": true
+				}
+			],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "cash"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2026-01-16",
+			"horizon": "2026-03-31",
+			"resolution": "day"
+		},
+		"sha256": "96675f9accaba6b2bf316f12af442cb4df6acc57c561b834f30f3d7f943044e9"
+	},
+	{
+		"name": "nominal-zero-month",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 1000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 0,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "savings"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2025-12-31",
+			"horizon": "2027-01-01",
+			"resolution": "month"
+		},
+		"sha256": "f65769f6150ccec7ec74eb50f137b364348f646a93ff7d95fd46c1e1f89a6cbe"
+	},
+	{
+		"name": "nominal-leap-february-day",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 1200000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 0
+			},
+			"accounts": [
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "savings"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2024-01-31",
+			"horizon": "2024-04-30",
+			"resolution": "day"
+		},
+		"sha256": "e52f52196d71a486a01204c83d780d58edb17b1db8e2090ff24885b1feda6dd2"
+	},
+	{
+		"name": "nominal-real-month",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "savings",
+					"amount": 1000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 3,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "savings",
+					"kind": "asset",
+					"rate": 1200,
+					"compounding": "monthly"
+				}
+			],
+			"flows": [],
+			"cashflow": {
+				"surplus": [
+					{
+						"account": "savings"
+					}
+				],
+				"contribute": [],
+				"withdraw": []
+			}
+		},
+		"timeline": {
+			"start": "2025-12-31",
+			"horizon": "2027-01-01",
+			"resolution": "month"
+		},
+		"sha256": "42eead49b6b1eb94ec0686004146d3c0f94801f8a2b0420ddf20188fc019002d"
+	},
+	{
 		"name": "freelancer-fi-retirement",
 		"baseline": {
 			"schemaVersion": 1,

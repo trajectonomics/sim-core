@@ -7,7 +7,7 @@ Domain vocabulary for `sim-core` (personal-finance projection engine).
 ## Core Concepts
 
 **Baseline**:
-The opening snapshot: balances per account at the Timeline start, and the Cost basis of any Account that tracks gains. Nothing else.
+The opening snapshot: balances per account at the Timeline start, and the Cost basis of any Account that tracks gains. Nothing else. A balance is capitalised principal with zero Accrued interest, so feeding a row's `amount` back in folds Accrued interest into principal early, feeding `capitalised` drops it, and only a row on a Compounding date resumes exactly.
 _Avoid_: Initial state, starting ledger, opening balance
 
 **Scenario**:

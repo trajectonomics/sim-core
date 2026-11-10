@@ -65,6 +65,27 @@ describe("hand-computed nominal rows", () => {
 	})
 })
 
+describe("annual roll-ups", () => {
+	it("reports the hand-computed interest for a nominal year", () => {
+		const fixture: Fixture = {
+			...nominalAnnual,
+			timeline: { start: "2025-12-31", horizon: "2026-12-31", resolution: "month" },
+		}
+		const annual = projectFixture(fixture).annual
+		expect(
+			annual.map((year) => ({
+				from: year.from,
+				to: year.to,
+				interest: year.interest,
+				partial: year.partial,
+			})),
+		).toEqual([
+			{ from: "2025-12-31", to: "2026-12-30", interest: 69_808, partial: false },
+			{ from: "2026-12-31", to: "2026-12-31", interest: 192, partial: true },
+		])
+	})
+})
+
 describe("real values deflate the components separately", () => {
 	it("rounds 26 and 26 to 25 and 25, while 52 rounds to 51", () => {
 		expect(deflate(26n, 200, 365)).toBe(25n)

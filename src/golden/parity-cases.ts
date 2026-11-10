@@ -12,6 +12,8 @@ import {
 	levyShortfallDay,
 	levyUnsettledMonth,
 } from "./levy-cases"
+import { nominalLeapFebruary, nominalPartial, nominalReal, nominalZero } from "./nominal-cases"
+import { nominalMonthlyLoan } from "./nominal-flow-cases"
 
 export interface ParityCase {
 	readonly name: string
@@ -56,6 +58,11 @@ export const PARITY_CASES: readonly ParityCase[] = [
 		fixture: thaiEmployee,
 		options: { method: "survival", minBufferMonths: 6 },
 	},
+	{ name: "nominal-monthly-loan", fixture: nominalMonthlyLoan },
+	{ name: "nominal-partial-day", fixture: nominalPartial },
+	{ name: "nominal-zero-month", fixture: nominalZero },
+	{ name: "nominal-leap-february-day", fixture: nominalLeapFebruary },
+	{ name: "nominal-real-month", fixture: nominalReal },
 	{
 		name: "freelancer-fi-retirement",
 		fixture: freelancer,
