@@ -16,7 +16,6 @@ export interface SearchInput {
 	readonly scenario: Scenario
 	readonly timeline: Timeline
 	readonly options: SurvivalOptions
-	readonly candidates: readonly DateString[]
 	readonly events: readonly DatedEvent[]
 	readonly prefix: Prefix
 	readonly expenses: ExpenseWindow
@@ -78,10 +77,10 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 	return { kind: "reachable", month, reference: reference.reference }
 }
 
-/** Ascending linear scan; returns the first pass, never assuming monotonicity. */
-export function search(input: SearchInput): SearchOutcome {
+/** Ascending linear scan over `months`; returns the first pass, never assuming monotonicity. */
+export function search(input: SearchInput, months: readonly DateString[]): SearchOutcome {
 	const acc: Accumulator = {}
-	for (const month of input.candidates) {
+	for (const month of months) {
 		consume(inspectCandidate(input, month), acc)
 		if (acc.done !== undefined) return acc.done
 		if (acc.stop === true) break

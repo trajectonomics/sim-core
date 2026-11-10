@@ -1,0 +1,460 @@
+{
+	"cases": [
+		{
+			"name": "freelancer",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"month": "2028-03-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2028-03-01",
+						"unlockedAssets": 79754301,
+						"annualExpenses": 27558116,
+						"threshold": 688952900,
+						"multipleBps": 28940,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "freelancer-buffer",
+			"options": {
+				"method": "survival",
+				"minBufferMonths": 6
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"minBufferMonths": 6,
+						"definitionVersion": 1
+					},
+					"month": "2028-06-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2028-06-01",
+						"unlockedAssets": 88258352,
+						"annualExpenses": 27695450,
+						"threshold": 692386250,
+						"multipleBps": 31867,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "thai",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"month": "2030-09-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2030-09-01",
+						"unlockedAssets": 132034133,
+						"annualExpenses": 33666296,
+						"threshold": 841657400,
+						"multipleBps": 39218,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "thai-buffer",
+			"options": {
+				"method": "survival",
+				"minBufferMonths": 6
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"minBufferMonths": 6,
+						"definitionVersion": 1
+					},
+					"month": "2033-01-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2033-01-01",
+						"unlockedAssets": 189497090,
+						"annualExpenses": 35660568,
+						"threshold": 891514200,
+						"multipleBps": 53139,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "freelancer-retirement-buffer",
+			"options": {
+				"method": "survival",
+				"retirementSpending": {
+					"amount": 2000000,
+					"growth": "inflation"
+				},
+				"minBufferMonths": 3
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"retirementSpending": {
+							"amount": 2000000,
+							"growth": "inflation"
+						},
+						"minBufferMonths": 3,
+						"definitionVersion": 1
+					},
+					"month": "2033-11-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2033-11-01",
+						"unlockedAssets": 301766275,
+						"annualExpenses": 28027932,
+						"threshold": 700698300,
+						"multipleBps": 107666,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "calendar",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"month": "2029-12-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2029-12-01",
+						"unlockedAssets": 57640767,
+						"annualExpenses": 5187186,
+						"threshold": 129679650,
+						"multipleBps": 111121,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "capped",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"month": "2026-03-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2026-03-01",
+						"unlockedAssets": 1501,
+						"annualExpenses": 0,
+						"threshold": 0,
+						"met": true
+					}
+				}
+			}
+		},
+		{
+			"name": "levy",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"month": "2026-01-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2026-01-01",
+						"unlockedAssets": 0,
+						"annualExpenses": 0,
+						"threshold": 0,
+						"met": true
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-0",
+			"options": {
+				"method": "survival",
+				"retirementSpending": {
+					"amount": 116457,
+					"growth": "inflation"
+				}
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"retirementSpending": {
+							"amount": 116457,
+							"growth": "inflation"
+						},
+						"definitionVersion": 1
+					},
+					"month": "2027-09-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2027-09-01",
+						"unlockedAssets": 3989060,
+						"annualExpenses": 1420872,
+						"threshold": 35521800,
+						"multipleBps": 28074,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-1",
+			"options": {
+				"method": "survival",
+				"minBufferMonths": 6
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"minBufferMonths": 6,
+						"definitionVersion": 1
+					},
+					"month": "2027-06-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2027-06-01",
+						"unlockedAssets": 6048428,
+						"annualExpenses": 2084213,
+						"threshold": 52105325,
+						"multipleBps": 29020,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-2",
+			"options": {
+				"method": "survival",
+				"minBufferMonths": 6
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"minBufferMonths": 6,
+						"definitionVersion": 1
+					},
+					"month": "2026-08-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2026-08-01",
+						"unlockedAssets": 4937810,
+						"annualExpenses": 1992604,
+						"threshold": 49815100,
+						"multipleBps": 24780,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-3",
+			"options": {
+				"method": "survival",
+				"retirementSpending": {
+					"amount": 114214,
+					"growth": "inflation"
+				}
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"retirementSpending": {
+							"amount": 114214,
+							"growth": "inflation"
+						},
+						"definitionVersion": 1
+					},
+					"month": "2026-12-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2026-12-01",
+						"unlockedAssets": 3088132,
+						"annualExpenses": 1370568,
+						"threshold": 34264200,
+						"multipleBps": 22531,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-4",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": false,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"binding": "shortfallBeforeStop",
+					"bestCase": {
+						"month": "2026-04-01",
+						"runsOut": {
+							"date": "2026-03-16",
+							"unmet": 2358677
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-5",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"month": "2026-07-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2026-07-01",
+						"unlockedAssets": 3683925,
+						"annualExpenses": 998328,
+						"threshold": 24958200,
+						"multipleBps": 36900,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-6",
+			"options": {
+				"method": "survival",
+				"minBufferMonths": 6
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"minBufferMonths": 6,
+						"definitionVersion": 1
+					},
+					"month": "2028-03-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2028-03-01",
+						"unlockedAssets": 6251382,
+						"annualExpenses": 2524668,
+						"threshold": 63116700,
+						"multipleBps": 24761,
+						"met": false
+					}
+				}
+			}
+		},
+		{
+			"name": "generated-case-7",
+			"options": {
+				"method": "survival",
+				"retirementSpending": {
+					"amount": 106156,
+					"growth": "inflation"
+				}
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": true,
+					"definition": {
+						"method": "survival",
+						"retirementSpending": {
+							"amount": 106156,
+							"growth": "inflation"
+						},
+						"definitionVersion": 1
+					},
+					"month": "2026-12-01",
+					"reference": {
+						"label": "ruleOfThumb25x",
+						"date": "2026-12-01",
+						"unlockedAssets": 4783409,
+						"annualExpenses": 1297225,
+						"threshold": 32430625,
+						"multipleBps": 36874,
+						"met": false
+					}
+				}
+			}
+		}
+	]
+}

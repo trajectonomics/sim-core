@@ -1,7 +1,5 @@
-import { resolvedCalendar } from "../calendar/resolve"
 import { check } from "../check"
 import { checkFinancialIndependenceOptions } from "../check/financial-independence"
-import { buildEvents } from "../engine/events"
 import type { Baseline, Scenario, Timeline } from "../types"
 import type {
 	FinancialIndependenceDefinition,
@@ -9,9 +7,7 @@ import type {
 	SurvivalOptions,
 } from "../types/financial-independence"
 import { unreachable } from "./binding"
-import { candidateMonths } from "./candidates"
-import { expenseWindow } from "./expenses"
-import { baselinePrefix, levyPlan } from "./prefix"
+import { planScan } from "./plan"
 import { search } from "./search"
 
 function definitionOf(options: SurvivalOptions): FinancialIndependenceDefinition {
@@ -45,33 +41,14 @@ export function financialIndependence(
 	]
 	if (problems.length > 0) return { ok: false, problems }
 	const definition = definitionOf(options)
-	const candidates = candidateMonths(timeline)
-	if (candidates.length === 0) {
+	const plan = planScan(baseline, scenario, timeline, options)
+	if (plan === undefined) {
 		return {
 			ok: true,
 			financialIndependence: { reachable: false, definition, binding: "noCandidateMonth" },
 		}
 	}
-	const calendar = resolvedCalendar(scenario)
-	const events = buildEvents(scenario, timeline, calendar)
-	const prefix = baselinePrefix(baseline, scenario, timeline, events, candidates, calendar)
-	const scanned =
-		prefix.problem === undefined
-			? candidates
-			: candidates.filter((month) => prefix.stoppedAt !== undefined && month <= prefix.stoppedAt)
-	const plan = levyPlan(scenario, timeline, calendar)
-	const outcome = search({
-		scenario,
-		timeline,
-		options,
-		candidates: scanned,
-		events,
-		prefix,
-		expenses: expenseWindow(scenario, timeline, options, candidates[0]!, calendar),
-		settlementDates: plan.settlementDates,
-		minBufferMonths: options.minBufferMonths ?? 0,
-		calendar,
-	})
+	const outcome = search(plan.input, plan.scanned)
 	if (outcome.kind === "problem") return { ok: false, problems: [outcome.problem] }
 	if (outcome.kind === "reachable") {
 		return {
@@ -84,7 +61,8 @@ export function financialIndependence(
 			},
 		}
 	}
-	if (prefix.problem !== undefined) return { ok: false, problems: [prefix.problem] }
+	const problem = plan.input.prefix.problem
+	if (problem !== undefined) return { ok: false, problems: [problem] }
 	return {
 		ok: true,
 		financialIndependence: unreachable(definition, outcome.buffer, outcome.shortfall),

@@ -39,6 +39,7 @@
 	"scripts": {
 		"build": "tsdown",
 		"test": "bun test",
+		"bench": "bun scripts/bench-fi.ts",
 		"typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
 		"lint": "biome ci --colors=off --error-on-warnings .",
 		"format": "biome check --write .",
