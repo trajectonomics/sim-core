@@ -10,7 +10,7 @@ export interface Economy {
 }
 
 export interface Scenario {
-	readonly schemaVersion: 2
+	readonly schemaVersion: 3
 	readonly currency: string
 	readonly economy: Economy
 	readonly accounts: readonly Account[]

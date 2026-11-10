@@ -36,13 +36,13 @@ describe("check() structure", () => {
 		)
 	})
 
-	it("requires scenario schemaVersion 2", () => {
+	it("rejects a scenario schemaVersion other than 3", () => {
 		expect(problemsFor({ scenario: [["schemaVersion"], 1] })).toEqual(
 			expected("UNSUPPORTED_SCHEMA_VERSION", ["scenario", "schemaVersion"]),
 		)
 	})
 
-	it("accepts baseline schemaVersion 1 with scenario schemaVersion 2", () => {
+	it("accepts baseline schemaVersion 1 with scenario schemaVersion 3", () => {
 		expect(problemsFor({})).toEqual([])
 	})
 

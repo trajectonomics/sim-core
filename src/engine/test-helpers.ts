@@ -40,7 +40,7 @@ export interface Setup {
 
 export function makeFixture(setup: Setup): Fixture {
 	const scenario: Scenario = {
-		schemaVersion: 2,
+		schemaVersion: 3,
 		currency: "THB",
 		economy: { inflation: setup.inflation ?? 0 },
 		accounts: setup.accounts,

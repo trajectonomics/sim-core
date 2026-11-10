@@ -23,7 +23,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -166,7 +166,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -281,7 +281,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 300
@@ -327,7 +327,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 100
@@ -429,7 +429,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -768,7 +768,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1107,7 +1107,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1446,7 +1446,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -1786,7 +1786,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -2125,7 +2125,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 0
@@ -2470,7 +2470,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -2536,7 +2536,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -2618,7 +2618,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200
@@ -2765,7 +2765,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 250
@@ -2897,7 +2897,7 @@
 			]
 		},
 		"scenario": {
-			"schemaVersion": 2,
+			"schemaVersion": 3,
 			"currency": "THB",
 			"economy": {
 				"inflation": 200

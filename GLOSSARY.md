@@ -39,7 +39,7 @@ The date money moves: the Occurrence date. A Flow's Due date moved forward to a 
 _Avoid_: Value date, posting date, actual date
 
 **Projection**:
-The deterministic output of a Baseline, Scenario and Timeline: states and cashflows over the horizon.
+The deterministic output of a Baseline, Scenario and Timeline: states and cashflows over the horizon. Each row's `balances` and `realBalances` list one **ProjectionBalance** per Account.
 _Avoid_: Forecast, prediction, simulation run
 
 **Occurrence**:
@@ -99,8 +99,36 @@ The tallies and Prepayment already recorded for a Settlement period that began b
 _Avoid_: Year-to-date, opening income
 
 **Account**:
-A named balance with an explicit rule in the Scenario: `kind` (`asset` or `liability`), effective annual rate in basis points (one year grows the balance by exactly the rate, unless a Return series covers those dates), optional `lockedUntil`. Every account with a balance must have a rule. A liability's balance is the positive amount owed. A Return series replaces the rate for the dates it covers; the rate stays required and validated.
+A named balance with an explicit rule in the Scenario: `kind` (`asset` or `liability`), rate in basis points, optional `lockedUntil`. Every account with a balance must have a rule. A liability's balance is the positive amount owed. Without `compounding`, `rate` is an **effective annual rate**: one year grows the balance by exactly the rate, whatever the compounding period, unless a Return series covers those dates. With `compounding`, `rate` is a **nominal annual rate** and the Account also carries the split of **Capitalised balance** and **Accrued interest**. A Return series replaces the rate for the dates it covers; the rate stays required and validated.
 _Avoid_: Wallet, holding
+
+**Nominal annual rate**:
+A rate stated by a contract or a law together with a **Compounding period**, such as "7% nominal, compounded monthly". It is not an effective annual rate: a full period earns exactly `rate / periodsPerYear`, and a year earns more when the interest is capitalised more often. An Account's `rate` is nominal exactly when it carries `compounding`; absent, the rate is effective annual.
+_Avoid_: APR (a different convention), monthly rate
+
+**Compounding period**:
+The calendar period (`monthly`, `quarterly`, `semiannual` or `annual`) at whose end a nominal Account's **Accrued interest** is **Capitalised**. Periods are calendar-aligned — a calendar month, quarter, half-year or year — and never depend on `Timeline.start`, a Flow's date or an Account id.
+_Avoid_: Period, interval, frequency
+
+**Compounding date**:
+The last day of a **Compounding period**: the date on which its Accrued interest is Capitalised. A Flow that lands on a compounding date sees that period's interest already capitalised and belongs to the next period.
+_Avoid_: Payment date, period end
+
+**Capitalisation**:
+The moment a nominal Account's **Accrued interest** is added to its **Capitalised balance** and starts earning interest itself. It happens once per Account per **Compounding date**, and early only when a debit would take principal below zero (a settlement, so the Account can be paid off).
+_Avoid_: Compounding, reinvestment, posting
+
+**Capitalised balance**:
+The part of a nominal Account's value that has been capitalised, or of an effective Account's value, which is all of it. It is the principal that earns interest; a Flow changes it from the Flow's date.
+_Avoid_: Principal, base balance, locked balance
+
+**Accrued interest**:
+A nominal Account's interest earned in the current **Compounding period** and not yet **Capitalised**. It is part of the Account's reported value and Net worth, but it does not itself earn interest until capitalisation. A row on a Compounding date, and the opening row, report zero. Effective-annual Accounts always report zero.
+_Avoid_: Unpaid interest, pending interest
+
+**ProjectionBalance**:
+One Account's value in a Projection row, split into `amount`, `capitalised` and `accruedInterest`, with `capitalised + accruedInterest = amount`. Effective-annual Accounts report `capitalised = amount` and `accruedInterest = 0`.
+_Avoid_: Balance entry, row amount
 
 **Flow**:
 A dated cash movement of kind `income`, `expense` or `contribution`, with a frequency (including `once`), a start, an optional end, and growth. Replaces the former Stream and Event.

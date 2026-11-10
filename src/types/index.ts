@@ -6,6 +6,7 @@ export type { Cashflow, SurplusStep } from "./cashflow"
 export type {
 	AccountId,
 	BasisPoints,
+	CompoundingPeriod,
 	DateString,
 	Frequency,
 	Growth,

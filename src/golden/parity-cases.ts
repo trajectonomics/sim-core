@@ -23,7 +23,7 @@ export interface ParityCase {
 const leapTie: Fixture = {
 	baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 1 }] },
 	scenario: {
-		schemaVersion: 2,
+		schemaVersion: 3,
 		currency: "THB",
 		economy: { inflation: 300 },
 		accounts: [{ id: "cash", kind: "asset", rate: 5000 }],

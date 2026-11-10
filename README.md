@@ -9,6 +9,15 @@ Pure, deterministic personal-finance projection engine.
 - **Closed-world**: No callbacks or external plugin hooks; all behavior emerges from validated, structured data.
 - **Strict environment**: Built with strict TypeScript with zero DOM, Node, or Bun ambient types in the core engine.
 
+## Input schema
+
+A Scenario is version `3`. `check()` reports `UNSUPPORTED_SCHEMA_VERSION` at
+`scenario.schemaVersion` for anything else, which means the caller must migrate from v2; a v2
+Scenario is otherwise rejected before its fields are read. An Account may declare a
+`compounding` period (`monthly`, `quarterly`, `semiannual` or `annual`) to make its `rate`
+nominal; without it, `rate` is the effective annual rate. See
+[ADR 0007](docs/adr/0007-nominal-compounding.md).
+
 ## Scripts
 
 - `bun run check`: Complete verification suite (`lint`, `typecheck`, `test`, `build`, `lint:package`).
