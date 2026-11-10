@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test"
 import { readFileSync } from "node:fs"
-import { planScan } from "../fi/plan"
-import { search } from "../fi/search"
+import { generateCases } from "../fi/scan-generator"
 import { financialIndependence } from "../index"
 import type { FinancialIndependenceResult } from "../types"
 import { SCAN_CASES } from "./fi-scan-cases"
+import { oracleFiMonth } from "./oracle-fi"
 
 interface Snapshot {
 	readonly cases: readonly {
@@ -30,17 +30,19 @@ describe("frozen FI scan results", () => {
 		})
 	}
 
-	it("reports the first candidate whose own walk survives", () => {
-		for (const testCase of SCAN_CASES) {
-			const { baseline, scenario, timeline } = testCase.fixture
-			const result = financialIndependence(baseline, scenario, timeline, testCase.options)
-			const plan = planScan(baseline, scenario, timeline, testCase.options)
-			const first = plan?.scanned.find((month) => search(plan.input, [month]).kind === "reachable")
+	it("matches the independent FI oracle on generated scenarios without a buffer", () => {
+		const generated = generateCases(6, 3n).filter(
+			(item) => item.options.minBufferMonths === undefined,
+		)
+		expect(generated.length).toBeGreaterThan(0)
+		for (const item of generated) {
+			const { baseline, scenario, timeline } = item.fixture
+			const result = financialIndependence(baseline, scenario, timeline, item.options)
 			const month =
 				result.ok && result.financialIndependence.reachable
 					? result.financialIndependence.month
 					: undefined
-			expect(first).toBe(month)
+			expect(month).toBe(oracleFiMonth(item.fixture, item.options))
 		}
 	})
 })

@@ -6,7 +6,7 @@ import { candidateMonths } from "./candidates"
 import { expenseWindow } from "./expenses"
 import { baselinePrefix, levyPlan } from "./prefix"
 import { requirementTable } from "./required"
-import { scanSchedule } from "./schedule"
+import { scanGrid } from "./scan-grid"
 import type { SearchInput } from "./search"
 
 /** Everything a scan needs except the candidate months it will visit. */
@@ -41,7 +41,7 @@ export function planScan(
 			scenario,
 			prefix,
 			requirement: requirementTable(expenses, options.minBufferMonths ?? 0),
-			schedule: scanSchedule(
+			grid: scanGrid(
 				events,
 				timeline,
 				options,

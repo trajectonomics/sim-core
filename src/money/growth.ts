@@ -1,3 +1,4 @@
+import { BoundedCache } from "../bounded-cache"
 import type { BasisPoints } from "../types"
 import { DAYS_PER_YEAR, dailyFactor, RATE_SCALE } from "./factor"
 import { roundHalfUp } from "./round"
@@ -30,8 +31,7 @@ function splitDays(days: number): readonly [years: number, remainder: number] {
 	return [years, days - years * DAYS_PER_YEAR]
 }
 
-const partCache: Map<string, FactorParts> = new Map()
-const PART_CACHE_LIMIT = 8192
+const partCache: BoundedCache<string, FactorParts> = new BoundedCache(8192)
 
 /** `(10000 + rate)^years * f^remainder / (10000^years * 10^(30*remainder))`, cached by both inputs. */
 function factorParts(rate: BasisPoints, days: number): FactorParts {
@@ -43,7 +43,6 @@ function factorParts(rate: BasisPoints, days: number): FactorParts {
 		numerator: powerAt(rate, years, true) * powerAt(rate, remainder, false),
 		denominator: powerAt(0, years, true) * powerAt(0, remainder, false),
 	}
-	if (partCache.size >= PART_CACHE_LIMIT) partCache.clear()
 	partCache.set(key, parts)
 	return parts
 }

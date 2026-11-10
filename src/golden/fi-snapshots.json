@@ -221,6 +221,138 @@
 			}
 		},
 		{
+			"name": "minimum-buffer",
+			"options": {
+				"method": "survival",
+				"minBufferMonths": 12
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": false,
+					"definition": {
+						"method": "survival",
+						"minBufferMonths": 12,
+						"definitionVersion": 1
+					},
+					"binding": "minimumBuffer",
+					"bestCase": {
+						"month": "2033-01-01",
+						"bufferBreach": {
+							"date": "2033-01-01",
+							"required": 35660568,
+							"accessible": 23648668
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "overflow",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": false,
+				"problems": [
+					{
+						"code": "VALUE_OVERFLOW",
+						"date": "2026-01-01",
+						"account": "savings"
+					}
+				]
+			}
+		},
+		{
+			"name": "no-candidate",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": false,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"binding": "noCandidateMonth"
+				}
+			}
+		},
+		{
+			"name": "undrawable",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": false,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"binding": "undrawableMoney",
+					"bestCase": {
+						"month": "2026-01-01",
+						"runsOut": {
+							"date": "2026-01-01",
+							"unmet": 100
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "insufficient",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": false,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"binding": "insufficientMoney",
+					"bestCase": {
+						"month": "2026-01-01",
+						"runsOut": {
+							"date": "2026-01-01",
+							"unmet": 100
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "before-stop",
+			"options": {
+				"method": "survival"
+			},
+			"result": {
+				"ok": true,
+				"financialIndependence": {
+					"reachable": false,
+					"definition": {
+						"method": "survival",
+						"definitionVersion": 1
+					},
+					"binding": "shortfallBeforeStop",
+					"bestCase": {
+						"month": "2026-02-01",
+						"runsOut": {
+							"date": "2026-01-15",
+							"unmet": 100
+						}
+					}
+				}
+			}
+		},
+		{
 			"name": "generated-case-0",
 			"options": {
 				"method": "survival",

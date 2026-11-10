@@ -21,11 +21,12 @@ function atSixtyYears(fixture: Fixture): Fixture {
 
 function measure(name: string, fixture: Fixture, options: SurvivalOptions): Measurement {
 	const { baseline, scenario, timeline } = atSixtyYears(fixture)
-	financialIndependence(baseline, scenario, timeline, options)
+	let result = financialIndependence(baseline, scenario, timeline, options)
 	const started = Bun.nanoseconds()
-	for (let run = 0; run < RUNS; run++) financialIndependence(baseline, scenario, timeline, options)
+	for (let run = 0; run < RUNS; run++) {
+		result = financialIndependence(baseline, scenario, timeline, options)
+	}
 	const ms = (Bun.nanoseconds() - started) / 1e6 / RUNS
-	const result = financialIndependence(baseline, scenario, timeline, options)
 	const month =
 		result.ok && result.financialIndependence.reachable
 			? result.financialIndependence.month

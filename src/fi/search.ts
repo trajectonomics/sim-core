@@ -8,14 +8,14 @@ import { expenseBetween } from "./expenses"
 import type { Prefix } from "./prefix"
 import { twentyFiveTimes } from "./reference"
 import type { RequirementTable } from "./required"
-import type { ScanSchedule } from "./schedule"
+import type { ScanGrid } from "./scan-grid"
 import { walkCandidate } from "./walk"
 
 export interface SearchInput {
 	readonly scenario: Scenario
 	readonly prefix: Prefix
 	readonly requirement: RequirementTable
-	readonly schedule: ScanSchedule
+	readonly grid: ScanGrid
 }
 
 export type SearchOutcome =
@@ -51,7 +51,7 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 	if (point === undefined) return { kind: "skip" }
 	const walked = walkCandidate(
 		{ scenario: input.scenario, month, point, requirement: input.requirement },
-		input.schedule,
+		input.grid,
 	)
 	if (walked.kind === "problem") return walked
 	if (walked.kind === "buffer") return { kind: "buffer", failure: { month, breach: walked.breach } }

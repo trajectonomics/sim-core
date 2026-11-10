@@ -38,19 +38,21 @@ const bandLevy: Levy = {
 		{ id: "salary", op: "tally", label: "salary", basis: "gross" },
 		{ id: "low", op: "const", value: 900_000 },
 		{ id: "high", op: "const", value: 1_700_000 },
-		{ id: "big", op: "const", value: 10_000_000 },
+		{ id: "base", op: "const", value: 3_000_000 },
 		{ id: "none", op: "const", value: 0 },
+		{ id: "middle", op: "sub", a: "base", b: "salary" },
 		// biome-ignore lint/suspicious/noThenProperty: `then` is a Measure operand key, not a thenable
-		{ id: "middle", op: "pick", a: "salary", b: "low", then: "big", else: "none" },
+		{ id: "inner", op: "pick", a: "salary", b: "low", then: "middle", else: "none" },
 		// biome-ignore lint/suspicious/noThenProperty: `then` is a Measure operand key, not a thenable
-		{ id: "due", op: "pick", a: "salary", b: "high", then: "none", else: "middle" },
+		{ id: "due", op: "pick", a: "salary", b: "high", then: "none", else: "inner" },
 	],
 	due: "due",
 }
 
 /**
- * A `pick` band charges 10,000,000 only while the tallied salary is between 900,000 and
- * 1,700,000: a mid-year stop pays it, a stop before July or after December does not.
+ * A `sub` inside a `pick` band charges `3,000,000 - tally` only while the tallied salary is
+ * between 900,000 and 1,700,000: a stop from August to October pays it, one before August or after
+ * October does not.
  */
 export const levyBand: NamedCase = {
 	fixture: makeFixture({

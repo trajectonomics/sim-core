@@ -8,7 +8,7 @@ import { type BufferBreach, checkBuffer } from "./buffer"
 import { cloneStates } from "./clone"
 import type { PrefixPoint } from "./prefix"
 import type { RequirementTable } from "./required"
-import { type ScanSchedule, scheduleDates, scheduleFlows } from "./schedule"
+import { gridDates, gridEvents, type ScanGrid } from "./scan-grid"
 import { lockedOrAbsentAssets } from "./undrawable"
 
 export interface Shortfall {
@@ -74,11 +74,11 @@ function processDay(
 }
 
 /** Continues a candidate from its unchanged prefix, checking survival and the optional buffer. */
-export function walkCandidate(input: WalkInput, schedule: ScanSchedule): WalkOutcome {
+export function walkCandidate(input: WalkInput, grid: ScanGrid): WalkOutcome {
 	const point = { states: cloneStates(input.point.states), tracker: input.point.tracker }
 	const working: WalkInput = { ...input, point }
-	const events = scheduleFlows(schedule, input.month)
-	const dates = scheduleDates(schedule, input.month)
+	const events = gridEvents(grid, input.month)
+	const dates = gridDates(grid, input.month)
 	let index = 0
 	let firstBreach: BufferBreach | undefined
 	for (const date of dates) {

@@ -6,7 +6,7 @@ import type { BasisPoints, DateString, Timeline } from "../types"
 import type { SurvivalOptions } from "../types/financial-independence"
 import { retirementEvents, uniqueRetirementId } from "./retirement-spending"
 
-export interface ScanSchedule {
+export interface ScanGrid {
 	/** Every original event the stop keeps, in date-then-id order. */
 	readonly kept: readonly DatedEvent[]
 	readonly keptDates: readonly DateString[]
@@ -53,7 +53,7 @@ function uniqueDates(
 }
 
 /** Builds the stop-filtered events once per scan, so a candidate only takes a suffix of them. */
-export function scanSchedule(
+export function scanGrid(
 	events: readonly DatedEvent[],
 	timeline: Timeline,
 	options: SurvivalOptions,
@@ -61,7 +61,7 @@ export function scanSchedule(
 	settlementDates: readonly DateString[],
 	calendar: ResolvedCalendar | undefined,
 	inflation: BasisPoints,
-): ScanSchedule {
+): ScanGrid {
 	const retirement = options.retirementSpending
 	const kept = events.filter((event) => !stopped(event, retirement !== undefined))
 	const added =
@@ -102,15 +102,15 @@ function merge(left: readonly DatedEvent[], right: readonly DatedEvent[]): reado
 }
 
 /** The events a candidate walks: the kept suffix from `month` plus retirement expenses from `month`. */
-export function scheduleFlows(schedule: ScanSchedule, month: DateString): readonly DatedEvent[] {
-	const kept = schedule.kept.slice(lowerBound(schedule.keptDates, month))
-	const from = monthIndex(month) - monthIndex(schedule.firstMonth)
-	const added = schedule.added.slice(Math.max(0, from))
+export function gridEvents(grid: ScanGrid, month: DateString): readonly DatedEvent[] {
+	const kept = grid.kept.slice(lowerBound(grid.keptDates, month))
+	const from = monthIndex(month) - monthIndex(grid.firstMonth)
+	const added = grid.added.slice(Math.max(0, from))
 	return merge(kept, added)
 }
 
 /** The dates a candidate walks: every scan date from `month` on, plus `month` itself. */
-export function scheduleDates(schedule: ScanSchedule, month: DateString): readonly DateString[] {
-	const rest = schedule.dates.slice(lowerBound(schedule.dates, month))
+export function gridDates(grid: ScanGrid, month: DateString): readonly DateString[] {
+	const rest = grid.dates.slice(lowerBound(grid.dates, month))
 	return rest[0] === month ? rest : [month, ...rest]
 }

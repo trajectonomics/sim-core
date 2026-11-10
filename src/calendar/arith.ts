@@ -1,3 +1,4 @@
+import { BoundedCache } from "../bounded-cache"
 import type { DateString } from "../types"
 import { daysInMonth, formatDate, parseDate } from "./civil"
 
@@ -17,8 +18,7 @@ function daysBeforeMonth(year: number, month: number): number {
 	return days
 }
 
-const dayNumbers: Map<DateString, number> = new Map()
-const DAY_CACHE_LIMIT = 65536
+const dayNumbers: BoundedCache<DateString, number> = new BoundedCache(65536)
 
 /** Zero-based serial day number; 0001-01-01 is 0. Cached per date, purely additively. */
 export function dayNumber(date: DateString): number {
@@ -26,7 +26,6 @@ export function dayNumber(date: DateString): number {
 	if (cached !== undefined) return cached
 	const { year, month, day } = parseDate(date)
 	const value = daysBeforeYear(year) + daysBeforeMonth(year, month) + day - 1
-	if (dayNumbers.size >= DAY_CACHE_LIMIT) dayNumbers.clear()
 	dayNumbers.set(date, value)
 	return value
 }

@@ -6,6 +6,7 @@ import { thaiEmployee } from "../fixtures/thai-employee"
 import type { SurvivalOptions } from "../types"
 import { calendarFiMonth } from "./calendar-cases"
 import { capped } from "./contribution-cases"
+import { beforeStop, insufficient, noCandidate, overflow, undrawable } from "./fi-scan-edge-cases"
 import { levySalaryDay } from "./levy-cases"
 
 export interface ScanCase {
@@ -55,5 +56,15 @@ export const SCAN_CASES: readonly ScanCase[] = [
 	{ name: "calendar", fixture: calendarFiMonth, options: { method: "survival" } },
 	{ name: "capped", fixture: capped, options: { method: "survival" } },
 	{ name: "levy", fixture: levySalaryDay, options: { method: "survival" } },
+	{
+		name: "minimum-buffer",
+		fixture: shortened(thaiEmployee, "2033-01-01"),
+		options: { method: "survival", minBufferMonths: 12 },
+	},
+	{ name: "overflow", fixture: overflow, options: { method: "survival" } },
+	{ name: "no-candidate", fixture: noCandidate, options: { method: "survival" } },
+	{ name: "undrawable", fixture: undrawable, options: { method: "survival" } },
+	{ name: "insufficient", fixture: insufficient, options: { method: "survival" } },
+	{ name: "before-stop", fixture: beforeStop, options: { method: "survival" } },
 	...generated,
 ]

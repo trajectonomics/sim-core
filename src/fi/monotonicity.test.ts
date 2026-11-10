@@ -32,7 +32,7 @@ describe("survival is not monotone in the candidate month", () => {
 		const pattern = scanPattern(levyBand.fixture, levyBand.options)
 		expect(shape(pattern.results)).toBe("pfp")
 		expect(pattern.months[pattern.results.indexOf("fail")]).toBe("2026-08-01")
-		expect(pattern.months[pattern.results.lastIndexOf("fail") + 1]).toBe("2027-01-01")
+		expect(pattern.months[pattern.results.lastIndexOf("fail") + 1]).toBe("2026-11-01")
 	})
 
 	it("checks the Minimum buffer at the candidate month itself, where nothing lands", () => {
