@@ -2,6 +2,7 @@ import type { BasisPoints, DateString, Flow, Levy, Tallies } from "../types"
 import { addTo } from "./add"
 import { capTables } from "./levy-cap"
 import { type SettlementPeriodPlan, settlementPeriodIndexAt } from "./levy-plan"
+import type { LevySet } from "./levy-set"
 import type { LevyTally, LevyTracker } from "./levy-types"
 
 /** Seeds only periods that began before `start`; a record for a period starting on `start` cannot be Carry-in. */
@@ -64,30 +65,30 @@ export function talliesOf(tally: LevyTally): Tallies {
 	}
 }
 
-/** Adds one Occurrence's income labels and Prepayment to the period containing `date`. */
+/** Adds one Occurrence's income labels and each Levy's own Prepayment to its containing period. */
 export function addFlowTallies(
-	tracker: LevyTracker,
+	set: LevySet,
 	date: DateString,
 	gross: ReadonlyMap<string, bigint>,
-	prepaid: bigint,
+	byLevy: ReadonlyMap<string, bigint>,
 ): void {
-	const tally = tracker.tallies[settlementPeriodIndexAt(tracker.periods, date)]
-	if (tally === undefined) return
-	for (const [label, amount] of gross) addTo(tally.gross, label, amount)
-	tally.prepaid += prepaid
+	for (const tracker of set.trackers) {
+		const tally = tracker.tallies[settlementPeriodIndexAt(tracker.periods, date)]
+		if (tally === undefined) continue
+		for (const [label, amount] of gross) addTo(tally.gross, label, amount)
+		tally.prepaid += byLevy.get(tracker.levy.id) ?? 0n
+	}
 }
 
 /** Adds the contribution amounts actually applied on `date` to that period's funded tallies. */
 export function addFundedTallies(
-	tracker: LevyTracker,
+	set: LevySet,
 	date: DateString,
 	funded: ReadonlyMap<string, bigint>,
 ): void {
-	const tally = tracker.tallies[settlementPeriodIndexAt(tracker.periods, date)]
-	if (tally === undefined) return
-	for (const [label, amount] of funded) addTo(tally.funded, label, amount)
-}
-
-export function hasSettlement(tracker: LevyTracker, date: DateString): boolean {
-	return tracker.settlementIndex.has(date)
+	for (const tracker of set.trackers) {
+		const tally = tracker.tallies[settlementPeriodIndexAt(tracker.periods, date)]
+		if (tally === undefined) continue
+		for (const [label, amount] of funded) addTo(tally.funded, label, amount)
+	}
 }

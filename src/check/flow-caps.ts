@@ -3,8 +3,8 @@ import { isRecord } from "./shape"
 
 type MeasureRecord = Readonly<Record<string, unknown>>
 
-/** Levy Measures by id, first declaration winning, as the graph walk indexes them. */
-function measuresById(levy: MeasureRecord): Map<string, MeasureRecord> {
+/** One Levy's Measures by id, first declaration winning, as the graph walk indexes them. */
+function measuresOf(levy: MeasureRecord): Map<string, MeasureRecord> {
 	const byId = new Map<string, MeasureRecord>()
 	const measures = levy["measures"]
 	if (!Array.isArray(measures)) return byId
@@ -15,6 +15,26 @@ function measuresById(levy: MeasureRecord): Map<string, MeasureRecord> {
 		if (typeof id === "string" && !byId.has(id)) byId.set(id, item)
 	}
 	return byId
+}
+
+/** Levy Measures by id, for the named levy; a missing or invalid id is reported. */
+function levyMeasures(
+	levies: readonly unknown[],
+	id: unknown,
+	at: Path,
+	emit: Emit,
+): Map<string, MeasureRecord> | undefined {
+	let found: MeasureRecord | undefined
+	for (let index = 0; index < levies.length; index++) {
+		const item: unknown = levies[index]
+		if (!isRecord(item) || item["id"] !== id) continue
+		found ??= item
+	}
+	if (found === undefined) {
+		emit("UNKNOWN_LEVY", [...at, "levy"])
+		return undefined
+	}
+	return measuresOf(found)
 }
 
 function checkUpTo(
@@ -39,18 +59,29 @@ function validRate(value: unknown): value is number {
 	return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= 10_000
 }
 
-/** The two shares together may never ask for more than the gross. */
+/** The plain share the Flow already credits to the cap's Levy. */
+function plainShare(flow: MeasureRecord, levy: unknown): number {
+	const list = flow["prepayments"]
+	if (!Array.isArray(list)) return 0
+	let total = 0
+	for (let index = 0; index < list.length; index++) {
+		const entry: unknown = list[index]
+		if (isRecord(entry) && entry["levy"] === levy && validRate(entry["bps"])) total += entry["bps"]
+	}
+	return total
+}
+
+/** The plain and capped shares together may never ask for more than the gross. */
 function checkShares(flow: MeasureRecord, capped: MeasureRecord, at: Path, emit: Emit): void {
 	const share = capped["bps"]
-	const plain = flow["prepaymentBps"]
-	if (!validRate(share) || !validRate(plain)) return
-	if (plain + share > 10_000) emit("RATE_OUT_OF_RANGE", at)
+	if (!validRate(share)) return
+	if (plainShare(flow, capped["levy"]) + share > 10_000) emit("RATE_OUT_OF_RANGE", at)
 }
 
 function checkFlow(
 	flow: unknown,
 	index: number,
-	byId: ReadonlyMap<string, MeasureRecord>,
+	levies: readonly unknown[],
 	path: Path,
 	emit: Emit,
 ): void {
@@ -60,14 +91,15 @@ function checkFlow(
 	const flowPath: Path = [...path, "flows", index]
 	if (!Object.hasOwn(flow, "label")) emit("MISSING_KEY", [...flowPath, "label"])
 	const at: Path = [...flowPath, "cappedPrepayment"]
-	checkUpTo(capped, at, byId, emit)
+	if (typeof capped["levy"] !== "string" || capped["levy"] === "") return
+	const byId = levyMeasures(levies, capped["levy"], at, emit)
+	if (byId !== undefined) checkUpTo(capped, at, byId, emit)
 	checkShares(flow, capped, [...at, "bps"], emit)
 }
 
-/** Cross-rules for `cappedPrepayment`: income only, a label, a Levy `const` cap, and the two shares. */
-export function checkFlowCaps(flows: unknown, levy: unknown, path: Path, emit: Emit): void {
-	if (!Array.isArray(flows) || !isRecord(levy)) return
-	const byId = measuresById(levy)
+/** Cross-rules for `cappedPrepayment`: income only, a label, its Levy's `const` cap, the two shares. */
+export function checkFlowCaps(flows: unknown, levies: unknown, path: Path, emit: Emit): void {
+	if (!Array.isArray(flows) || !Array.isArray(levies)) return
 	for (let index = 0; index < flows.length; index++)
-		checkFlow(flows[index], index, byId, path, emit)
+		checkFlow(flows[index], index, levies, path, emit)
 }

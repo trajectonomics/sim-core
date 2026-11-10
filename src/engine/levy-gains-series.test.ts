@@ -22,7 +22,7 @@ function projectionOf(fixture: Fixture, returns: Returns): Projection {
 }
 
 function measureOf(projection: Projection, from: string, id: string): MinorUnits {
-	const period = projection.levy?.periods.find((item) => item.from === from)
+	const period = projection.levies?.[0]?.periods.find((item) => item.from === from)
 	if (period === undefined) throw new Error(`Missing period ${from}`)
 	const found = period.measures.find((item) => item.id === id)
 	if (found === undefined) throw new Error(`Missing ${id}`)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import type { ConstMeasure, Growth, Levy, MinorUnits } from "../types"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
 /** A calendar-year Levy that owes 0 and holds one `const` the caps name. */
@@ -30,8 +30,8 @@ const monthlySalary = (bps: number, prepaymentBps?: number) =>
 		frequency: "monthly",
 		start: "2026-01-31",
 		label: "wage",
-		...(prepaymentBps === undefined ? {} : { prepaymentBps }),
-		cappedPrepayment: { bps, upTo: "base" },
+		...(prepaymentBps === undefined ? {} : { prepayments: prepays("wage", prepaymentBps) }),
+		cappedPrepayment: { levy: "wage", bps, upTo: "base" },
 	})
 
 function project(
@@ -125,12 +125,12 @@ describe("capped Prepayment in the engine", () => {
 			income("a", 10_000, {
 				start: "2026-01-31",
 				label: "wage",
-				cappedPrepayment: { bps: 620, upTo: "wide" },
+				cappedPrepayment: { levy: "wage", bps: 620, upTo: "wide" },
 			}),
 			income("b", 10_000, {
 				start: "2026-01-31",
 				label: "wage",
-				cappedPrepayment: { bps: 620, upTo: "narrow" },
+				cappedPrepayment: { levy: "wage", bps: 620, upTo: "narrow" },
 			}),
 		]
 		const levy = withCarryIn(

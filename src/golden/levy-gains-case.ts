@@ -13,7 +13,7 @@ export const levyGainsDay: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 250 },
 		accounts: [brokerage, cash, deposit],
@@ -23,19 +23,21 @@ export const levyGainsDay: Fixture = {
 			contribute: [],
 			withdraw: ["cash", "deposit", "brokerage"],
 		},
-		levy: {
-			id: "gains",
-			period: { month: 1, day: 1 },
-			settlement: { month: 6, day: 30 },
-			measures: [
-				{ id: "gain", op: "tally", label: "gain", basis: "gains" },
-				{ id: "interest", op: "tally", label: "interest", basis: "returns" },
-				{ id: "zero", op: "const", value: 0 },
-				{ id: "due", op: "max", a: "gain", b: "zero" },
-			],
-			due: "due",
-			carryIn: [emptyCarryIn("2025-01-01")],
-		},
+		levies: [
+			{
+				id: "gains",
+				period: { month: 1, day: 1 },
+				settlement: { month: 6, day: 30 },
+				measures: [
+					{ id: "gain", op: "tally", label: "gain", basis: "gains" },
+					{ id: "interest", op: "tally", label: "interest", basis: "returns" },
+					{ id: "zero", op: "const", value: 0 },
+					{ id: "due", op: "max", a: "gain", b: "zero" },
+				],
+				due: "due",
+				carryIn: [emptyCarryIn("2025-01-01")],
+			},
+		],
 	},
 	timeline,
 }

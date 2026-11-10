@@ -2,8 +2,8 @@ import type { EngineLevy, EngineSettlementPeriod } from "../engine/levy-types"
 import { isSafeInteger, overflow } from "../engine/overflow"
 import type { LevyMeasureValue, LevyReport, ProjectionProblem, SettlementPeriod } from "../types"
 
-export interface LevyOutcome {
-	readonly levy: LevyReport | undefined
+export interface LeviesOutcome {
+	readonly levies: readonly LevyReport[] | undefined
 	readonly problem: ProjectionProblem | undefined
 }
 
@@ -32,16 +32,24 @@ function settlementPeriodOf(period: EngineSettlementPeriod): SettlementPeriod | 
 	}
 }
 
-/** Converts the engine's bigint Levy results to reported minor units. */
-export function buildLevy(run: EngineLevy | undefined): LevyOutcome {
-	if (run === undefined) return { levy: undefined, problem: undefined }
+function reportOf(run: EngineLevy): LevyReport | ProjectionProblem {
 	const periods: SettlementPeriod[] = []
 	for (const period of run.periods) {
 		const reported = settlementPeriodOf(period)
-		if (reported === undefined) {
-			return { levy: undefined, problem: overflow(period.settlementDate) }
-		}
+		if (reported === undefined) return overflow(period.settlementDate)
 		periods.push(reported)
 	}
-	return { levy: { id: run.id, periods }, problem: undefined }
+	return { id: run.id, periods }
+}
+
+/** Converts the engine's bigint Levy results to reported minor units, in Scenario order. */
+export function buildLevies(runs: readonly EngineLevy[] | undefined): LeviesOutcome {
+	if (runs === undefined || runs.length === 0) return { levies: undefined, problem: undefined }
+	const levies: LevyReport[] = []
+	for (const run of runs) {
+		const report = reportOf(run)
+		if ("code" in report) return { levies: undefined, problem: report }
+		levies.push(report)
+	}
+	return { levies, problem: undefined }
 }

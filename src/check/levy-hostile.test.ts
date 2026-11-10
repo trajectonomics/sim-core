@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { evaluateMeasures } from "../levy/evaluate"
 import { CONTEXT, levyOf, talliesOf } from "../levy/test-levy"
-import type { Measure } from "../types"
+import type { LevyMeasure } from "../types"
 import { checkWith, LEVY } from "./levy-fixture"
 
 /** An array whose `map`, `forEach` and iterator lie: only index access tells the truth. */
@@ -29,7 +29,7 @@ describe("check() Levy graph with lying array methods", () => {
 	})
 
 	it("accepts a valid Levy", () => {
-		const measures = [
+		const measures: LevyMeasure[] = [
 			{ id: "b", op: "add", a: "a", b: "a" },
 			{ id: "a", op: "const", value: 2 },
 		]
@@ -39,7 +39,7 @@ describe("check() Levy graph with lying array methods", () => {
 
 describe("evaluateMeasures with lying array methods", () => {
 	it("evaluates a checked Levy declared out of dependency order", () => {
-		const measures: Measure[] = [
+		const measures: LevyMeasure[] = [
 			{ id: "b", op: "add", a: "a", b: "a" },
 			{ id: "a", op: "const", value: 2 },
 			{ id: "t", op: "tally", label: "x", basis: "gross" },

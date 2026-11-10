@@ -5,14 +5,24 @@ export type MeasureOp = (typeof MEASURE_OPS)[number]
 export type TallyBasis = (typeof TALLY_BASES)[number]
 export type Rounding = (typeof ROUNDINGS)[number]
 
-/** A fixed amount. With `growth`, it steps once per whole year after `asOf` (required then). */
+/** One dated value of a Dated constant; `value` holds until the next step. */
+export interface ConstStep {
+	readonly from: DateString
+	readonly value: MinorUnits
+}
+
+/**
+ * A fixed amount. With `growth`, it steps once per whole year after `asOf` (required then).
+ * With `steps`, it takes the last value whose `from` is on or before the period's last day.
+ */
 export type ConstMeasure = {
 	readonly id: string
 	readonly op: "const"
 	readonly value: MinorUnits
 } & (
-	| { readonly asOf?: DateString; readonly growth?: never }
-	| { readonly asOf: DateString; readonly growth: Growth }
+	| { readonly asOf?: DateString; readonly growth?: never; readonly steps?: never }
+	| { readonly asOf: DateString; readonly growth: Growth; readonly steps?: never }
+	| { readonly steps: readonly ConstStep[]; readonly asOf?: never; readonly growth?: never }
 )
 
 /** Sum of the Flows carrying `label`: `gross` sums income Flows, `funded` contribution Flows. */
@@ -61,6 +71,13 @@ export interface PickMeasure {
 	readonly else: string
 }
 
+/** The planned gross amount another Flow lands on the same Landed date; 0 when it does not. */
+export interface FlowMeasure {
+	readonly id: string
+	readonly op: "flow"
+	readonly flow: string
+}
+
 export type Measure =
 	| ConstMeasure
 	| TallyMeasure
@@ -68,3 +85,16 @@ export type Measure =
 	| ScaleMeasure
 	| MulMeasure
 	| PickMeasure
+	| FlowMeasure
+
+/** A Measure a Levy may hold: everything but a `flow` reference, which only a Derived amount has. */
+export type LevyMeasure = Exclude<Measure, FlowMeasure>
+
+/** A Measure a Derived amount may hold: everything but a `tally`, which only a Levy has. */
+export type DeriveMeasure = Exclude<Measure, TallyMeasure>
+
+/** A Measure graph with ids local to one Flow, and the id of the Measure that is its amount. */
+export interface Derive {
+	readonly measures: readonly DeriveMeasure[]
+	readonly result: string
+}

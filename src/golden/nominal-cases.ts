@@ -9,7 +9,7 @@ function quietAsset(account: Account, start: string, horizon: string, inflation 
 	return {
 		baseline: { schemaVersion: 1, balances: [{ account: account.id, amount: 1_000_000 }] },
 		scenario: {
-			schemaVersion: 3,
+			schemaVersion: 4,
 			currency: "THB",
 			economy: { inflation },
 			accounts: [account],
@@ -53,7 +53,7 @@ export const nominalPartial: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [cash, asset("monthly", 1200)],
@@ -67,7 +67,7 @@ export const nominalPartial: Fixture = {
 export const nominalLeapFebruary: Fixture = {
 	baseline: { schemaVersion: 1, balances: [{ account: "savings", amount: 1_200_000 }] },
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 0 },
 		accounts: [asset("monthly", 1200)],

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import type { Levy } from "../types"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { amounts, emptyCarryIn, periodFrom, rowAt, run, withCarryIn } from "./test-helpers"
 
 const zero: Levy = {
@@ -31,9 +31,9 @@ describe("Settlement period boundaries", () => {
 				income("first", 100, {
 					start: "2026-06-01",
 					label: "x",
-					prepaymentBps: 1000,
+					prepayments: prepays("gross", 1000),
 				}),
-				income("second", 50, { start: "2027-01-01", label: "x", prepaymentBps: 0 }),
+				income("second", 50, { start: "2027-01-01", label: "x" }),
 			],
 			surplus: [{ account: "cash" }],
 			withdraw: ["cash"],
@@ -81,7 +81,7 @@ describe("Settlement period boundaries", () => {
 			levy,
 		})
 		expect(
-			projection.levy!.periods.map((period) => [
+			projection.levies![0]!.periods.map((period) => [
 				period.from,
 				period.to,
 				period.settlementDate,
@@ -128,7 +128,7 @@ describe("Settlement period boundaries", () => {
 				emptyCarryIn("9997-01-01"),
 			),
 		})
-		expect(projection.levy!.periods).toHaveLength(2)
+		expect(projection.levies![0]!.periods).toHaveLength(2)
 		expect(periodFrom(projection, "9998-01-01")).toMatchObject({
 			to: "9998-12-31",
 			settlementDate: "9999-12-31",

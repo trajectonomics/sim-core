@@ -1,9 +1,7 @@
 import type { DateString, Scenario } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import type { DatedEvent } from "./events"
-import { closeReturns } from "./levy-returns"
-import { hasSettlement } from "./levy-tally"
-import type { LevyTracker } from "./levy-types"
+import { closeReturnsOn, hasSettlement, type LevySet } from "./levy-set"
 import type { DayTotals, EngineRunsOut } from "./occurrence"
 import { processDate } from "./occurrence"
 import { isSafeInteger, overflow } from "./overflow"
@@ -15,7 +13,7 @@ export interface RunAccumulator {
 	readonly snapshots: EngineSnapshot[]
 	readonly totals: DayTotals[]
 	readonly wanted: ReadonlySet<DateString>
-	readonly levy: LevyTracker | undefined
+	readonly levies: LevySet | undefined
 }
 
 function addSnapshot(
@@ -43,9 +41,9 @@ function handleDay(
 	date: DateString,
 	events: readonly DatedEvent[],
 ): EngineResult | undefined {
-	const settlement = acc.levy !== undefined && hasSettlement(acc.levy, date)
+	const settlement = acc.levies !== undefined && hasSettlement(acc.levies, date)
 	if (events.length === 0 && !settlement) return undefined
-	const outcome = processDate(states, scenario, date, events, acc.levy)
+	const outcome = processDate(states, scenario, date, events, acc.levies)
 	acc.totals.push(outcome.totals)
 	if (outcome.problem !== undefined) return { ok: false, problem: outcome.problem }
 	if (outcome.runsOut !== undefined) return finishRunout(acc, states, outcome.runsOut)
@@ -70,7 +68,7 @@ export function stepDate(
 	date: DateString,
 	events: readonly DatedEvent[],
 ): EngineResult | undefined {
-	if (acc.levy !== undefined) closeReturns(states, acc.levy, date)
+	if (acc.levies !== undefined) closeReturnsOn(acc.levies, states, date)
 	const dayResult = handleDay(acc, states, scenario, date, events)
 	if (dayResult !== undefined) return dayResult
 	return handleSnapshot(acc, states, date)

@@ -73,12 +73,14 @@ export interface Projection {
 	readonly annual: readonly AnnualRollup[]
 	readonly unfundedContributions: readonly AccountAmount[]
 	readonly runsOut?: RunsOut
-	readonly levy?: LevyReport
+	readonly levies?: readonly LevyReport[]
 }
 
 export interface InputProblem {
 	readonly code: ErrorCode
 	readonly path: Path
+	/** The Occurrence date, for a problem the engine finds at run time. */
+	readonly date?: DateString
 }
 
 export interface ValueOverflowProblem {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import type { Measure } from "../types"
+import type { LevyMeasure } from "../types"
 import { CONTEXT, dueOf, talliesOf } from "./test-levy"
 
 /** `x mul y / den`, over two constants. */
@@ -9,7 +9,7 @@ function multiplied(
 	den: number,
 	rounding: "floor" | "halfUp" | "ceil",
 ): number | undefined {
-	const measures: Measure[] = [
+	const measures: LevyMeasure[] = [
 		{ id: "x", op: "const", value: x },
 		{ id: "y", op: "const", value: y },
 		{ id: "r", op: "mul", a: "x", b: "y", den, rounding },
@@ -84,7 +84,7 @@ describe("mul precision and overflow", () => {
 	})
 
 	it("reports a result that is not a safe integer as VALUE_OVERFLOW at the date", () => {
-		const measures: Measure[] = [
+		const measures: LevyMeasure[] = [
 			{ id: "x", op: "const", value: 9_000_000_000_000_000 },
 			{ id: "y", op: "const", value: 2 },
 			{ id: "r", op: "mul", a: "x", b: "y", den: 1, rounding: "halfUp" },
@@ -96,7 +96,7 @@ describe("mul precision and overflow", () => {
 	})
 
 	it("multiplies two derived Measures, not only constants", () => {
-		const measures: Measure[] = [
+		const measures: LevyMeasure[] = [
 			{ id: "care", op: "tally", label: "care", basis: "gross" },
 			{ id: "income", op: "tally", label: "salary", basis: "gross" },
 			{ id: "bump", op: "scale", of: "income", num: 1, den: 100_000, rounding: "floor" },

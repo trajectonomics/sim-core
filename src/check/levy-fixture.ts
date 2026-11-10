@@ -36,13 +36,18 @@ function alignedStart(base: DateString, levy: unknown): DateString {
 	return `${year}-${String(period.month).padStart(2, "0")}-${String(period.day).padStart(2, "0")}`
 }
 
-/** `check()` with `levy`, optional flow edits and optional timeline edits on the Thai employee fixture. */
+/**
+ * `check()` with a `levy` patch (put into `levies`), other Scenario edits and optional timeline
+ * edits, on the Thai employee fixture.
+ */
 export function checkWith(
 	patch: Readonly<Record<string, unknown>>,
 	timelinePatch: Partial<Timeline> = {},
 ): readonly Problem[] {
 	const { baseline, scenario, timeline } = thaiEmployee
-	return check(baseline, { ...scenario, ...patch }, { ...timeline, ...timelinePatch })
+	const { levy, ...rest } = patch
+	const applied = levy === undefined ? patch : { ...rest, levies: [levy] }
+	return check(baseline, { ...scenario, ...applied }, { ...timeline, ...timelinePatch })
 }
 
 /** An empty Carry-in for the period before the aligned start year. */

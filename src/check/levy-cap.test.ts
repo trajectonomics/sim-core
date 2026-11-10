@@ -8,13 +8,21 @@ const at = (index: number, ...rest: readonly (string | number)[]) =>
 const capAt = (index: number, key?: string) =>
 	at(index, "cappedPrepayment", ...(key === undefined ? [] : [key]))
 
+/** The fixture Levy, injected into a cap that a test wrote without one. */
+function withLevy(capped: unknown): unknown {
+	if (typeof capped !== "object" || capped === null || Array.isArray(capped)) return capped
+	return { levy: "levy", ...capped }
+}
+
 const incomeCap = (cappedPrepayment: unknown, prepaymentBps?: number) =>
 	checkWith({
 		levy: LEVY,
 		flows: flowsWith(0, {
 			label: "salary",
-			...(prepaymentBps === undefined ? {} : { prepaymentBps }),
-			cappedPrepayment,
+			...(prepaymentBps === undefined
+				? {}
+				: { prepayments: [{ levy: "levy", bps: prepaymentBps }] }),
+			cappedPrepayment: withLevy(cappedPrepayment),
 		}),
 	})
 
@@ -54,7 +62,10 @@ describe("check() cappedPrepayment", () => {
 	})
 
 	it("rejects the cap and its label when the Scenario has no Levy", () => {
-		const flows = flowsWith(0, { label: "salary", cappedPrepayment: { bps: 620, upTo: "cap" } })
+		const flows = flowsWith(0, {
+			label: "salary",
+			cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" },
+		})
 		expect(checkWith({ flows })).toEqual([
 			{ code: "LEVY_REQUIRED", path: at(0, "label") },
 			{ code: "LEVY_REQUIRED", path: at(0, "cappedPrepayment") },
@@ -64,13 +75,13 @@ describe("check() cappedPrepayment", () => {
 	it("accepts a label no tally Measure reads: the cap only needs the gross", () => {
 		const flows = flowsWith(0, {
 			label: "untallied",
-			cappedPrepayment: { bps: 620, upTo: "cap" },
+			cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" },
 		})
 		expect(checkWith({ levy: LEVY, flows })).toEqual([])
 	})
 
 	it("requires the label the cap is measured on", () => {
-		const flows = flowsWith(0, { cappedPrepayment: { bps: 620, upTo: "cap" } })
+		const flows = flowsWith(0, { cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" } })
 		expect(checkWith({ levy: LEVY, flows })).toEqual(expected("MISSING_KEY", at(0, "label")))
 	})
 
@@ -91,7 +102,10 @@ describe("check() cappedPrepayment", () => {
 		expect(
 			checkWith({
 				levy: { ...levy, measures },
-				flows: flowsWith(0, { label: "salary", cappedPrepayment: { bps: 620, upTo: "cap" } }),
+				flows: flowsWith(0, {
+					label: "salary",
+					cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" },
+				}),
 			}),
 		).toEqual(expected("NEGATIVE_AMOUNT", capAt(0, "upTo")))
 	})

@@ -13,20 +13,22 @@ export const levyReturnsDay: Fixture = {
 		],
 	},
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 250 },
 		accounts: [cash, deposit, pension],
 		flows: [salary, living],
 		cashflow: { surplus: [{ account: "cash" }], contribute: [], withdraw: ["cash", "deposit"] },
-		levy: {
-			id: "returns",
-			period: { month: 1, day: 1 },
-			settlement: { month: 6, day: 30 },
-			measures: [{ id: "interest", op: "tally", label: "interest", basis: "returns" }],
-			due: "interest",
-			carryIn: [emptyCarryIn("2025-01-01")],
-		},
+		levies: [
+			{
+				id: "returns",
+				period: { month: 1, day: 1 },
+				settlement: { month: 6, day: 30 },
+				measures: [{ id: "interest", op: "tally", label: "interest", basis: "returns" }],
+				due: "interest",
+				carryIn: [emptyCarryIn("2025-01-01")],
+			},
+		],
 	},
 	timeline,
 }

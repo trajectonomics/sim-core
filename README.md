@@ -11,12 +11,54 @@ Pure, deterministic personal-finance projection engine.
 
 ## Input schema
 
-A Scenario is version `3`. `check()` reports `UNSUPPORTED_SCHEMA_VERSION` at
-`scenario.schemaVersion` for anything else, which means the caller must migrate from v2; a v2
-Scenario is otherwise rejected before its fields are read. An Account may declare a
-`compounding` period (`monthly`, `quarterly`, `semiannual` or `annual`) to make its `rate`
-nominal; without it, `rate` is the effective annual rate. See
-[ADR 0007](docs/adr/0007-nominal-compounding.md).
+A Scenario is version `4`. `check()` reports `UNSUPPORTED_SCHEMA_VERSION` at
+`scenario.schemaVersion` for anything else, so an older Scenario is rejected before its fields
+are read. v3 added nominal compounding; v4 replaced `levy` with `levies` and `prepaymentBps`
+with `prepayments`, renamed `Projection.levy` to `Projection.levies`, and added `steps` on a
+`const` Measure and `derive` on a Flow. An Account may declare a `compounding` period
+(`monthly`, `quarterly`, `semiannual` or `annual`) to make its `rate` nominal; without it,
+`rate` is the effective annual rate. See [ADR 0007](docs/adr/0007-nominal-compounding.md).
+
+## Levies
+
+A Levy is a closed rule set: a twelve-month period rule, a settlement rule and a graph of
+Measures over the Flows' Tally labels. A Scenario may hold several in `scenario.levies`; each
+has its own periods, Settlement and Carry-in, and they share Tally labels but never read each
+other. A Flow's Prepayment credits one Levy per entry, and the shares are rounded cumulatively
+in Scenario Levy order so together they never exceed the gross:
+
+```ts
+{ id: "salary", kind: "income", earned: true, amount: 1_000_000, frequency: "monthly",
+  start: "2026-01-31", growth: { bps: 0 }, label: "salary",
+  prepayments: [{ levy: "national", bps: 300 }, { levy: "local", bps: 200 }] }
+```
+
+A `const` Measure may step on given dates. A Settlement period reads the last step on or before
+its own last day, not its Settlement date, so a fact that holds at the end of a period governs
+that period and a step between the two does not reopen it:
+
+```ts
+{ id: "due", op: "const", value: 100_000,
+  steps: [{ from: "2026-06-01", value: 200_000 }, { from: "2027-01-01", value: 300_000 }] }
+```
+
+A Flow takes `derive` instead of `amount` and `growth`: a Measure graph whose `flow` op reads
+another Flow's planned gross amount on the same Landed date, before Prepayment and any cap, and
+0 when that Flow does not land then. Rent as 30% of salary follows a raise:
+
+```ts
+{ id: "rent", kind: "expense", frequency: "monthly", start: "2026-01-31",
+  derive: { measures: [
+    { id: "salary", op: "flow", flow: "salary" },
+    { id: "result", op: "scale", of: "salary", num: 30, den: 100, rounding: "halfUp" },
+  ], result: "result" } }
+```
+
+A negative derived amount or one that overflows is reported, never clamped. In the Financial
+Independence test earned income stops, so a derived amount that reads it falls to 0; a derived
+expense that reads earned income is rejected by the FI entry unless `retirementSpending`
+replaces every expense after the FI month. The plain Projection is unaffected. See
+[ADR 0008](docs/adr/0008-levy-extensions.md).
 
 ## Scripts
 

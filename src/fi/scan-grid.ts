@@ -1,10 +1,10 @@
 import type { ResolvedCalendar } from "../calendar/business"
-import { amountAt } from "../engine/amount"
+import { fixedAmountAt } from "../engine/amount"
 import type { DatedEvent } from "../engine/events"
-import { compareIds } from "../engine/order"
 import type { BasisPoints, DateString, Timeline } from "../types"
 import type { FinancialIndependenceOptions } from "../types/financial-independence"
 import { retirementEvents, uniqueRetirementId } from "./retirement-spending"
+import { merge } from "./scan-merge"
 
 export interface ScanGrid {
 	/** Every original event the stop keeps, in date-then-id order. */
@@ -20,11 +20,6 @@ export interface ScanGrid {
 function stopped(event: DatedEvent, retirement: boolean): boolean {
 	if (event.flow.kind === "income" && event.flow.earned) return true
 	return retirement && event.flow.kind === "expense"
-}
-
-function byDateThenId(left: DatedEvent, right: DatedEvent): number {
-	if (left.date !== right.date) return left.date < right.date ? -1 : 1
-	return compareIds(left.flow.id, right.flow.id)
 }
 
 export function lowerBound(dates: readonly DateString[], target: DateString): number {
@@ -73,7 +68,10 @@ export function scanGrid(
 					retirement,
 					uniqueRetirementId(events),
 					calendar,
-				).map((event) => ({ ...event, amount: amountAt(event, inflation) }))
+				).map((event) => ({
+					...event,
+					amount: fixedAmountAt(event.flow as never, event.years, inflation),
+				}))
 	return {
 		kept,
 		keptDates: kept.map((event) => event.date),
@@ -85,20 +83,6 @@ export function scanGrid(
 			timeline.horizon,
 		]),
 	}
-}
-
-function merge(left: readonly DatedEvent[], right: readonly DatedEvent[]): readonly DatedEvent[] {
-	if (right.length === 0) return left
-	const merged: DatedEvent[] = []
-	let leftIndex = 0
-	let rightIndex = 0
-	while (leftIndex < left.length && rightIndex < right.length) {
-		if (byDateThenId(left[leftIndex]!, right[rightIndex]!) <= 0) merged.push(left[leftIndex++]!)
-		else merged.push(right[rightIndex++]!)
-	}
-	while (leftIndex < left.length) merged.push(left[leftIndex++]!)
-	while (rightIndex < right.length) merged.push(right[rightIndex++]!)
-	return merged
 }
 
 /** The events a candidate walks: the kept suffix from `month` plus retirement expenses from `month`. */

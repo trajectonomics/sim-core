@@ -4,7 +4,7 @@ import { addTo } from "./add"
 import type { ContributionEntry } from "./aggregate"
 import { grantAsset } from "./asset-grant"
 import { appliedByLabel, groupEntries, plannedTotal } from "./contribution-entries"
-import type { LevyTracker } from "./levy-types"
+import type { LevySet } from "./levy-set"
 import { minBigInt } from "./min"
 import { mutate } from "./mutate"
 import { compareIds } from "./order"
@@ -31,14 +31,14 @@ function applyDebtTarget(
 	target: AccountId,
 	entries: readonly ContributionEntry[],
 	date: DateString,
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 ): DebtResult {
 	const state = states.get(target)
 	const planned = plannedTotal(entries)
 	if (state?.rule.kind !== "liability" || planned === 0n) return NOTHING
 	const payment = minBigInt(planned, valuation(state, date))
 	if (payment === 0n) return NOTHING
-	const problem = mutate(state, date, -payment, tracker)
+	const problem = mutate(state, date, -payment, levies)
 	if (problem !== undefined) return { paid: 0n, funded: new Map(), problem }
 	return { paid: payment, funded: appliedByLabel(entries, payment), problem: undefined }
 }
@@ -48,13 +48,13 @@ export function applyDebt(
 	states: StateMap,
 	entries: readonly ContributionEntry[],
 	date: DateString,
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 ): DebtResult {
 	const groups = groupEntries(entries)
 	let paid = 0n
 	const funded = new Map<string, bigint>()
 	for (const target of [...groups.keys()].sort(compareIds)) {
-		const result = applyDebtTarget(states, target, groups.get(target) ?? [], date, tracker)
+		const result = applyDebtTarget(states, target, groups.get(target) ?? [], date, levies)
 		if (result.problem !== undefined) return { paid, funded, problem: result.problem }
 		paid += result.paid
 		for (const [label, amount] of result.funded) addTo(funded, label, amount)
@@ -72,7 +72,7 @@ export function applyAssets(
 	entries: readonly ContributionEntry[],
 	available: bigint,
 	date: DateString,
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 ): AssetResult {
 	const groups = groupEntries(entries)
 	let remaining = available
@@ -82,7 +82,7 @@ export function applyAssets(
 	for (const target of contribute) {
 		const targetEntries = groups.get(target) ?? []
 		if (plannedTotal(targetEntries) === 0n) continue
-		const grant = grantAsset(states, target, targetEntries, remaining, date, tracker)
+		const grant = grantAsset(states, target, targetEntries, remaining, date, levies)
 		if (grant.problem !== undefined) {
 			return { applied, funded, unfunded, problem: grant.problem }
 		}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import type { Levy } from "../types"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { emptyCarryIn, problems, withCarryIn } from "./test-helpers"
 
 const levy: Levy = withCarryIn(
@@ -26,7 +26,7 @@ describe("unsafe Levy tallies", () => {
 						start: "2025-01-01",
 						growth: { bps: 10_000 },
 						label: "x",
-						prepaymentBps: 10_000,
+						prepayments: prepays("huge", 10_000),
 					}),
 				],
 				surplus: [{ account: "cash" }],

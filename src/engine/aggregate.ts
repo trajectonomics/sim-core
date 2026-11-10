@@ -1,9 +1,9 @@
-import type { AccountId, BasisPoints, DateString } from "../types"
+import type { AccountId, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
-import { amountAt } from "./amount"
+import type { Planned } from "./derive"
 import type { DatedEvent } from "./events"
-import { addIncome, settlementPeriodView } from "./levy-prepaid"
-import type { LevyTracker } from "./levy-types"
+import { addIncome } from "./levy-prepaid"
+import type { LevyPeriodView } from "./levy-shares"
 
 export interface ContributionEntry {
 	readonly target: AccountId
@@ -19,38 +19,63 @@ export interface DayFlows {
 	/** Planned gross income by Tally label. */
 	readonly gross: ReadonlyMap<string, bigint>
 	readonly prepaid: bigint
+	/** Each Levy's own Prepayment share. */
+	readonly prepaidByLevy: ReadonlyMap<string, bigint>
 	/** A capped Prepayment read a cap that is not a safe integer. */
-	readonly capProblem?: ProjectionProblem
+	readonly problem?: ProjectionProblem
+}
+
+interface Totals {
+	income: bigint
+	expense: bigint
+	prepaid: bigint
+	readonly gross: Map<string, bigint>
+	readonly prepaidByLevy: Map<string, bigint>
+	readonly contributionEntries: ContributionEntry[]
+}
+
+function takeIncome(
+	totals: Totals,
+	flow: Extract<DatedEvent["flow"], { kind: "income" }>,
+	amount: bigint,
+	views: readonly LevyPeriodView[],
+	date: DateString,
+): ProjectionProblem | undefined {
+	totals.income += amount
+	const taken = addIncome(flow, amount, totals.gross, views, date)
+	for (const [levy, share] of taken.byLevy) {
+		totals.prepaidByLevy.set(levy, (totals.prepaidByLevy.get(levy) ?? 0n) + share)
+	}
+	totals.prepaid += taken.prepaid
+	return taken.problem
 }
 
 /** Sums one Occurrence's flows, separating Prepayment and Tally labels from the cash amounts. */
 export function aggregate(
 	events: readonly DatedEvent[],
-	inflation: BasisPoints,
+	planned: Planned,
+	views: readonly LevyPeriodView[],
 	date: DateString,
-	tracker: LevyTracker | undefined,
 ): DayFlows {
-	let income = 0n
-	let expense = 0n
-	let prepaid = 0n
-	const gross = new Map<string, bigint>()
-	const contributionEntries: ContributionEntry[] = []
-	const view = settlementPeriodView(tracker, date)
+	const totals: Totals = {
+		income: 0n,
+		expense: 0n,
+		prepaid: 0n,
+		gross: new Map(),
+		prepaidByLevy: new Map(),
+		contributionEntries: [],
+	}
 	for (const event of events) {
-		const amount = event.amount ?? amountAt(event, inflation)
 		const flow = event.flow
+		const amount = event.amount ?? planned.derived.get(flow.id) ?? 0n
 		if (flow.kind === "income") {
-			income += amount
-			const taken = addIncome(flow, amount, gross, view, date)
-			if (taken.problem !== undefined) {
-				return { income, expense, contributionEntries, gross, prepaid, capProblem: taken.problem }
-			}
-			prepaid += taken.prepaid
+			const problem = takeIncome(totals, flow, amount, views, date)
+			if (problem !== undefined) return { ...totals, problem }
 		} else if (flow.kind === "expense") {
-			expense += amount
+			totals.expense += amount
 		} else {
-			contributionEntries.push({ target: flow.target, amount, label: flow.label })
+			totals.contributionEntries.push({ target: flow.target, amount, label: flow.label })
 		}
 	}
-	return { income, expense, contributionEntries, gross, prepaid }
+	return totals
 }

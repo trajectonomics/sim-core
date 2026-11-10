@@ -32,7 +32,7 @@ function edgesOf(item: unknown, at: Path, ids: Map<string, number>, emit: Emit):
 }
 
 /** Depth-first walk; an edge back to a Measure still being visited closes a cycle. */
-function reportCycles(edges: readonly (readonly Edge[])[], emit: Emit): void {
+export function reportCycles(edges: readonly (readonly Edge[])[], emit: Emit): void {
 	const state = new Array<0 | 1 | 2>(edges.length).fill(0)
 	const visit = (index: number): void => {
 		state[index] = 1
@@ -45,16 +45,27 @@ function reportCycles(edges: readonly (readonly Edge[])[], emit: Emit): void {
 	for (let index = 0; index < edges.length; index++) if (state[index] === 0) visit(index)
 }
 
-/** Reports unknown Measure references (operands and `due`) and cycles among the Measures. */
-export function checkGraph(levy: Readonly<Record<string, unknown>>, path: Path, emit: Emit): void {
-	const measures = levy["measures"]
+/** Reports unknown Measure references (operands and the result key) and cycles among the Measures. */
+export function checkRefs(
+	measures: unknown,
+	result: unknown,
+	resultKey: string,
+	path: Path,
+	emit: Emit,
+): void {
 	if (!Array.isArray(measures)) return
 	const ids = indexIds(measures)
-	const due = levy["due"]
-	if (typeof due === "string" && !ids.has(due)) emit("UNKNOWN_MEASURE", [...path, "due"])
+	if (typeof result === "string" && !ids.has(result)) {
+		emit("UNKNOWN_MEASURE", [...path, resultKey])
+	}
 	const edges: Edge[][] = []
 	for (let index = 0; index < measures.length; index++) {
 		edges.push(edgesOf(measures[index], [...path, "measures", index], ids, emit))
 	}
 	reportCycles(edges, emit)
+}
+
+/** Reports unknown Measure references (operands and `due`) and cycles among the Measures. */
+export function checkGraph(levy: Readonly<Record<string, unknown>>, path: Path, emit: Emit): void {
+	checkRefs(levy["measures"], levy["due"], "due", path, emit)
 }

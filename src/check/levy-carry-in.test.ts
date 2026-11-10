@@ -4,7 +4,7 @@ import type { CarryIn } from "../types"
 import { checkWith, LEVY } from "./levy-fixture"
 
 const at = (...tail: readonly (string | number)[]) =>
-	["scenario", "levy", "carryIn", ...tail] as const
+	["scenario", "levies", 0, "carryIn", ...tail] as const
 
 const empty = (periodStart: string): CarryIn => ({ periodStart, tallies: [], prepaid: 0 })
 

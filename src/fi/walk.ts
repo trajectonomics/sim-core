@@ -1,12 +1,11 @@
 import { type DatedEvent, flowsAt } from "../engine/events"
-import { closeReturns } from "../engine/levy-returns"
-import { hasSettlement } from "../engine/levy-tally"
+import { closeReturnsOn, hasSettlement } from "../engine/levy-set"
 import { processDate } from "../engine/occurrence"
 import { isSafeInteger, overflow } from "../engine/overflow"
 import type { DateString, Scenario } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import { type BufferBreach, checkBuffer } from "./buffer"
-import { cloneStates } from "./clone"
+import { cloneLevySet, cloneStates } from "./clone"
 import type { PrefixPoint } from "./prefix"
 import type { RequirementTable } from "./required"
 import { gridDates, gridEvents, type ScanGrid } from "./scan-grid"
@@ -42,10 +41,10 @@ function processFlows(
 	dayEvents: readonly DatedEvent[],
 ): DayOutcome {
 	const { scenario, point } = input
-	const tracker = point.tracker
-	const settlement = tracker !== undefined && hasSettlement(tracker, date)
+	const levies = point.levies
+	const settlement = levies !== undefined && hasSettlement(levies, date)
 	if (dayEvents.length === 0 && !settlement) return { kind: "ok" }
-	const outcome = processDate(point.states, scenario, date, dayEvents, tracker)
+	const outcome = processDate(point.states, scenario, date, dayEvents, levies)
 	if (outcome.problem !== undefined) return { kind: "problem", problem: outcome.problem }
 	if (outcome.runsOut === undefined) return { kind: "ok" }
 	if (!isSafeInteger(outcome.runsOut.unmet)) return { kind: "problem", problem: overflow(date) }
@@ -66,8 +65,7 @@ function processDay(
 	date: DateString,
 	dayEvents: readonly DatedEvent[],
 ): DayOutcome {
-	const tracker = input.point.tracker
-	if (tracker !== undefined) closeReturns(input.point.states, tracker, date)
+	if (input.point.levies !== undefined) closeReturnsOn(input.point.levies, input.point.states, date)
 	const flows = processFlows(input, date, dayEvents)
 	if (flows.kind !== "ok" || input.requirement.months === 0) return flows
 	const checked = checkBuffer(input.point.states, date, input.requirement)
@@ -78,7 +76,10 @@ function processDay(
 
 /** Continues a candidate from its unchanged prefix, checking survival and the optional buffer. */
 export function walkCandidate(input: WalkInput, grid: ScanGrid): WalkOutcome {
-	const point = { states: cloneStates(input.point.states), tracker: input.point.tracker }
+	const point = {
+		states: cloneStates(input.point.states),
+		levies: cloneLevySet(input.point.levies),
+	}
 	const working: WalkInput = { ...input, point }
 	const events = gridEvents(grid, input.month)
 	const dates = gridDates(grid, input.month)

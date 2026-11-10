@@ -10,12 +10,12 @@ export interface Economy {
 }
 
 export interface Scenario {
-	readonly schemaVersion: 3
+	readonly schemaVersion: 4
 	readonly currency: string
 	readonly economy: Economy
 	readonly accounts: readonly Account[]
 	readonly flows: readonly Flow[]
 	readonly cashflow: Cashflow
-	readonly levy?: Levy
+	readonly levies?: readonly Levy[]
 	readonly calendar?: Calendar
 }

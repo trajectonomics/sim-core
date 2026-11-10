@@ -1,6 +1,6 @@
 import type { CarryIn } from "./carry-in"
 import type { BasisPoints, DateString, MinorUnits } from "./common"
-import type { Measure } from "./measure"
+import type { LevyMeasure } from "./measure"
 import type { InputProblem, ValueOverflowProblem } from "./projection"
 
 /** A recurring calendar date without a year. Never Feb 29, so it exists in every year. */
@@ -19,9 +19,13 @@ export interface Tallies {
 	readonly gains?: ReadonlyMap<string, MinorUnits>
 }
 
-/** `date` is where `const` growth is measured to; `inflation` resolves `"inflation"` growth. */
+/**
+ * `date` is where `const` growth is measured to and `periodEnd` the period's last day, where a
+ * Dated constant reads its step (falling back to `date`); `inflation` resolves growth.
+ */
 export interface LevyContext {
 	readonly date: DateString
+	readonly periodEnd?: DateString
 	readonly inflation: BasisPoints
 }
 
@@ -40,7 +44,7 @@ export interface Levy {
 	readonly period: MonthDay
 	/** The first such date strictly after the period's last day. */
 	readonly settlement: MonthDay
-	readonly measures: readonly Measure[]
+	readonly measures: readonly LevyMeasure[]
 	/** Id of the Measure that is the amount owed before Prepayment. */
 	readonly due: string
 	/** Required for periods that began before `Timeline.start`; see `CarryIn`. */

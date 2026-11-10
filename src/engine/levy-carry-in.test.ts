@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import type { CarryIn, Levy, Projection, SettlementPeriod } from "../types"
-import { income } from "./test-flows"
+import { income, prepays } from "./test-flows"
 import { amounts, rowAt, run } from "./test-helpers"
 
 const empty = (periodStart: string): CarryIn => ({ periodStart, tallies: [], prepaid: 0 })
@@ -28,11 +28,13 @@ const salary = () =>
 		start: "2026-01-31",
 		end: "2026-12-31",
 		label: "salary",
-		prepaymentBps: 500,
+		prepayments: prepays("gross", 500),
 	})
 
 function periodFrom(projection: Projection, from: string): SettlementPeriod {
-	const period = projection.levy?.periods.find((item) => item.from === from)
+	const period = projection.levies
+		?.flatMap((report) => report.periods)
+		.find((item) => item.from === from)
 	if (period === undefined) throw new Error(`Missing Settlement period ${from}`)
 	return period
 }

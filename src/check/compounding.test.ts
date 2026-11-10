@@ -69,7 +69,7 @@ describe("check() compounding vocabulary", () => {
 		])
 	})
 
-	it("requires scenario schemaVersion 3", () => {
+	it("requires scenario schemaVersion 4", () => {
 		const version = (value: number): readonly Problem[] =>
 			check(
 				thaiEmployee.baseline,
@@ -79,6 +79,6 @@ describe("check() compounding vocabulary", () => {
 		expect(version(2)).toEqual([
 			{ code: "UNSUPPORTED_SCHEMA_VERSION", path: ["scenario", "schemaVersion"] },
 		])
-		expect(version(3)).toEqual([])
+		expect(version(4)).toEqual([])
 	})
 })

@@ -74,7 +74,7 @@ export function buildRollups(
 	const snapshots = new Map<string, EngineSnapshot>()
 	for (const snapshot of run.snapshots) snapshots.set(snapshot.date, snapshot)
 	const annual: AnnualRollup[] = []
-	const hasLevy = run.levy !== undefined
+	const hasLevy = run.levies !== undefined && run.levies.length > 0
 	let openingWorth = opening
 	for (const period of periods) {
 		const sums = sumFlows(run.totals, period)

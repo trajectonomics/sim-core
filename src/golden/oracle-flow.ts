@@ -1,5 +1,6 @@
 import type { Fixture } from "../fixtures/fixture"
-import type { DateString, Flow, Frequency } from "../types"
+import type { DateString, FixedAmount, Flow, Frequency } from "../types"
+import { isFixed } from "../types"
 import { type OracleCalendar, oracleCalendar, oracleLand } from "./oracle-calendar"
 import { oracleAddDays, oracleAddMonthsClamped, oracleGrowthYears } from "./oracle-date"
 import { oracleGrow } from "./oracle-money"
@@ -78,10 +79,14 @@ export function oracleEvents(
 	return events
 }
 
+/** A fixed Flow's amount; the full-projection oracle does not model Derived amounts. */
 export function oracleAmount(event: OracleEvent, inflation: number): bigint {
-	const growth = event.flow.growth
+	const flow = event.flow
+	if (!isFixed(flow)) throw new Error(`Oracle has no Derived amount for ${flow.id}`)
+	const fixed = flow as Flow & FixedAmount
+	const growth = fixed.growth
 	const rate = growth === "inflation" ? inflation : growth.bps
-	return oracleGrow(BigInt(event.flow.amount), rate, event.years * 365)
+	return oracleGrow(BigInt(fixed.amount), rate, event.years * 365)
 }
 
 /** Every event in the timeline, grouped by date. */

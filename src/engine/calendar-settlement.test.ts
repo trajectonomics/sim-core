@@ -152,7 +152,7 @@ describe("Carry-in is judged on the Landed Settlement date", () => {
 	it("requires the previous period's record only when the Settlement lands on the start", () => {
 		expect(run(base)).toBeDefined()
 		expect(problems({ ...base, calendar: next })).toEqual([
-			{ code: "MISSING_CARRY_IN", path: ["scenario", "levy", "carryIn"] },
+			{ code: "MISSING_CARRY_IN", path: ["scenario", "levies", 0, "carryIn"] },
 		])
 		const both = withCarryIn(salaryLevy, emptyCarryIn("2029-01-01"), emptyCarryIn("2030-01-01"))
 		expect(periodFrom(run({ ...base, levy: both, calendar: next }), "2029-01-01")).toMatchObject({

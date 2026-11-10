@@ -1,59 +1,25 @@
-import type { ResolvedCalendar } from "../calendar/business"
 import { resolvedCalendar } from "../calendar/resolve"
 import type { Baseline, DateString, Scenario, Timeline } from "../types"
 import { collectDates } from "./dates"
 import { buildEvents, flowsAt } from "./events"
-import { type SettlementPeriodPlan, settlementPeriods } from "./levy-plan"
-import { finishTracker } from "./levy-settle"
-import { createTracker } from "./levy-tally"
-import type { LevyTracker } from "./levy-types"
+import { finishLevies, planLevies } from "./levy-finish"
+import { allSettlementDates, type LevySet } from "./levy-set"
 import type { EngineResult } from "./result"
 import { resolveReturns } from "./return-rows"
 import type { Returns } from "./returns"
 import { type RunAccumulator, stepDate } from "./run-step"
 import { createStates, type StateMap } from "./state"
 
-interface Plan {
-	readonly periods: readonly SettlementPeriodPlan[]
-	readonly tracker: LevyTracker | undefined
-}
-
-function planFor(
-	scenario: Scenario,
-	timeline: Timeline,
-	calendar: ResolvedCalendar | undefined,
-): Plan {
-	if (scenario.levy === undefined) return { periods: [], tracker: undefined }
-	const periods = settlementPeriods(timeline.start, timeline.horizon, scenario.levy, calendar)
-	return {
-		periods,
-		tracker: createTracker(
-			scenario.levy,
-			scenario.flows,
-			periods,
-			scenario.economy.inflation,
-			timeline.start,
-		),
-	}
-}
-
-function settlementDates(
-	periods: readonly SettlementPeriodPlan[],
-	horizon: DateString,
-): DateString[] {
-	return periods.map((period) => period.settlementDate).filter((date) => date <= horizon)
-}
-
-function attachLevy(
+function attachLevies(
 	result: EngineResult,
 	states: StateMap,
-	tracker: LevyTracker | undefined,
+	levies: LevySet | undefined,
 	runEnd: DateString,
 ): EngineResult {
-	if (!result.ok || tracker === undefined) return result
-	const finished = finishTracker(tracker, states, runEnd)
+	if (!result.ok || levies === undefined) return result
+	const finished = finishLevies(levies, states, runEnd)
 	if (!finished.ok) return { ok: false, problem: finished.problem }
-	return { ok: true, run: { ...result.run, levy: finished.levy } }
+	return { ok: true, run: { ...result.run, levies: finished.levies } }
 }
 
 function endDate(result: EngineResult, timeline: Timeline): DateString {
@@ -71,21 +37,22 @@ export function runEngine(
 	const states = createStates(baseline, scenario, timeline.start, resolveReturns(returns, timeline))
 	const calendar = resolvedCalendar(scenario)
 	const events = buildEvents(scenario, timeline, calendar)
-	const { periods, tracker } = planFor(scenario, timeline, calendar)
+	const levies = planLevies(scenario, timeline, calendar)
 	const acc: RunAccumulator = {
 		snapshots: [],
 		totals: [],
 		wanted: new Set<DateString>(observations),
-		levy: tracker,
+		levies,
 	}
 	let index = 0
-	const dates = collectDates(events, observations, settlementDates(periods, timeline.horizon))
+	const settlements = levies === undefined ? [] : allSettlementDates(levies, timeline.horizon)
+	const dates = collectDates(events, observations, settlements)
 	for (const date of dates) {
 		const [next, dayEvents] = flowsAt(events, index, date)
 		index = next
 		const result = stepDate(acc, states, scenario, date, dayEvents)
-		if (result !== undefined) return attachLevy(result, states, tracker, endDate(result, timeline))
+		if (result !== undefined) return attachLevies(result, states, levies, endDate(result, timeline))
 	}
 	const run = { snapshots: acc.snapshots, totals: acc.totals }
-	return attachLevy({ ok: true, run }, states, tracker, timeline.horizon)
+	return attachLevies({ ok: true, run }, states, levies, timeline.horizon)
 }

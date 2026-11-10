@@ -182,12 +182,12 @@ describe("Levy gains tally", () => {
 		}
 		const day = run({ ...base, resolution: "day" })
 		const month = run({ ...base, resolution: "month" })
-		expect(day.levy).toEqual(month.levy)
+		expect(day.levies).toEqual(month.levies)
 		const reversed = run({
 			...base,
 			accounts: [...base.accounts].reverse(),
 			balances: { cash: 0, brokerage: 100_000 },
 		})
-		expect(reversed.levy).toEqual(day.levy)
+		expect(reversed.levies).toEqual(day.levies)
 	})
 })

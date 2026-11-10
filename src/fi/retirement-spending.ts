@@ -1,6 +1,6 @@
 import { addMonthsClamped, growthYears } from "../calendar/arith"
 import { landedDate, type ResolvedCalendar } from "../calendar/business"
-import { amountAt } from "../engine/amount"
+import { type FixedFlow, fixedAmountAt } from "../engine/amount"
 import type { DatedEvent } from "../engine/events"
 import type { DateString, ExpenseFlow, Growth, Timeline } from "../types"
 import type { SurvivalOptions } from "../types/financial-independence"
@@ -21,7 +21,7 @@ export function retirementFlow(
 	amount: number,
 	growth: Growth,
 	id: string = RETIREMENT_ID,
-): ExpenseFlow {
+): ExpenseFlow & FixedFlow {
 	return { id, kind: "expense", amount, frequency: "monthly", start: timeline.start, growth }
 }
 
@@ -40,8 +40,11 @@ export function retirementMeasurements(
 	const flow = retirementFlow(timeline, retirement.amount, retirement.growth)
 	const measurements: RetirementMeasurement[] = []
 	for (let due = from; due <= through; due = addMonthsClamped(due, 1)) {
-		const event: DatedEvent = { date: due, flow, years: growthYears(timeline.start, due) }
-		measurements.push({ date: landedDate(due, calendar), amount: amountAt(event, inflation) })
+		const years = growthYears(timeline.start, due)
+		measurements.push({
+			date: landedDate(due, calendar),
+			amount: fixedAmountAt(flow, years, inflation),
+		})
 	}
 	return measurements
 }

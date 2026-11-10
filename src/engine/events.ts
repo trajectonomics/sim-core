@@ -1,7 +1,8 @@
 import type { ResolvedCalendar } from "../calendar/business"
 import { occurrences } from "../calendar/occurrence"
 import type { DateString, Flow, Scenario, Timeline } from "../types"
-import { amountAt } from "./amount"
+import { isFixed } from "../types"
+import { fixedAmountAt } from "./amount"
 import { compareIds } from "./order"
 
 export interface DatedEvent {
@@ -30,7 +31,11 @@ export function buildEvents(
 		)
 		for (const occurrence of found) {
 			const event = { date: occurrence.date, flow, years: occurrence.years }
-			events.push({ ...event, amount: amountAt(event, scenario.economy.inflation) })
+			events.push(
+				isFixed(flow)
+					? { ...event, amount: fixedAmountAt(flow, occurrence.years, scenario.economy.inflation) }
+					: event,
+			)
 		}
 	}
 	return events.sort((left, right) =>

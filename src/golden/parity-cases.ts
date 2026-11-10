@@ -4,6 +4,7 @@ import { thaiEmployee } from "../fixtures/thai-employee"
 import type { SurvivalOptions } from "../types"
 import { calendarFiMonth, calendarShiftDay } from "./calendar-cases"
 import { capped } from "./contribution-cases"
+import { deriveRent } from "./derive-case"
 import { levyJointFilers, wageBaseCase } from "./levy-cap-cases"
 import {
 	levyCarryInDay,
@@ -13,6 +14,7 @@ import {
 	levyShortfallDay,
 	levyUnsettledMonth,
 } from "./levy-cases"
+import { levySeveral, levyStepped } from "./levy-extensions-cases"
 import { levyGainsDay } from "./levy-gains-case"
 import { levyReturnsDay } from "./levy-returns-case"
 import { levyCareCredit } from "./levy-us-cases"
@@ -29,7 +31,7 @@ export interface ParityCase {
 const leapTie: Fixture = {
 	baseline: { schemaVersion: 1, balances: [{ account: "cash", amount: 1 }] },
 	scenario: {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		currency: "THB",
 		economy: { inflation: 300 },
 		accounts: [{ id: "cash", kind: "asset", rate: 5000 }],
@@ -57,6 +59,9 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "levy-returns-day", fixture: levyReturnsDay },
 	{ name: "levy-gains-day", fixture: levyGainsDay },
 	{ name: "levy-care-credit", fixture: levyCareCredit },
+	{ name: "levy-several", fixture: levySeveral },
+	{ name: "levy-stepped", fixture: levyStepped },
+	{ name: "derive-rent", fixture: deriveRent },
 	{ name: "levy-wage-base", fixture: wageBaseCase(60_000_000) },
 	{ name: "levy-joint-filers", fixture: levyJointFilers },
 	{ name: "calendar-shift-day", fixture: calendarShiftDay },
