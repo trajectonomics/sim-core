@@ -70,15 +70,23 @@ export const levyBand: NamedCase = {
 	options: { method: "survival" },
 }
 
-/** Nothing lands on the first of the month; only the candidate's own month adds that buffer check. */
+/**
+ * The one-off expense on 2027-01-20 raises `required(D)` from 2026-01-21, so February's own
+ * month is checked at 660 before the gift lands, while January never checks a date in that
+ * window and the gift makes the balance comfortable again before March.
+ */
 export const bufferDate: NamedCase = {
 	fixture: makeFixture({
 		accounts: [cash],
-		balances: { cash: 200 },
-		flows: [expense("living", 50, { frequency: "monthly", start: "2026-01-15" })],
+		balances: { cash: 300 },
+		flows: [
+			expense("living", 10, { frequency: "monthly", start: "2026-01-15" }),
+			expense("one-off", 1_200, { start: "2027-01-20" }),
+			{ ...income("gift", 3_000, { start: "2026-02-10" }), earned: false },
+		],
 		surplus: [{ account: "cash" }],
 		withdraw: ["cash"],
-		horizon: "2026-04-01",
+		horizon: "2027-06-01",
 	}),
 	options: { method: "survival", minBufferMonths: 6 },
 }

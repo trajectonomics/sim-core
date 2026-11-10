@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
+import { buildEvents } from "../engine/events"
 import { project } from "../engine/project"
 import { financialIndependence } from "../index"
-import { candidateMonths } from "./candidates"
 import { bufferDate, levyBand, retirementGap, upToCap } from "./named-cases"
 import { planScan } from "./plan"
 import { generateCases } from "./scan-generator"
@@ -36,28 +36,28 @@ describe("survival is not monotone in the candidate month", () => {
 	})
 
 	it("checks the Minimum buffer at the candidate month itself, where nothing lands", () => {
+		const pattern = scanPattern(bufferDate.fixture, bufferDate.options)
+		expect(shape(pattern.results)).toBe("pfp")
+		expect(firstMonth(pattern, "pass")).toBe("2026-01-01")
+		expect(pattern.months[pattern.results.indexOf("fail")]).toBe("2026-02-01")
 		const plan = planScan(
 			bufferDate.fixture.baseline,
 			bufferDate.fixture.scenario,
 			bufferDate.fixture.timeline,
 			bufferDate.options,
 		)
-		expect(plan).toBeDefined()
-		const first = search(plan!.input, ["2026-01-01"])
-		expect(first).toMatchObject({ kind: "unreachable", buffer: { breach: { date: "2026-01-01" } } })
-		const landed = candidateMonths(bufferDate.fixture.timeline).flatMap((month) =>
-			search(plan!.input, [month]),
-		)
-		expect(landed.every((outcome) => outcome.kind === "unreachable")).toBe(true)
-		const unbuffered = planScan(
-			bufferDate.fixture.baseline,
-			bufferDate.fixture.scenario,
-			bufferDate.fixture.timeline,
-			{ method: "survival" },
-		)
-		expect(search(unbuffered!.input, ["2026-01-01"])).toMatchObject({ kind: "reachable" })
+		expect(search(plan!.input, ["2026-02-01"])).toMatchObject({
+			kind: "unreachable",
+			buffer: { breach: { date: "2026-02-01" } },
+		})
+		const { scenario, timeline } = bufferDate.fixture
+		const events = buildEvents(scenario, timeline, undefined)
+		expect(events.some((event) => event.date === "2026-02-01")).toBe(false)
 	})
 
+	// ADR 0004 also records a pass/fail/pass from this rounding with no buffer. That pattern needs
+	// the expense that decides a Shortfall to land inside a one-minor-unit gap between two
+	// candidates, so no stable fixture exists; this test pins the mechanism the rounding comes from.
 	it("a filled-up surplus cap skips the commit, so the account keeps its old date", () => {
 		const { baseline, scenario, timeline } = upToCap.fixture
 		const result = project(baseline, scenario, { ...timeline, resolution: "month" })
