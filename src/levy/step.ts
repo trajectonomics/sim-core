@@ -45,7 +45,7 @@ export function step(
 		case "const":
 			return constantValue(measure, context)
 		case "tally":
-			return BigInt(tallies[measure.basis].get(measure.label) ?? 0)
+			return BigInt(tallies[measure.basis]?.get(measure.label) ?? 0)
 		case "scale":
 			return scaleValue(get(measure.of), BigInt(measure.num), BigInt(measure.den), measure.rounding)
 		case "mul":

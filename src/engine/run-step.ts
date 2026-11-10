@@ -1,6 +1,7 @@
 import type { DateString, Scenario } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import type { DatedEvent } from "./events"
+import { closeReturns } from "./levy-returns"
 import { hasSettlement } from "./levy-tally"
 import type { LevyTracker } from "./levy-types"
 import type { DayTotals, EngineRunsOut } from "./occurrence"
@@ -69,6 +70,7 @@ export function stepDate(
 	date: DateString,
 	events: readonly DatedEvent[],
 ): EngineResult | undefined {
+	if (acc.levy !== undefined) closeReturns(states, acc.levy, date)
 	const dayResult = handleDay(acc, states, scenario, date, events)
 	if (dayResult !== undefined) return dayResult
 	return handleSnapshot(acc, states, date)

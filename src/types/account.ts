@@ -8,6 +8,10 @@ export interface AssetRule {
 	readonly rate: BasisPoints
 	readonly compounding?: CompoundingPeriod
 	readonly lockedUntil?: DateString
+	/** Tally label for this Account's accrued growth; absent means it is never tallied. */
+	readonly returnLabel?: string
+	/** Tally label for this Account's realised gains; absent means it is never tallied. */
+	readonly gainLabel?: string
 }
 
 /** Liability: `rate` is the interest on the outstanding balance. Cannot be locked. */

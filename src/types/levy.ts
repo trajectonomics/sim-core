@@ -13,6 +13,10 @@ export interface MonthDay {
 export interface Tallies {
 	readonly gross: ReadonlyMap<string, MinorUnits>
 	readonly funded: ReadonlyMap<string, MinorUnits>
+	/** Growth accrued by Accounts under their `returnLabel`; absent means no totals. */
+	readonly returns?: ReadonlyMap<string, MinorUnits>
+	/** Gain realised by withdrawals under their `gainLabel`; absent means no totals. */
+	readonly gains?: ReadonlyMap<string, MinorUnits>
 }
 
 /** `date` is where `const` growth is measured to; `inflation` resolves `"inflation"` growth. */

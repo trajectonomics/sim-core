@@ -26,6 +26,8 @@ import { project } from "./project"
 export interface Setup {
 	readonly accounts: readonly Account[]
 	readonly balances: Readonly<Record<string, MinorUnits>>
+	/** Opening Cost basis per Account, for a gain-tracked Account's positive balance. */
+	readonly basis?: Readonly<Record<string, MinorUnits>>
 	readonly flows?: readonly Flow[]
 	readonly surplus: readonly SurplusStep[]
 	readonly contribute?: readonly AccountId[]
@@ -58,7 +60,10 @@ export function makeFixture(setup: Setup): Fixture {
 		horizon: setup.horizon ?? "2027-01-01",
 		resolution: setup.resolution ?? "day",
 	}
-	const balances = Object.entries(setup.balances).map(([account, amount]) => ({ account, amount }))
+	const balances = Object.entries(setup.balances).map(([account, amount]) => {
+		const cost = setup.basis?.[account]
+		return cost === undefined ? { account, amount } : { account, amount, basis: cost }
+	})
 	return { baseline: { schemaVersion: 1, balances }, scenario, timeline }
 }
 

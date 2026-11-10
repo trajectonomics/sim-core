@@ -39,12 +39,12 @@ export function processDate(
 	tracker: LevyTracker | undefined,
 ): DateOutcome {
 	const day = aggregate(events, scenario.economy.inflation, date, tracker)
-	const settlement = settlementOn(tracker, date)
+	const settlement = settlementOn(tracker, states, date)
 	if (day.capProblem !== undefined) {
 		const totals = totalsOf(date, day, 0n, new Map(), settlement)
 		return { totals, problem: day.capProblem, runsOut: undefined }
 	}
-	const debt = applyDebt(states, day.contributionEntries, date)
+	const debt = applyDebt(states, day.contributionEntries, date, tracker)
 	if (debt.problem !== undefined) {
 		tally(tracker, date, day.gross, debt.funded, day.prepaid)
 		const totals = totalsOf(date, day, debt.paid, new Map(), settlement)
@@ -58,11 +58,12 @@ export function processDate(
 		day.contributionEntries,
 		available,
 		date,
+		tracker,
 	)
 	tally(tracker, date, day.gross, mergeFunded(debt.funded, assets.funded), day.prepaid)
 	const totals = totalsOf(date, day, debt.paid + assets.applied, assets.unfunded, settlement)
 	if (settlement.problem !== undefined)
 		return { totals, problem: settlement.problem, runsOut: undefined }
 	if (assets.problem !== undefined) return { totals, problem: assets.problem, runsOut: undefined }
-	return route(states, scenario, date, totals, cashflow - assets.applied)
+	return route(states, scenario, date, totals, cashflow - assets.applied, tracker)
 }

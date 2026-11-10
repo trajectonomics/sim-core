@@ -95,7 +95,7 @@ describe("valuation over a Return series", () => {
 
 	it("rounds once per held row, so a mid-row commit adds the r² term", () => {
 		const state = stateAt(fixture())
-		expect(mutate(state, "2023-04-01", 0n)).toBeUndefined()
+		expect(mutate(state, "2023-04-01", 0n, undefined)).toBeUndefined()
 		// The commit at 2023-04-01 carries 105,000; the second half is 105,000 × 1.05 = 110,250.
 		expect(valuation(state, "2023-06-30")).toBe(110250n)
 		// r²·h₁h₂/D² = 0.01 × 0.25 = 0.0025, so 100,000 × 0.0025 = 250 above 110,000.

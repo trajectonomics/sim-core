@@ -5,6 +5,7 @@ import { settleAt } from "./levy-settle"
 import { addFlowTallies, addFundedTallies } from "./levy-tally"
 import type { LevyTracker } from "./levy-types"
 import type { DayTotals } from "./occurrence"
+import type { StateMap } from "./state"
 
 export interface Settlement {
 	readonly amount: bigint
@@ -17,9 +18,13 @@ interface DayParts {
 	readonly prepaid: bigint
 }
 
-export function settlementOn(tracker: LevyTracker | undefined, date: DateString): Settlement {
+export function settlementOn(
+	tracker: LevyTracker | undefined,
+	states: StateMap,
+	date: DateString,
+): Settlement {
 	if (tracker === undefined) return { amount: 0n, problem: undefined }
-	const outcome = settleAt(tracker, date)
+	const outcome = settleAt(tracker, states, date)
 	return { amount: outcome.settlement, problem: outcome.problem }
 }
 

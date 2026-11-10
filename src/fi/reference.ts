@@ -4,6 +4,7 @@ import { valuation } from "../engine/value"
 import type { DateString } from "../types"
 import type { TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
+import { cloneStates } from "./clone"
 
 export type ReferenceOutcome =
 	| { readonly ok: true; readonly reference: TwentyFiveTimesReference }
@@ -21,13 +22,16 @@ function unlockedAssets(states: StateMap, date: DateString): bigint | Projection
 	return isSafeInteger(total) ? total : overflow(date)
 }
 
-/** The informational 25× rule-of-thumb beside a reachable month; it never decides the answer. */
+/**
+ * The informational 25× rule-of-thumb beside a reachable month; it never decides the answer.
+ * It reads a copy, because a nominal Account capitalises (and moves its clock) on a read.
+ */
 export function twentyFiveTimes(
 	states: StateMap,
 	date: DateString,
 	annualExpenses: bigint,
 ): ReferenceOutcome {
-	const assets = unlockedAssets(states, date)
+	const assets = unlockedAssets(cloneStates(states), date)
 	if (typeof assets !== "bigint") return { ok: false, problem: assets }
 	if (!isSafeInteger(annualExpenses)) return { ok: false, problem: overflow(date) }
 	const threshold = 25n * annualExpenses

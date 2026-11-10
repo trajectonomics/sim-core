@@ -1,6 +1,7 @@
 import { evaluateMeasures } from "../levy/evaluate"
 import type { DateString, Levy, MeasuresResult } from "../types"
 import type { ProjectionProblem } from "../types/projection"
+import { closeReturns } from "./levy-returns"
 import { talliesOf } from "./levy-tally"
 import type {
 	EngineLevyMeasure,
@@ -9,6 +10,7 @@ import type {
 	LevyTracker,
 	SettlementOutcome,
 } from "./levy-types"
+import type { StateMap } from "./state"
 
 function measureValues(
 	levy: Levy,
@@ -62,18 +64,28 @@ function evaluatePeriod(
 }
 
 /** Evaluates and records the Settlement falling on `date`, if any; no Settlement is 0. */
-export function settleAt(tracker: LevyTracker, date: DateString): SettlementOutcome {
+export function settleAt(
+	tracker: LevyTracker,
+	states: StateMap,
+	date: DateString,
+): SettlementOutcome {
 	const index = tracker.settlementIndex.get(date)
 	if (index === undefined) return { settlement: 0n, problem: undefined }
 	const existing = tracker.results[index]
 	if (existing !== undefined) return { settlement: existing.settlement, problem: undefined }
+	const plan = tracker.periods[index]
+	if (plan !== undefined) closeReturns(states, tracker, plan.to)
 	const evaluated = evaluatePeriod(tracker, index, true, false)
 	if (evaluated.problem !== undefined) return { settlement: 0n, problem: evaluated.problem }
 	return { settlement: evaluated.period!.settlement, problem: undefined }
 }
 
 /** Evaluates every period that started by `runEnd` but never settled, in period order. */
-export function finishTracker(tracker: LevyTracker, runEnd: DateString): LevyFinish {
+export function finishTracker(
+	tracker: LevyTracker,
+	states: StateMap,
+	runEnd: DateString,
+): LevyFinish {
 	const periods: EngineSettlementPeriod[] = []
 	for (const plan of tracker.periods) {
 		if (plan.from > runEnd) break
@@ -82,6 +94,7 @@ export function finishTracker(tracker: LevyTracker, runEnd: DateString): LevyFin
 			periods.push(existing)
 			continue
 		}
+		closeReturns(states, tracker, plan.to < runEnd ? plan.to : runEnd)
 		const evaluated = evaluatePeriod(tracker, plan.index, false, runEnd < plan.to)
 		if (evaluated.problem !== undefined) return { ok: false, problem: evaluated.problem }
 		periods.push(evaluated.period!)

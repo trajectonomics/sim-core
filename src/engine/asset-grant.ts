@@ -2,6 +2,7 @@ import type { AccountId, DateString } from "../types"
 import type { ProjectionProblem } from "../types/projection"
 import type { ContributionEntry } from "./aggregate"
 import { appliedByLabel, plannedTotal } from "./contribution-entries"
+import type { LevyTracker } from "./levy-types"
 import { minBigInt } from "./min"
 import { mutate } from "./mutate"
 import type { StateMap } from "./state"
@@ -20,6 +21,7 @@ export function grantAsset(
 	entries: readonly ContributionEntry[],
 	remaining: bigint,
 	date: DateString,
+	tracker: LevyTracker | undefined,
 ): Grant {
 	const planned = plannedTotal(entries)
 	const granted = minBigInt(planned, remaining)
@@ -27,7 +29,7 @@ export function grantAsset(
 	if (granted === 0n || state === undefined) {
 		return { applied: 0n, funded: new Map(), unfunded: planned, problem: undefined }
 	}
-	const problem = mutate(state, date, granted)
+	const problem = mutate(state, date, granted, tracker)
 	if (problem !== undefined) {
 		return { applied: 0n, funded: new Map(), unfunded: planned, problem }
 	}

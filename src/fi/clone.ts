@@ -5,18 +5,21 @@ export function cloneStates(states: StateMap): StateMap {
 	const cloned = new Map<string, AccountState>()
 	for (const [id, state] of states) {
 		cloned.set(id, {
-			rule: state.rule,
-			balance: state.balance,
-			asOf: state.asOf,
-			capitalisedDays: state.capitalisedDays,
-			...(state.series === undefined ? {} : { series: state.series }),
+			...state,
+			...(state.returns === undefined ? {} : { returns: { ...state.returns } }),
 		})
 	}
 	return cloned
 }
 
 function cloneTally(tally: LevyTally): LevyTally {
-	return { gross: new Map(tally.gross), funded: new Map(tally.funded), prepaid: tally.prepaid }
+	return {
+		gross: new Map(tally.gross),
+		funded: new Map(tally.funded),
+		returns: new Map(tally.returns),
+		gains: new Map(tally.gains),
+		prepaid: tally.prepaid,
+	}
 }
 
 function cloneSettlementPeriod(

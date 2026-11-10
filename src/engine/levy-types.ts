@@ -6,6 +6,8 @@ import type { SettlementPeriodPlan } from "./levy-plan"
 export interface LevyTally {
 	readonly gross: Map<string, bigint>
 	readonly funded: Map<string, bigint>
+	readonly returns: Map<string, bigint>
+	readonly gains: Map<string, bigint>
 	prepaid: bigint
 }
 
