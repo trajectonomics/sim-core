@@ -1,0 +1,19 @@
+name: Tooling drift
+
+# Weekly report of this repository's distance from the published
+# @trajectonomics/tooling. The caller owns the schedule: a reusable workflow's
+# own `schedule` does not fire for the repositories that call it. It opens,
+# updates or closes one issue titled "Tooling drift: ...", and needs
+# `issues: write` for that; `contents: read` is needed for the checkout.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    uses: trajectonomics/cicd/.github/workflows/drift.yml@v1
