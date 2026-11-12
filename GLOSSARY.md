@@ -185,9 +185,9 @@ _Avoid_: Post-retirement expenses, withdrawal rate
 The number of months of expenses the FI method requires as accessible net worth.
 _Avoid_: Emergency fund, cash reserve
 
-**Rule-of-thumb 25× reference**:
-An informational multiple of annual expenses reported beside a reachable FI month. It never decides the FI answer.
-_Avoid_: FI threshold, target net worth
+**Rule-of-thumb reference**:
+An informational multiple of annual expenses (25 by default) reported beside a reachable FI month. The caller may set the multiplier, which balances count, which twelve months of expenses it divides by, and nominal or real money. It never decides the FI answer.
+_Avoid_: FI threshold, target net worth, 25× reference
 
 ## Market Paths and Stochastic Runs
 
