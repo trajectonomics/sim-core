@@ -30,3 +30,11 @@ export const MEASURE_OPS = [
 ] as const
 export const TALLY_BASES = ["gross", "funded", "returns", "gains"] as const
 export const ROUNDINGS = ["floor", "halfUp", "ceil"] as const
+export const REFERENCE_BASES = [
+	"unlockedAssets",
+	"allAssets",
+	"accessibleNetWorth",
+	"netWorth",
+] as const
+export const REFERENCE_WINDOWS = ["next12Months", "trailing12Months"] as const
+export const REFERENCE_TERMS = ["nominal", "real"] as const

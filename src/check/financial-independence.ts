@@ -1,6 +1,7 @@
 import { FI_METHODS } from "../vocab"
 import type { Check, Emit, Path, Problem } from "./codes"
 import { makeGuard } from "./guard"
+import { reference } from "./reference"
 import { amount, boundedInt, growth, oneOf } from "./scalars"
 import { checkShape, isRecord, opt, req } from "./shape"
 
@@ -20,7 +21,11 @@ const paths = boundedInt(1, 200, "INVALID_PATH_COUNT")
 
 const shared = { retirementSpending: opt(retirementSpending), minBufferMonths: opt(amount) }
 
-const survivalShape = { method: req(oneOf(FI_METHODS, "INVALID_FI_METHOD")), ...shared }
+const survivalShape = {
+	method: req(oneOf(FI_METHODS, "INVALID_FI_METHOD")),
+	reference: opt(reference),
+	...shared,
+}
 
 const probabilityShape = {
 	method: req(oneOf(FI_METHODS, "INVALID_FI_METHOD")),

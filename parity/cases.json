@@ -3452,7 +3452,7 @@
 		"options": {
 			"method": "survival"
 		},
-		"fiSha256": "f450bad0dc6185e8ccdca5f0247416bccb0c5e8b832664cdaf016c680a0d84af"
+		"fiSha256": "c2c988ea7499b5a3868a8352c7bedf3a47b9ec4e35f4def6bcfde2e91e28397c"
 	},
 	{
 		"name": "levy-wage-base",
@@ -3831,7 +3831,7 @@
 		"options": {
 			"method": "survival"
 		},
-		"fiSha256": "a52cf174b94d10ff4ef71b04e5f4487449006ee8bab0f7ec4bb059b93ef10f71"
+		"fiSha256": "04965d898011e20d22d3d98977c1fe89153d360e9a68a7edb7000589e2b76f6b"
 	},
 	{
 		"name": "freelancer-fi",
@@ -3978,7 +3978,160 @@
 		"options": {
 			"method": "survival"
 		},
-		"fiSha256": "4067c426c69732159a85b03561c944b3d54c39d5c83fc3878e38e7225910a4b3"
+		"fiSha256": "a71b0ef582569cc8176f03741053b6ef15b4c61fb49d983c4cac04c7118f30e5"
+	},
+	{
+		"name": "freelancer-fi-reference",
+		"baseline": {
+			"schemaVersion": 1,
+			"balances": [
+				{
+					"account": "cash",
+					"amount": 15000000
+				},
+				{
+					"account": "tax-reserve",
+					"amount": 2000000
+				},
+				{
+					"account": "ssf",
+					"amount": 8000000
+				},
+				{
+					"account": "equipment-loan",
+					"amount": 9000000
+				}
+			]
+		},
+		"scenario": {
+			"schemaVersion": 4,
+			"currency": "THB",
+			"economy": {
+				"inflation": 200
+			},
+			"accounts": [
+				{
+					"id": "cash",
+					"kind": "asset",
+					"rate": 0
+				},
+				{
+					"id": "tax-reserve",
+					"kind": "asset",
+					"rate": 100
+				},
+				{
+					"id": "ssf",
+					"kind": "asset",
+					"rate": 450,
+					"lockedUntil": "2036-06-30"
+				},
+				{
+					"id": "equipment-loan",
+					"kind": "liability",
+					"rate": 700
+				},
+				{
+					"id": "brokerage",
+					"kind": "asset",
+					"rate": 600
+				}
+			],
+			"flows": [
+				{
+					"id": "client-retainer",
+					"kind": "income",
+					"earned": true,
+					"amount": 4500000,
+					"frequency": "monthly",
+					"start": "2026-01-31",
+					"growth": "inflation"
+				},
+				{
+					"id": "project-fee",
+					"kind": "income",
+					"earned": true,
+					"amount": 2000000,
+					"frequency": "quarterly",
+					"start": "2026-02-15",
+					"end": "2031-02-15",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "dividend",
+					"kind": "income",
+					"earned": false,
+					"amount": 300000,
+					"frequency": "annual",
+					"start": "2027-04-30",
+					"growth": {
+						"bps": 100
+					}
+				},
+				{
+					"id": "living",
+					"kind": "expense",
+					"amount": 2200000,
+					"frequency": "monthly",
+					"start": "2026-01-01",
+					"growth": "inflation"
+				},
+				{
+					"id": "ssf-top-up",
+					"kind": "contribution",
+					"target": "ssf",
+					"amount": 1500000,
+					"frequency": "quarterly",
+					"start": "2026-03-31",
+					"end": "2035-12-31",
+					"growth": {
+						"bps": 0
+					}
+				},
+				{
+					"id": "loan-payment",
+					"kind": "contribution",
+					"target": "equipment-loan",
+					"amount": 350000,
+					"frequency": "monthly",
+					"start": "2026-01-10",
+					"growth": {
+						"bps": 0
+					}
+				}
+			],
+			"cashflow": {
+				"contribute": ["ssf"],
+				"surplus": [
+					{
+						"account": "tax-reserve",
+						"upTo": 5000000
+					},
+					{
+						"account": "brokerage"
+					}
+				],
+				"withdraw": ["cash", "tax-reserve", "brokerage", "ssf"]
+			}
+		},
+		"timeline": {
+			"start": "2026-01-01",
+			"horizon": "2051-01-01",
+			"resolution": "day"
+		},
+		"sha256": "a2f7b7f7e6c709045fd0c4cb27be0e50fda465e844ca9c5f84859d97a45302dc",
+		"options": {
+			"method": "survival",
+			"reference": {
+				"multiplier": 30,
+				"basis": "netWorth",
+				"window": "trailing12Months",
+				"terms": "real"
+			}
+		},
+		"fiSha256": "b3bd6139095ddff2fa897a235771bf6cbe501344899c4fe4e467ebb640283004"
 	},
 	{
 		"name": "thai-employee-fi-buffer",
@@ -4110,7 +4263,7 @@
 			"method": "survival",
 			"minBufferMonths": 6
 		},
-		"fiSha256": "e4773251ec99dbc356bf5f0727fbe6b1028f286169f23dcac3cc31cdf6067aea"
+		"fiSha256": "681ef23d76a9c3d3b1263dafc188564dd7bac91b20293065057f82e295488951"
 	},
 	{
 		"name": "nominal-monthly-loan",
@@ -4528,6 +4681,6 @@
 			},
 			"minBufferMonths": 3
 		},
-		"fiSha256": "6547005a76b8226eb2e48f43983e4b41c709c1820e184a6cdfb74a62d1a6e7f1"
+		"fiSha256": "b39dc4d354df8758bee908b877f8c6931ea8287b3499f9dde5032c5c1fdf19f2"
 	}
 ]

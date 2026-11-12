@@ -24,7 +24,6 @@ export type {
 	SurvivalDefinition,
 	SurvivalOptions,
 	ThresholdMonth,
-	TwentyFiveTimesReference,
 } from "./financial-independence"
 export type {
 	FinancialIndependence,
@@ -83,5 +82,13 @@ export type {
 	SettlementPeriod,
 	ValueOverflowProblem,
 } from "./projection"
+export type {
+	ReferenceBasis,
+	ReferenceOptions,
+	ReferenceTerms,
+	ReferenceWindow,
+	RuleOfThumbReference,
+	TwentyFiveTimesReference,
+} from "./reference"
 export type { Economy, Scenario } from "./scenario"
 export type { Timeline } from "./timeline"

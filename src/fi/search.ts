@@ -1,12 +1,11 @@
-import { addMonthsClamped } from "../calendar/arith"
 import type { DateString, Scenario } from "../types"
-import type { TwentyFiveTimesReference } from "../types/financial-independence"
 import type { ProjectionProblem } from "../types/projection"
+import type { RuleOfThumbReference } from "../types/reference"
 import { type Accumulator, consume } from "./accumulate"
 import type { BufferFailure, ShortfallFailure } from "./best"
-import { expenseBetween } from "./expenses"
 import type { Prefix } from "./prefix"
-import { twentyFiveTimes } from "./reference"
+import { ruleOfThumb } from "./reference"
+import type { ReferencePlan } from "./reference-plan"
 import type { RequirementTable } from "./required"
 import type { ScanGrid } from "./scan-grid"
 import { walkCandidate } from "./walk"
@@ -15,6 +14,7 @@ export interface SearchInput {
 	readonly scenario: Scenario
 	readonly prefix: Prefix
 	readonly requirement: RequirementTable
+	readonly reference: ReferencePlan
 	readonly grid: ScanGrid
 }
 
@@ -22,7 +22,7 @@ export type SearchOutcome =
 	| {
 			readonly kind: "reachable"
 			readonly month: DateString
-			readonly reference: TwentyFiveTimesReference
+			readonly reference: RuleOfThumbReference
 	  }
 	| {
 			readonly kind: "unreachable"
@@ -35,7 +35,7 @@ export type CandidateOutcome =
 	| {
 			readonly kind: "reachable"
 			readonly month: DateString
-			readonly reference: TwentyFiveTimesReference
+			readonly reference: RuleOfThumbReference
 	  }
 	| { readonly kind: "buffer"; readonly failure: BufferFailure }
 	| { readonly kind: "shortfall"; readonly failure: ShortfallFailure; readonly beforeStop: boolean }
@@ -58,9 +58,7 @@ function inspectCandidate(input: SearchInput, month: DateString): CandidateOutco
 	if (walked.kind === "shortfall") {
 		return { kind: "shortfall", failure: { month, shortfall: walked.shortfall }, beforeStop: false }
 	}
-	const annual = expenseBetween(input.requirement.expenses, month, addMonthsClamped(month, 12))
-	if (annual.kind === "problem") return { kind: "problem", problem: annual.problem, terminal: true }
-	const reference = twentyFiveTimes(point.states, month, annual.amount)
+	const reference = ruleOfThumb(point.states, month, input.reference)
 	if (!reference.ok) return { kind: "problem", problem: reference.problem, terminal: true }
 	return { kind: "reachable", month, reference: reference.reference }
 }

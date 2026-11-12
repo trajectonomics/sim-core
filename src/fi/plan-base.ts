@@ -7,6 +7,7 @@ import type { FinancialIndependenceOptions } from "../types/financial-independen
 import { candidateMonths } from "./candidates"
 import { expenseWindow } from "./expenses"
 import { baselinePrefix, levyPlan, type Prefix } from "./prefix"
+import { type ReferencePlan, referencePlan } from "./reference-plan"
 import { type RequirementTable, requirementTable } from "./required"
 import { type ScanGrid, scanGrid } from "./scan-grid"
 import type { SearchInput } from "./search"
@@ -19,6 +20,7 @@ export interface ScanBase {
 	readonly calendar: ResolvedCalendar | undefined
 	readonly candidates: readonly DateString[]
 	readonly requirement: RequirementTable
+	readonly reference: ReferencePlan
 	readonly grid: ScanGrid
 }
 
@@ -43,6 +45,13 @@ export function planBase(
 		calendar,
 		candidates,
 		requirement: requirementTable(expenses, options.minBufferMonths ?? 0),
+		reference: referencePlan(
+			options.method === "survival" ? options.reference : undefined,
+			scenario,
+			timeline,
+			expenses,
+			calendar,
+		),
 		grid: scanGrid(
 			events,
 			timeline,
@@ -73,6 +82,7 @@ export function inputFor(base: ScanBase, prefix: Prefix): SearchInput {
 		scenario: base.scenario,
 		prefix,
 		requirement: base.requirement,
+		reference: base.reference,
 		grid: base.grid,
 	}
 }

@@ -85,3 +85,14 @@ export function expenseWindow(
 	if ("code" in measurements) return { ok: false, problem: measurements }
 	return { ok: true, window: buildWindow(measurements) }
 }
+
+/** Original-plan expenses through the horizon, ignoring retirement spending: the trailing window. */
+export function originalExpenseWindow(
+	scenario: Scenario,
+	timeline: Timeline,
+	calendar: ResolvedCalendar | undefined,
+): WindowOutcome {
+	const measurements = originalExpenses(scenario, timeline, timeline.horizon, calendar)
+	if ("code" in measurements) return { ok: false, problem: measurements }
+	return { ok: true, window: buildWindow(measurements) }
+}
