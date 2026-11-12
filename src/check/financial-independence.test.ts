@@ -97,4 +97,85 @@ describe("financialIndependence options validation", () => {
 	it("accepts the survival method", () => {
 		expect(problemsFor({ method: "survival" })).toMatchObject({ ok: true })
 	})
+
+	it("rejects a reference multiplier outside 1..100", () => {
+		expect(problemsFor({ method: "survival", reference: { multiplier: 0 } })).toEqual({
+			ok: false,
+			problems: expected("REFERENCE_MULTIPLIER_OUT_OF_RANGE", [
+				"options",
+				"reference",
+				"multiplier",
+			]),
+		})
+		expect(problemsFor({ method: "survival", reference: { multiplier: 101 } })).toEqual({
+			ok: false,
+			problems: expected("REFERENCE_MULTIPLIER_OUT_OF_RANGE", [
+				"options",
+				"reference",
+				"multiplier",
+			]),
+		})
+	})
+
+	it("rejects a fractional reference multiplier as not a safe integer", () => {
+		expect(problemsFor({ method: "survival", reference: { multiplier: 2.5 } })).toEqual({
+			ok: false,
+			problems: expected("NOT_SAFE_INTEGER", ["options", "reference", "multiplier"]),
+		})
+	})
+
+	it("rejects a bad basis, window or terms", () => {
+		expect(problemsFor({ method: "survival", reference: { basis: "cash" } })).toEqual({
+			ok: false,
+			problems: expected("INVALID_REFERENCE_BASIS", ["options", "reference", "basis"]),
+		})
+		expect(problemsFor({ method: "survival", reference: { window: "annual" } })).toEqual({
+			ok: false,
+			problems: expected("INVALID_REFERENCE_WINDOW", ["options", "reference", "window"]),
+		})
+		expect(problemsFor({ method: "survival", reference: { terms: "today" } })).toEqual({
+			ok: false,
+			problems: expected("INVALID_REFERENCE_TERMS", ["options", "reference", "terms"]),
+		})
+	})
+
+	it("rejects unknown keys and non-objects inside the reference block", () => {
+		expect(problemsFor({ method: "survival", reference: { extra: true } })).toEqual({
+			ok: false,
+			problems: expected("UNKNOWN_KEY", ["options", "reference", "extra"]),
+		})
+		expect(problemsFor({ method: "survival", reference: 5 })).toEqual({
+			ok: false,
+			problems: expected("NOT_AN_OBJECT", ["options", "reference"]),
+		})
+	})
+
+	it("does not accept a reference block on the probability method", () => {
+		expect(
+			problemsFor({
+				method: "probabilityThreshold",
+				thresholdBps: 5000,
+				paths: 1,
+				seed: "0123456789abcdef",
+				reference: {},
+			}),
+		).toEqual({
+			ok: false,
+			problems: expected("UNKNOWN_KEY", ["options", "reference"]),
+		})
+	})
+
+	it("accepts every reference field", () => {
+		expect(
+			problemsFor({
+				method: "survival",
+				reference: {
+					multiplier: 30,
+					basis: "accessibleNetWorth",
+					window: "trailing12Months",
+					terms: "real",
+				},
+			}),
+		).toMatchObject({ ok: true })
+	})
 })

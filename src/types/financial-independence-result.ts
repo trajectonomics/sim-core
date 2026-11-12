@@ -5,16 +5,16 @@ import type {
 	SurvivalBinding,
 	SurvivalDefinition,
 	ThresholdMonth,
-	TwentyFiveTimesReference,
 } from "./financial-independence"
 import type { ProjectionProblem } from "./projection"
+import type { RuleOfThumbReference } from "./reference"
 
 export type SurvivalFinancialIndependence =
 	| {
 			readonly reachable: true
 			readonly definition: SurvivalDefinition
 			readonly month: DateString
-			readonly reference: TwentyFiveTimesReference
+			readonly reference: RuleOfThumbReference
 	  }
 	| {
 			readonly reachable: false

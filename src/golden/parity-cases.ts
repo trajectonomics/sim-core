@@ -41,6 +41,11 @@ const leapTie: Fixture = {
 	timeline: { start: "2027-02-28", horizon: "2029-03-01", resolution: "day" },
 }
 
+const configured: SurvivalOptions = {
+	method: "survival",
+	reference: { multiplier: 30, basis: "netWorth", window: "trailing12Months", terms: "real" },
+}
+
 /** Inputs whose Projection and Financial Independence must hash identically under every engine. */
 export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "freelancer-day", fixture: freelancer },
@@ -73,6 +78,7 @@ export const PARITY_CASES: readonly ParityCase[] = [
 	{ name: "calendar-shift-day", fixture: calendarShiftDay },
 	{ name: "calendar-fi", fixture: calendarFiMonth, options: { method: "survival" } },
 	{ name: "freelancer-fi", fixture: freelancer, options: { method: "survival" } },
+	{ name: "freelancer-fi-reference", fixture: freelancer, options: configured },
 	{
 		name: "thai-employee-fi-buffer",
 		fixture: thaiEmployee,

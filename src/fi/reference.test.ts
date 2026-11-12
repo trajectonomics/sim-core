@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test"
 import { createStates } from "../engine/state"
 import { makeFixture } from "../engine/test-helpers"
-import { twentyFiveTimes } from "./reference"
+import { ruleOfThumb } from "./reference"
+import { referencePlan } from "./reference-plan"
+
+const emptyWindow = { ok: true as const, window: { dates: [], cumulative: [0n] } }
 
 const fixture = makeFixture({
 	accounts: [{ id: "deposit", kind: "asset", rate: 1200, compounding: "monthly" }],
@@ -16,7 +19,14 @@ describe("the 25× reference beside a reachable month", () => {
 		const states = createStates(fixture.baseline, fixture.scenario, fixture.timeline.start)
 		const state = states.get("deposit")
 		if (state === undefined) throw new Error("Missing deposit")
-		expect(twentyFiveTimes(states, "2026-06-30", 100_000n).ok).toBe(true)
+		const plan = referencePlan(
+			undefined,
+			fixture.scenario,
+			fixture.timeline,
+			emptyWindow,
+			undefined,
+		)
+		expect(ruleOfThumb(states, "2026-06-30", plan).ok).toBe(true)
 		expect(state.asOf).toBe("2026-01-01")
 		expect(state.balance).toBe(100_000n)
 	})

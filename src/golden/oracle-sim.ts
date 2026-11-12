@@ -27,6 +27,7 @@ export interface OracleFlowDay {
 export interface OracleRun {
 	readonly snapshots: readonly OracleSnapshot[]
 	readonly flows: readonly OracleFlowDay[]
+	readonly states: OracleStates
 	readonly runsOut?: OracleRunsOut
 }
 
@@ -97,7 +98,7 @@ export function oracleRun(fixture: Fixture, observations: readonly DateString[])
 		if (stop !== undefined || wanted.has(date)) {
 			snapshots.push(oracleSnapshot(states, date, timeline.start, inflation))
 		}
-		if (stop !== undefined) return { snapshots, flows, runsOut: stop }
+		if (stop !== undefined) return { snapshots, flows, states, runsOut: stop }
 	}
-	return { snapshots, flows }
+	return { snapshots, flows, states }
 }

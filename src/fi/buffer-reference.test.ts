@@ -97,7 +97,7 @@ describe("minimum buffer", () => {
 	})
 })
 
-describe("25× rule-of-thumb reference", () => {
+describe("rule-of-thumb reference", () => {
 	it("rounds the multiple down", () => {
 		expect(
 			fi({
@@ -113,12 +113,18 @@ describe("25× rule-of-thumb reference", () => {
 			financialIndependence: {
 				reachable: true,
 				reference: {
-					label: "ruleOfThumb25x",
+					label: "ruleOfThumb",
 					date: "2026-01-01",
+					multiplier: 25,
+					basis: "unlockedAssets",
+					window: "next12Months",
+					terms: "nominal",
 					unlockedAssets: 2000,
+					numerator: 2000,
 					annualExpenses: 1200,
 					threshold: 30_000,
 					multipleBps: 16_666,
+					partial: false,
 					met: false,
 				},
 			},

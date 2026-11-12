@@ -1,10 +1,12 @@
 import type { BasisPoints, DateString, Growth, MinorUnits } from "./common"
 import type { RunsOut } from "./projection"
+import type { ReferenceOptions } from "./reference"
 
 export interface SurvivalOptions {
 	readonly method: "survival"
 	readonly retirementSpending?: { readonly amount: MinorUnits; readonly growth: Growth }
 	readonly minBufferMonths?: number
+	readonly reference?: ReferenceOptions
 }
 
 export interface ProbabilityThresholdOptions {
@@ -18,7 +20,7 @@ export interface ProbabilityThresholdOptions {
 
 export type FinancialIndependenceOptions = SurvivalOptions | ProbabilityThresholdOptions
 
-export interface SurvivalDefinition extends SurvivalOptions {
+export interface SurvivalDefinition extends Omit<SurvivalOptions, "reference"> {
 	readonly definitionVersion: 1
 }
 
@@ -34,16 +36,6 @@ export interface ProbabilityDefinition {
 }
 
 export type FinancialIndependenceDefinition = SurvivalDefinition | ProbabilityDefinition
-
-export interface TwentyFiveTimesReference {
-	readonly label: "ruleOfThumb25x"
-	readonly date: DateString
-	readonly unlockedAssets: MinorUnits
-	readonly annualExpenses: MinorUnits
-	readonly threshold: MinorUnits
-	readonly multipleBps?: BasisPoints
-	readonly met: boolean
-}
 
 export type FiBestCase =
 	| { readonly month: DateString; readonly runsOut: RunsOut }

@@ -15,11 +15,17 @@
 					},
 					"month": "2028-03-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2028-03-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 79754301,
+						"numerator": 79754301,
 						"annualExpenses": 27558116,
 						"threshold": 688952900,
+						"partial": false,
 						"multipleBps": 28940,
 						"met": false
 					}
@@ -43,11 +49,17 @@
 					},
 					"month": "2028-06-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2028-06-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 88258352,
+						"numerator": 88258352,
 						"annualExpenses": 27695450,
 						"threshold": 692386250,
+						"partial": false,
 						"multipleBps": 31867,
 						"met": false
 					}
@@ -69,11 +81,17 @@
 					},
 					"month": "2030-09-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2030-09-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 132034133,
+						"numerator": 132034133,
 						"annualExpenses": 33666296,
 						"threshold": 841657400,
+						"partial": false,
 						"multipleBps": 39218,
 						"met": false
 					}
@@ -97,11 +115,17 @@
 					},
 					"month": "2033-01-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2033-01-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 189497090,
+						"numerator": 189497090,
 						"annualExpenses": 35660568,
 						"threshold": 891514200,
+						"partial": false,
 						"multipleBps": 53139,
 						"met": false
 					}
@@ -133,11 +157,17 @@
 					},
 					"month": "2033-11-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2033-11-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 301766275,
+						"numerator": 301766275,
 						"annualExpenses": 28027932,
 						"threshold": 700698300,
+						"partial": false,
 						"multipleBps": 107666,
 						"met": false
 					}
@@ -159,11 +189,17 @@
 					},
 					"month": "2029-12-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2029-12-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 57640767,
+						"numerator": 57640767,
 						"annualExpenses": 5187186,
 						"threshold": 129679650,
+						"partial": false,
 						"multipleBps": 111121,
 						"met": false
 					}
@@ -185,11 +221,17 @@
 					},
 					"month": "2026-03-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2026-03-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 1501,
+						"numerator": 1501,
 						"annualExpenses": 0,
 						"threshold": 0,
+						"partial": false,
 						"met": true
 					}
 				}
@@ -210,11 +252,17 @@
 					},
 					"month": "2026-01-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2026-01-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 0,
+						"numerator": 0,
 						"annualExpenses": 0,
 						"threshold": 0,
+						"partial": false,
 						"met": true
 					}
 				}
@@ -375,11 +423,17 @@
 					},
 					"month": "2027-09-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2027-09-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 3989060,
+						"numerator": 3989060,
 						"annualExpenses": 1420872,
 						"threshold": 35521800,
+						"partial": false,
 						"multipleBps": 28074,
 						"met": false
 					}
@@ -403,11 +457,17 @@
 					},
 					"month": "2027-06-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2027-06-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 6048428,
+						"numerator": 6048428,
 						"annualExpenses": 2084213,
 						"threshold": 52105325,
+						"partial": false,
 						"multipleBps": 29020,
 						"met": false
 					}
@@ -431,11 +491,17 @@
 					},
 					"month": "2026-08-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2026-08-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 4937810,
+						"numerator": 4937810,
 						"annualExpenses": 1992604,
 						"threshold": 49815100,
+						"partial": false,
 						"multipleBps": 24780,
 						"met": false
 					}
@@ -465,11 +531,17 @@
 					},
 					"month": "2026-12-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2026-12-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 3088132,
+						"numerator": 3088132,
 						"annualExpenses": 1370568,
 						"threshold": 34264200,
+						"partial": false,
 						"multipleBps": 22531,
 						"met": false
 					}
@@ -515,11 +587,17 @@
 					},
 					"month": "2026-07-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2026-07-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 3683925,
+						"numerator": 3683925,
 						"annualExpenses": 998328,
 						"threshold": 24958200,
+						"partial": false,
 						"multipleBps": 36900,
 						"met": false
 					}
@@ -543,11 +621,17 @@
 					},
 					"month": "2028-03-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2028-03-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 6251382,
+						"numerator": 6251382,
 						"annualExpenses": 2524668,
 						"threshold": 63116700,
+						"partial": false,
 						"multipleBps": 24761,
 						"met": false
 					}
@@ -577,11 +661,17 @@
 					},
 					"month": "2026-12-01",
 					"reference": {
-						"label": "ruleOfThumb25x",
+						"label": "ruleOfThumb",
 						"date": "2026-12-01",
+						"multiplier": 25,
+						"basis": "unlockedAssets",
+						"window": "next12Months",
+						"terms": "nominal",
 						"unlockedAssets": 4783409,
+						"numerator": 4783409,
 						"annualExpenses": 1297225,
 						"threshold": 32430625,
+						"partial": false,
 						"multipleBps": 36874,
 						"met": false
 					}
