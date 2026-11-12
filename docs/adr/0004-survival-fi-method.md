@@ -47,6 +47,8 @@ test's behaviour changes.
 - **25× reference.** On a reachable answer, the result reports unlocked assets at M before M's
   flows, `E(M)`, `25 × E(M)`, and the floored multiple in basis points. It is informational and
   never decides the FI month.
+  [ADR 0007](./0007-fi-reference-is-configured-not-decided.md) makes the multiplier, balances,
+  window and terms configurable; the reference stays informational.
 - **Execution.** The scan reuses the unchanged prefix: one walk saves cloned account states and
   Levy tallies before each candidate month, then each candidate continues from its own clone.
   This keeps Levy tallies and Settlements recomputed for the modified part without building a
