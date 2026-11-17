@@ -141,7 +141,8 @@ describe("Carry-in is judged on the Landed Settlement date", () => {
 	const base = {
 		accounts: [cash],
 		balances: { cash: 0 },
-		flows: [],
+		// The Levy reads the salary tally; this Flow lands after the horizon, so no due changes.
+		flows: [income("later", 700, { start: "2031-01-01", label: "salary" })],
 		surplus: [{ account: "cash" }],
 		withdraw: ["cash"],
 		start: "2030-04-01",

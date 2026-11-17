@@ -35,6 +35,11 @@ describe("check() Levy graph with lying array methods", () => {
 		]
 		expect(withMeasures(hostile(measures), "b")).toEqual([])
 	})
+
+	it("never refuses a Levy whose measures array hides its tallies", () => {
+		const measures = hostile([{ id: "a", op: "tally", label: "salary", basis: "gross" }])
+		expect(withMeasures(measures, "a")).toEqual([])
+	})
 })
 
 describe("evaluateMeasures with lying array methods", () => {

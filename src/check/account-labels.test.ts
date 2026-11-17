@@ -1,8 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { check } from "../check"
 import { edit, expected, REMOVE } from "../testing"
-import type { Baseline, Scenario, Timeline } from "../types"
-import { LEVY } from "./levy-fixture"
+import type { Baseline, Levy, Scenario, Timeline } from "../types"
 
 const baseline: Baseline = {
 	schemaVersion: 1,
@@ -10,6 +9,16 @@ const baseline: Baseline = {
 		{ account: "cash", amount: 100 },
 		{ account: "deposit", amount: 100 },
 	],
+}
+
+/** A Levy whose `due` is a `const`, so `check()` only asks that a Levy exist for a label. */
+const LEVY: Levy = {
+	id: "levy",
+	period: { month: 1, day: 1 },
+	settlement: { month: 3, day: 31 },
+	measures: [{ id: "due", op: "const", value: 0 }],
+	due: "due",
+	carryIn: [{ periodStart: "2025-01-01", tallies: [], prepaid: 0 }],
 }
 
 const scenario: Scenario = {
@@ -23,7 +32,7 @@ const scenario: Scenario = {
 	],
 	flows: [],
 	cashflow: { surplus: [{ account: "cash" }], contribute: [], withdraw: ["cash"] },
-	levies: [LEVY as never],
+	levies: [LEVY],
 }
 
 const timeline: Timeline = { start: "2026-01-01", horizon: "2026-12-31", resolution: "day" }

@@ -2,12 +2,15 @@ import { describe, expect, it } from "bun:test"
 import { thaiEmployee } from "../fixtures/thai-employee"
 import { expected } from "../testing"
 import type { Derive, DeriveMeasure } from "../types"
-import { checkWith, flowsWith, LEVY } from "./levy-fixture"
+import { checkWith, flowsThen, flowsWith, LEVY } from "./levy-fixture"
 
 const at = (index: number, ...rest: readonly (string | number)[]) =>
 	["scenario", "flows", index, ...rest] as const
 
-/** The Thai employee income Flow, with `amount` and `growth` removed and `patch` applied. */
+/**
+ * The Thai employee Flow at `index` with `amount` and `growth` removed and `patch` applied. The
+ * income Flow is labelled `salary`, the tally the shared Levy reads.
+ */
 function derived(index: number, patch: Readonly<Record<string, unknown>>): unknown[] {
 	return thaiEmployee.scenario.flows.map((flow, i) => {
 		if (i !== index) return flow
@@ -16,7 +19,7 @@ function derived(index: number, patch: Readonly<Record<string, unknown>>): unkno
 			growth: _growth,
 			...rest
 		} = flow as unknown as Readonly<Record<string, unknown>>
-		return { ...rest, ...patch }
+		return { ...rest, ...(i === 0 ? { label: "salary" } : {}), ...patch }
 	})
 }
 
@@ -42,7 +45,7 @@ describe("check() Derived Flow amounts", () => {
 	})
 
 	it("accepts a derived contribution with a target", () => {
-		const flows = derived(3, { derive: basic })
+		const flows = flowsThen(derived(3, { derive: basic }), 0, { label: "salary" })
 		expect(checkWith({ levy: LEVY, flows: derived(0, { derive: basic }) })).toEqual([])
 		expect(checkWith({ levy: LEVY, flows })).toEqual([])
 	})
@@ -52,7 +55,7 @@ describe("check() Derived Flow amounts", () => {
 		expect(checkWith({ levy: LEVY, flows: neither })).toEqual(
 			expected("MISSING_KEY", at(0, "amount")),
 		)
-		const both = flowsWith(0, { derive: basic })
+		const both = flowsWith(0, { derive: basic, label: "salary" })
 		expect(checkWith({ levy: LEVY, flows: both })).toEqual(
 			expected("FIELD_NOT_ALLOWED", at(0, "derive")),
 		)
@@ -111,7 +114,12 @@ describe("check() Derived Flow amounts", () => {
 		expect(checkWith({ levy: LEVY, flows: derived(0, { derive: tally }) })).toEqual(
 			expected("INVALID_OP", deriveAt(0, "op")),
 		)
-		expect(checkWith({ levy: LEVY, flows: flowsWith(0, { label: "x" }) })).toEqual([])
+		expect(
+			checkWith({
+				levy: LEVY,
+				flows: flowsThen(flowsWith(0, { label: "x" }), 1, { label: "salary" }),
+			}),
+		).toEqual([])
 	})
 
 	it("rejects a const that grows, is dated or steps inside a Derived amount", () => {

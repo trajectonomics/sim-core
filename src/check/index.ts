@@ -5,6 +5,7 @@ import { checkBaselineBasis } from "./baseline-basis"
 import type { Emit, Path, Problem } from "./codes"
 import { makeGuard } from "./guard"
 import { checkLevyCarryIn } from "./levy-carry-in-required"
+import { checkTallySupply } from "./levy-tally-supply"
 import { checkScenario } from "./scenario"
 import { isRecord } from "./shape"
 import { checkTimeline } from "./timeline"
@@ -42,5 +43,6 @@ export function check(baseline: unknown, scenario: unknown, timeline: unknown): 
 		guard("scenario", undefined, () => checkScenario(scenario, ["scenario"], accounts, emit))
 	guard("timeline", undefined, () => checkTimeline(timeline, ["timeline"], emit))
 	guard("timeline", undefined, () => checkLevyCarryIn(scenario, timeline, emit))
+	guard("scenario", undefined, () => checkTallySupply(scenario, timeline, emit))
 	return problems
 }
