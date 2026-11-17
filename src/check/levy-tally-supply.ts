@@ -74,7 +74,7 @@ function unsupplied(levy: unknown, shared: ReadonlySet<string>, start: string): 
 	return true
 }
 
-function run(scenario: unknown, timeline: unknown, emit: Emit): void {
+function reportUnsupplied(scenario: unknown, timeline: unknown, emit: Emit): void {
 	if (!isRecord(scenario) || !isRecord(timeline)) return
 	const levies = scenario["levies"]
 	const start = timeline["start"]
@@ -91,7 +91,7 @@ function run(scenario: unknown, timeline: unknown, emit: Emit): void {
 /** Refuses a Levy whose `due` graph reads tally labels and is supplied none of them. */
 export function checkTallySupply(scenario: unknown, timeline: unknown, emit: Emit): void {
 	try {
-		run(scenario, timeline, emit)
+		reportUnsupplied(scenario, timeline, emit)
 	} catch {
 		// A throwing getter or revoked Proxy is reported at its own root by the main guards.
 	}

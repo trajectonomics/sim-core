@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { evaluateMeasures } from "../levy/evaluate"
 import { CONTEXT, levyOf, talliesOf } from "../levy/test-levy"
+import { expected } from "../testing"
 import type { LevyMeasure } from "../types"
 import { checkWith, LEVY } from "./levy-fixture"
 
@@ -36,9 +37,11 @@ describe("check() Levy graph with lying array methods", () => {
 		expect(withMeasures(hostile(measures), "b")).toEqual([])
 	})
 
-	it("never refuses a Levy whose measures array hides its tallies", () => {
-		const measures = hostile([{ id: "a", op: "tally", label: "salary", basis: "gross" }])
-		expect(withMeasures(measures, "a")).toEqual([])
+	it("still reads a tally from a measures array whose iteration methods lie", () => {
+		const measures = hostile([{ id: "a", op: "tally", label: "rent", basis: "gross" }])
+		expect(withMeasures(measures, "a")).toEqual(
+			expected("UNSUPPLIED_TALLY_LABEL", ["scenario", "levies", 0]),
+		)
 	})
 })
 
