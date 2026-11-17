@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { expected } from "../testing"
-import { checkWith, flowsWith, LEVY } from "./levy-fixture"
+import { checkWith, flowsThen, flowsWith, LEVY } from "./levy-fixture"
 
 const at = (index: number, ...rest: readonly (string | number)[]) =>
 	["scenario", "flows", index, ...rest] as const
@@ -68,12 +68,13 @@ describe("check() cappedPrepayment", () => {
 	})
 
 	it("rejects the cap on a contribution and on an expense", () => {
-		expect(checkWith({ levy: LEVY, flows: flowsWith(3, { cappedPrepayment: {} }) })).toEqual(
-			expected("FIELD_NOT_ALLOWED", at(3, "cappedPrepayment")),
-		)
-		expect(checkWith({ levy: LEVY, flows: flowsWith(2, { cappedPrepayment: {} }) })).toEqual(
-			expected("FIELD_NOT_ALLOWED", at(2, "cappedPrepayment")),
-		)
+		const errors = (index: number) =>
+			checkWith({
+				levy: LEVY,
+				flows: flowsThen(flowsWith(index, { cappedPrepayment: {} }), 0, { label: "salary" }),
+			})
+		expect(errors(3)).toEqual(expected("FIELD_NOT_ALLOWED", at(3, "cappedPrepayment")))
+		expect(errors(2)).toEqual(expected("FIELD_NOT_ALLOWED", at(2, "cappedPrepayment")))
 	})
 
 	it("rejects the cap and its label when the Scenario has no Levy", () => {
@@ -88,16 +89,18 @@ describe("check() cappedPrepayment", () => {
 	})
 
 	it("accepts a label no tally Measure reads: the cap only needs the gross", () => {
-		const flows = flowsWith(0, {
+		const capped = flowsWith(0, {
 			label: "untallied",
 			cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" },
 		})
-		expect(checkWith({ levy: LEVY, flows })).toEqual([])
+		expect(checkWith({ levy: LEVY, flows: flowsThen(capped, 1, { label: "salary" }) })).toEqual([])
 	})
 
 	it("requires the label the cap is measured on", () => {
-		const flows = flowsWith(0, { cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" } })
-		expect(checkWith({ levy: LEVY, flows })).toEqual(expected("MISSING_KEY", at(0, "label")))
+		const capped = flowsWith(0, { cappedPrepayment: { levy: "levy", bps: 620, upTo: "cap" } })
+		expect(checkWith({ levy: LEVY, flows: flowsThen(capped, 1, { label: "salary" }) })).toEqual(
+			expected("MISSING_KEY", at(0, "label")),
+		)
 	})
 
 	it("rejects a cap that names no Measure or names one that is not a const", () => {

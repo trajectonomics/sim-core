@@ -91,9 +91,11 @@ describe("Carry-in", () => {
 	})
 
 	it("ignores a Carry-in record for a period that starts on the Timeline start", () => {
+		// The salary Flow lands after the horizon: the Levy reads its tally yet owes 0 here.
 		const projection = run({
 			accounts,
 			balances: { cash: 0 },
+			flows: [income("later", 777, { start: "2027-06-01", label: "salary" })],
 			surplus: [{ account: "cash" }],
 			withdraw: ["cash"],
 			start: "2026-01-01",

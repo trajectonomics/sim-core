@@ -18,6 +18,10 @@ const shares = (...entries: readonly (string | number)[]) =>
 
 const base = LEVY as Levy
 
+/** The salary Flow, labelled with the tally the shared Levy reads, and `patch` applied. */
+const salary = (patch: Readonly<Record<string, unknown>>) =>
+	flowsWith(0, { label: "salary", ...patch })
+
 function secondLevy(): Levy {
 	return { ...base, id: "other", settlement: { month: 4, day: 30 } }
 }
@@ -55,11 +59,11 @@ describe("check() Flow prepayments", () => {
 		expect(
 			checkWith({
 				levies: [base, secondLevy()],
-				flows: flowsWith(0, { prepayments: shares("levy", 5000, "other", 5000) }),
+				flows: salary({ prepayments: shares("levy", 5000, "other", 5000) }),
 			}),
 		).toEqual([])
 		expect(
-			checkWith({ levies: [base], flows: flowsWith(0, { prepayments: shares("ghost", 5000) }) }),
+			checkWith({ levies: [base], flows: salary({ prepayments: shares("ghost", 5000) }) }),
 		).toEqual(expected("UNKNOWN_LEVY", at(0, "prepayments", 0, "levy")))
 	})
 
@@ -67,28 +71,28 @@ describe("check() Flow prepayments", () => {
 		expect(
 			checkWith({
 				levies: [base],
-				flows: flowsWith(0, { prepayments: shares("levy", 100, "levy", 100) }),
+				flows: salary({ prepayments: shares("levy", 100, "levy", 100) }),
 			}),
 		).toEqual(expected("DUPLICATE_ID", at(0, "prepayments", 1, "levy")))
 		expect(
 			checkWith({
 				levies: [base, secondLevy()],
-				flows: flowsWith(0, { prepayments: shares("levy", 6000, "other", 4001) }),
+				flows: salary({ prepayments: shares("levy", 6000, "other", 4001) }),
 			}),
 		).toEqual(expected("RATE_OUT_OF_RANGE", at(0, "prepayments")))
 	})
 
 	it("rejects a value that is not an array and an entry that is not an object", () => {
-		expect(checkWith({ levies: [base], flows: flowsWith(0, { prepayments: 500 }) })).toEqual(
+		expect(checkWith({ levies: [base], flows: salary({ prepayments: 500 }) })).toEqual(
 			expected("NOT_AN_ARRAY", at(0, "prepayments")),
 		)
-		expect(checkWith({ levies: [base], flows: flowsWith(0, { prepayments: [7] }) })).toEqual(
+		expect(checkWith({ levies: [base], flows: salary({ prepayments: [7] }) })).toEqual(
 			expected("NOT_AN_OBJECT", at(0, "prepayments", 0)),
 		)
 	})
 
 	it("rejects the retired prepaymentBps key", () => {
-		expect(checkWith({ levies: [base], flows: flowsWith(0, { prepaymentBps: 500 }) })).toEqual(
+		expect(checkWith({ levies: [base], flows: salary({ prepaymentBps: 500 }) })).toEqual(
 			expected("UNKNOWN_KEY", at(0, "prepaymentBps")),
 		)
 	})

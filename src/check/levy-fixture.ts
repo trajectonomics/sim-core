@@ -38,7 +38,8 @@ function alignedStart(base: DateString, levy: unknown): DateString {
 
 /**
  * `check()` with a `levy` patch (put into `levies`), other Scenario edits and optional timeline
- * edits, on the Thai employee fixture.
+ * edits, on the Thai employee fixture. A patch that brings a Levy and no `flows` gets the salary
+ * Flow labelled, so the shared Levy's `salary` tally is supplied.
  */
 export function checkWith(
 	patch: Readonly<Record<string, unknown>>,
@@ -47,7 +48,14 @@ export function checkWith(
 	const { baseline, scenario, timeline } = thaiEmployee
 	const { levy, ...rest } = patch
 	const applied = levy === undefined ? patch : { ...rest, levies: [levy] }
-	return check(baseline, { ...scenario, ...applied }, { ...timeline, ...timelinePatch })
+	const supplied = applied["flows"] ?? suppliedFlows(applied["levies"])
+	const scenarioPatch = supplied === undefined ? applied : { ...applied, flows: supplied }
+	return check(baseline, { ...scenario, ...scenarioPatch }, { ...timeline, ...timelinePatch })
+}
+
+/** The fixture's Flows, with the salary Flow labelled, when the Scenario declares a Levy. */
+function suppliedFlows(levies: unknown): readonly unknown[] | undefined {
+	return Array.isArray(levies) && levies.length > 0 ? flowsWith(0, { label: "salary" }) : undefined
 }
 
 /** An empty Carry-in for the period before the aligned start year. */
@@ -75,7 +83,16 @@ export function levyProblems(...edits: readonly Edit[]): readonly Problem[] {
 	return checkWith({ levy }, { start: alignedStart(thaiEmployee.timeline.start, edited) })
 }
 
+/** `flows` with `change` merged into the Flow at `index`. */
+export function flowsThen(
+	flows: readonly unknown[],
+	index: number,
+	change: Readonly<Record<string, unknown>>,
+): unknown[] {
+	return flows.map((flow, i) => (i === index ? { ...(flow as object), ...change } : flow))
+}
+
 /** Flows of the Thai employee scenario with `change` merged into the flow at `index`. */
 export function flowsWith(index: number, change: Readonly<Record<string, unknown>>): unknown[] {
-	return thaiEmployee.scenario.flows.map((flow, i) => (i === index ? { ...flow, ...change } : flow))
+	return flowsThen(thaiEmployee.scenario.flows, index, change)
 }
