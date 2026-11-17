@@ -71,7 +71,7 @@ A Flow amount computed on each Occurrence from other Flows instead of fixed: a M
 _Avoid_: Percentage flow, formula flow, linked flow
 
 **Tally label**:
-A label on an income Flow, on a contribution Flow, or on an asset Account (`returnLabel`, `gainLabel`), that a Levy sums over a Settlement period. A Flow or Account with no label is never tallied, which is how a tax-sheltered Account is left out. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap. A label is the unit of per-person scope: separate caps per earner are separate labels, and `add` sums their Measures.
+A label on an income Flow, on a contribution Flow, or on an asset Account (`returnLabel`, `gainLabel`), that a Levy sums over a Settlement period. A Flow or Account with no label is never tallied, which is how a tax-sheltered Account is left out. Gross tallies use the planned income amount; funded tallies use the amount a contribution actually applied after any cap. A label is the unit of per-person scope: separate caps per earner are separate labels, and `add` sums their Measures. A Levy whose `due` graph reads tally labels and has none of them supplied anywhere in the Scenario is refused by `check()` (`UNSUPPLIED_TALLY_LABEL`), because every total it reads would be zero in every Settlement period.
 _Avoid_: Category, tag, tax category
 
 **Returns tally**:

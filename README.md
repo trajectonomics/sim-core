@@ -24,7 +24,9 @@ with `prepayments`, renamed `Projection.levy` to `Projection.levies`, and added 
 A Levy is a closed rule set: a twelve-month period rule, a settlement rule and a graph of
 Measures over the Flows' Tally labels. A Scenario may hold several in `scenario.levies`; each
 has its own periods, Settlement and Carry-in, and they share Tally labels but never read each
-other. A Flow's Prepayment credits one Levy per entry, and the shares are rounded cumulatively
+other. `check()` refuses a Levy whose `due` graph reads Tally labels that no Flow, Account or
+Carry-in supplies (`UNSUPPLIED_TALLY_LABEL`), because every total it reads would be zero in every
+Settlement period. A Flow's Prepayment credits one Levy per entry, and the shares are rounded cumulatively
 in Scenario Levy order so together they never exceed the gross:
 
 ```ts
