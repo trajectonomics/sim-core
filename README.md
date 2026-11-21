@@ -57,9 +57,12 @@ another Flow's planned gross amount on the same Landed date, before Prepayment a
 ```
 
 A negative derived amount or one that overflows is reported, never clamped. In the Financial
-Independence test earned income stops, so a derived amount that reads it falls to 0; a derived
-expense that reads earned income is rejected by the FI entry unless `retirementSpending`
-replaces every expense after the FI month. The plain Projection is unaffected. See
+Independence test earned income stops, so a derived amount that reads it falls to 0. That is right
+for a derived income and for a derived contribution into an asset, and wrong for a derived expense
+and for a derived contribution into a liability, which is a debt payment and would silently stop
+being paid. The FI entry rejects both: a derived expense unless `retirementSpending` replaces every
+expense after the FI month, and a derived debt payment unconditionally, because retirement spending
+replaces expenses only. The plain Projection is unaffected. See
 [ADR 0008](docs/adr/0008-levy-extensions.md).
 
 ## Scripts
