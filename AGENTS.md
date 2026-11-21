@@ -21,6 +21,7 @@ Instructions for AI coding agents in `trajectonomics/sim-core` (`@trajectonomics
 8. Pi (`pi.dev`) model restriction: When running the Pi coding agent (`pi.dev`), strictly use **DeepSeek 4.1 Flash** only (e.g., `deepseek/deepseek-v4.1-flash`, `deepseek/deepseek-v4.1-flash-fast`), whether routed via Command Code GOAT (`command-code`) or OpenCode Go (`opencode`). Do not switch to or run any other models (Claude, GPT, Gemini, etc.) in Pi sessions for this repository. This rule is mechanically enforced via `.pi/settings.json`.
 9. Never use `gemini-3.8-flash` anywhere; use `gemini-4-hydrogen` instead for Antigravity tasks and reviews (and `gemini-4-argon` where configured).
 10. Temporary files and scratch clones: `/tmp` is a shared, nearly full tmpfs. Never use fixed `/tmp` filenames (use `mktemp`, or `--body-file -` for `gh` bodies), and never install `node_modules` or clone scratch repositories under `/tmp`; use `~/.cache/<slug>`.
+11. Never write a closing keyword (`Closes #<n>`, `Fixes #<n>`, `Resolves #<n>`) in a pull-request body unless merging that pull request is meant to close the issue. GitHub parses the keyword out of prose too, in any sentence, so even a line disclaiming one closes the issue on merge. Name the issue with a bare `#<n>` or a link instead. On 2026-11-21 a docs pull request whose body said `Closes #114 is not claimed here` closed #114 on merge, and it had to be reopened.
 
 ## README code blocks
 
